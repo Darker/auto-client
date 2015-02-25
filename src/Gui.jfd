@@ -1,0 +1,190 @@
+JFDML JFormDesigner: "5.2.1.0.138" Java: "1.7.0_45" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) ) {
+			name: "this"
+			"title": "Auto call"
+			add( new FormComponent( "javax.swing.JProgressBar" ) {
+				name: "progressBar1"
+				"orientation": 1
+				auxiliary() {
+					"JavaCodeGenerator.variableGetter": true
+				}
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 0
+				"y": 0
+				"height": 151
+				"width": 18
+			} )
+			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+				name: "scrollPane1"
+				add( new FormComponent( "javax.swing.JTree" ) {
+					name: "tree1"
+					"font": new com.jformdesigner.model.SwingDerivedFont( null, 0, -1, false )
+					"model": new javax.swing.tree.DefaultTreeModel( new javax.swing.tree.DefaultMutableTreeNode {
+						userObject: "Game Mode"
+						add( new javax.swing.tree.DefaultMutableTreeNode {
+							userObject: "PvP"
+							add( new javax.swing.tree.DefaultMutableTreeNode {
+								userObject: "Classic"
+								add( new javax.swing.tree.DefaultMutableTreeNode {
+									userObject: "5v5"
+									add( new javax.swing.tree.DefaultMutableTreeNode {
+										userObject: "Blind"
+									} )
+									add( new javax.swing.tree.DefaultMutableTreeNode {
+										userObject: "Draft"
+									} )
+								} )
+								add( new javax.swing.tree.DefaultMutableTreeNode {
+									userObject: "3v3"
+									add( new javax.swing.tree.DefaultMutableTreeNode {
+										userObject: "Blind"
+									} )
+								} )
+							} )
+							add( new javax.swing.tree.DefaultMutableTreeNode {
+								userObject: "Dominion"
+								add( new javax.swing.tree.DefaultMutableTreeNode {
+									userObject: "Blind"
+								} )
+								add( new javax.swing.tree.DefaultMutableTreeNode {
+									userObject: "Draft"
+								} )
+							} )
+							add( new javax.swing.tree.DefaultMutableTreeNode {
+								userObject: "ARAM"
+							} )
+						} )
+						add( new javax.swing.tree.DefaultMutableTreeNode {
+							userObject: "Co-op vs. AI"
+							add( new javax.swing.tree.DefaultMutableTreeNode {
+								userObject: "Classic"
+								add( new javax.swing.tree.DefaultMutableTreeNode {
+									userObject: "5v5"
+									add( new javax.swing.tree.DefaultMutableTreeNode {
+										userObject: "Beginner"
+									} )
+									add( new javax.swing.tree.DefaultMutableTreeNode {
+										userObject: "Intermediate"
+									} )
+								} )
+								add( new javax.swing.tree.DefaultMutableTreeNode {
+									userObject: "3v3"
+									add( new javax.swing.tree.DefaultMutableTreeNode {
+										userObject: "Beginner"
+									} )
+									add( new javax.swing.tree.DefaultMutableTreeNode {
+										userObject: "Intermediate"
+									} )
+								} )
+							} )
+							add( new javax.swing.tree.DefaultMutableTreeNode {
+								userObject: "Dominion"
+								add( new javax.swing.tree.DefaultMutableTreeNode {
+									userObject: "Beginner"
+								} )
+								add( new javax.swing.tree.DefaultMutableTreeNode {
+									userObject: "Intermediate"
+								} )
+							} )
+						} )
+					} )
+					"rootVisible": false
+					addEvent( new FormEvent( "java.beans.PropertyChangeListener", "propertyChange", "ModeSelected", true ) )
+				} )
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 18
+				"y": 0
+				"width": 194
+				"height": 151
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "textField1"
+				"toolTipText": "Enter Champion Name"
+				auxiliary() {
+					"JavaCodeGenerator.variableGetter": true
+					"JavaCodeGenerator.variableName": "champField"
+				}
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 1
+				"y": 151
+				"width": 68
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "textField2"
+				"toolTipText": "Enter AutoCall Text"
+				auxiliary() {
+					"JavaCodeGenerator.variableGetter": true
+				}
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"width": 69
+				"height": 20
+				"x": 71
+				"y": 151
+			} )
+			add( new FormComponent( "javax.swing.JToggleButton" ) {
+				name: "toggleButton1"
+				"text": "Start"
+				"toolTipText": "Start/Stop tool"
+				"focusable": false
+				"focusPainted": false
+				auxiliary() {
+					"JavaCodeGenerator.variableGetter": true
+				}
+				addEvent( new FormEvent( "javax.swing.event.ChangeListener", "stateChanged", "toggleButton1StateChanged", true ) )
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "ToolAction", true ) )
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 142
+				"y": 151
+				"width": 69
+				"height": 19
+			} )
+			menuBar: new FormContainer( "javax.swing.JMenuBar", new FormLayoutManager( class javax.swing.JMenuBar ) ) {
+				name: "menuBar1"
+				add( new FormContainer( "javax.swing.JMenu", new FormLayoutManager( class javax.swing.JMenu ) ) {
+					name: "menu1"
+					"text": "Settings"
+					add( new FormComponent( "javax.swing.JMenuItem" ) {
+						name: "menuItem1"
+						"text": "Set Chat Delay"
+						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "DelaySelected", true ) )
+					} )
+				} )
+			}
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 15, 15 )
+			"size": new java.awt.Dimension( 245, 235 )
+		} )
+		add( new FormWindow( "java.awt.Dialog", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
+			"$horizontalGroup": "par l {seq {space :p:54:p, comp button1:::p::p, space :49::x}, seq l {space :p:12:p, comp label1:::p::p, space :::x, comp spinner1:::p:47:p, space :::p}}"
+			"$verticalGroup": "par l {seq l {space :::p, par b {comp label1::b:p::p, comp spinner1::b:p::p}, space :::x, comp button1:::p::p, space :::p}}"
+		} ) {
+			name: "chatDialog"
+			"title": "Chat Delay"
+			"resizable": false
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label1"
+				"text": "Enter a delay:"
+				"toolTipText": "Sets an additional delay before tool types your message. (Seconds)"
+			} )
+			add( new FormComponent( "javax.swing.JSpinner" ) {
+				name: "spinner1"
+				"model": new javax.swing.SpinnerNumberModel( 0.0, 0.0, 5.0, 0.1 )
+				auxiliary() {
+					"JavaCodeGenerator.variableGetter": true
+				}
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "button1"
+				"text": "OK"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "ChatOKClicked", true ) )
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 315, 40 )
+			"size": new java.awt.Dimension( 155, 100 )
+		} )
+	}
+}

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<log>
+    <changes date="26.1.2015">
+        <change severity="0%" author="MXXIV">
+            Creating my own Window class that actually uses OOP,
+            instead of being just a set of static methods. Also creating MouseButton
+            enumerator for mouse button IDs.
+        </change>
+    </changes>
+    <changes date="22.1.2015">
+        <change severity="80%" complete="false" author="MXXIV">
+            Moving all pixel offsets to external enumerator. This allows way
+            faster updating.
+        </change>
+        <change severity="50%" author="MXXIV">
+            The program will no longer wait for you to select game mode. Instead
+            it now assumes queue is already started and waits to accept game and
+            pick a champion.
+        </change>
+    </changes>
+</log>
