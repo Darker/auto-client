@@ -15,7 +15,7 @@ import autoclick.Rect;
 public class Constants {
   public static Rect normalSize = new Rect(0, 1152, 720, 0);
   public static double sizeCoeficient(Rect size) {
-    //With cold blood, I'll assume these idiots will never allow you to change Client aspect ratio
+    //With cold blood, I'll assume these Riot idiots will never allow you to change Client aspect ratio
     return size.right/normalSize.right;
   }
 }

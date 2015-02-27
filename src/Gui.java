@@ -1,51 +1,78 @@
-import java.awt.*;
+import automat_settings.Settings;
+import java.awt.Color;
  import java.awt.Container;
  import java.awt.Dialog;
  import java.awt.Dimension;
+import java.awt.GridLayout;
  import java.awt.Insets;
  import java.awt.Rectangle;
  import java.awt.event.ActionEvent;
  import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
  import java.beans.PropertyChangeEvent;
- import java.beans.PropertyChangeListener;
-import javax.swing.*;
+import java.io.IOException;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
  import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.ParallelGroup;
+import javax.swing.GroupLayout.SequentialGroup;
+import javax.swing.ImageIcon;
  import javax.swing.JButton;
+import javax.swing.JComponent;
  import javax.swing.JFrame;
  import javax.swing.JLabel;
  import javax.swing.JMenu;
  import javax.swing.JMenuBar;
  import javax.swing.JMenuItem;
- import javax.swing.JProgressBar;
- import javax.swing.JScrollPane;
+import javax.swing.JPanel;
  import javax.swing.JSpinner;
+import javax.swing.JTabbedPane;
  import javax.swing.JTextField;
  import javax.swing.JToggleButton;
- import javax.swing.JTree;
 import javax.swing.LayoutStyle;
  import javax.swing.SpinnerNumberModel;
  import javax.swing.event.ChangeEvent;
  import javax.swing.event.ChangeListener;
- import javax.swing.tree.DefaultMutableTreeNode;
- import javax.swing.tree.DefaultTreeModel;
  
  public class Gui
    extends JFrame
  {
    private Main ac;
+   private Settings settings;
    private String[] selected;
-
-
    
    public String[] getSelectedMode()
    {
-     return (String[]) (selected != null ? selected : "");
+     return new String[0];//(String[]) (selected != null ? selected : "");
    }
    
-   public Gui(Main acmain)
+   public Gui(Main acmain, final Settings settings)
    {
      this.ac = acmain;
+     this.settings = settings;
+     
      initComponents();
+
+     this.addWindowListener(new WindowAdapter()
+     {
+        @Override
+        public void windowClosing(WindowEvent event)
+        {
+          if(settings==null) {
+            System.out.println("Settings is null!");
+            return;
+          }
+          try {
+            settings.loadSettingsFromBoundFields();
+            settings.saveToFile(Main.SETTINGS_FILE, false);
+          }
+          catch(IOException e) {
+             
+          }
+        }
+     });
    }
    
    private void ModeSelected(PropertyChangeEvent e)
@@ -103,11 +130,6 @@ import javax.swing.LayoutStyle;
      return this.textField2;
    }
    
-   public JProgressBar getProgressBar1()
-   {
-     return this.progressBar1;
-   }
-   
    private void DelaySelected(ActionEvent e)
    {
      this.chatDialog.setVisible(true);
@@ -136,9 +158,6 @@ import javax.swing.LayoutStyle;
         menuBar1 = new JMenuBar();
         menu1 = new JMenu();
         menuItem1 = new JMenuItem();
-        progressBar1 = new JProgressBar();
-        scrollPane1 = new JScrollPane();
-        tree1 = new JTree();
         champField = new JTextField();
         textField2 = new JTextField();
         toggleButton1 = new JToggleButton();
@@ -151,6 +170,7 @@ import javax.swing.LayoutStyle;
         setTitle("Auto call");
         Container contentPane = getContentPane();
         contentPane.setLayout(null);
+        //createTabs(contentPane);
 
         //======== menuBar1 ========
         {
@@ -173,73 +193,16 @@ import javax.swing.LayoutStyle;
         }
         setJMenuBar(menuBar1);
 
-        //---- progressBar1 ----
-        progressBar1.setOrientation(SwingConstants.VERTICAL);
-        contentPane.add(progressBar1);
-        progressBar1.setBounds(0, 0, 18, 151);
-
-        //======== scrollPane1 ========
-        {
-
-            //---- tree1 ----
-            tree1.setFont(tree1.getFont().deriveFont(tree1.getFont().getSize() - 1f));
-            tree1.setModel(new DefaultTreeModel(
-                new DefaultMutableTreeNode("Game Mode") {
-                    {
-                        DefaultMutableTreeNode node1 = new DefaultMutableTreeNode("PvP");
-                            DefaultMutableTreeNode node2 = new DefaultMutableTreeNode("Classic");
-                                DefaultMutableTreeNode node3 = new DefaultMutableTreeNode("5v5");
-                                    node3.add(new DefaultMutableTreeNode("Blind"));
-                                    node3.add(new DefaultMutableTreeNode("Draft"));
-                                node2.add(node3);
-                                node3 = new DefaultMutableTreeNode("3v3");
-                                    node3.add(new DefaultMutableTreeNode("Blind"));
-                                node2.add(node3);
-                            node1.add(node2);
-                            node2 = new DefaultMutableTreeNode("Dominion");
-                                node2.add(new DefaultMutableTreeNode("Blind"));
-                                node2.add(new DefaultMutableTreeNode("Draft"));
-                            node1.add(node2);
-                            node1.add(new DefaultMutableTreeNode("ARAM"));
-                        add(node1);
-                        node1 = new DefaultMutableTreeNode("Co-op vs. AI");
-                            node2 = new DefaultMutableTreeNode("Classic");
-                                node3 = new DefaultMutableTreeNode("5v5");
-                                    node3.add(new DefaultMutableTreeNode("Beginner"));
-                                    node3.add(new DefaultMutableTreeNode("Intermediate"));
-                                node2.add(node3);
-                                node3 = new DefaultMutableTreeNode("3v3");
-                                    node3.add(new DefaultMutableTreeNode("Beginner"));
-                                    node3.add(new DefaultMutableTreeNode("Intermediate"));
-                                node2.add(node3);
-                            node1.add(node2);
-                            node2 = new DefaultMutableTreeNode("Dominion");
-                                node2.add(new DefaultMutableTreeNode("Beginner"));
-                                node2.add(new DefaultMutableTreeNode("Intermediate"));
-                            node1.add(node2);
-                        add(node1);
-                    }
-                }));
-            tree1.setRootVisible(false);
-            tree1.addPropertyChangeListener(new PropertyChangeListener() {
-                @Override
-                public void propertyChange(PropertyChangeEvent e) {
-                    ModeSelected(e);
-                }
-            });
-            scrollPane1.setViewportView(tree1);
-        }
-        contentPane.add(scrollPane1);
-        scrollPane1.setBounds(18, 0, 194, 151);
-
         //---- champField ----
         champField.setToolTipText("Enter Champion Name");
         contentPane.add(champField);
+        settings.bindToInput("champ_name", champField, true);
         champField.setBounds(1, 151, 68, champField.getPreferredSize().height);
 
         //---- textField2 ----
         textField2.setToolTipText("Enter AutoCall Text");
         contentPane.add(textField2);
+        settings.bindToInput("call_text", textField2, true);
         textField2.setBounds(71, 151, 69, 20);
 
         //---- toggleButton1 ----
@@ -329,16 +292,105 @@ import javax.swing.LayoutStyle;
             chatDialog.setLocationRelativeTo(chatDialog.getOwner());
         }
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
+        
+        //Display settings:
+        settings.displaySettingsOnBoundFields();
     }
+    //http://docs.oracle.com/javase/tutorial/uiswing/examples/components/TabbedPaneDemoProject/src/components/TabbedPaneDemo.java
+    public void createTabs(Container pane) {
+        pane.setLayout(new GridLayout(1, 1));
+        
+        JTabbedPane tabbedPane = new JTabbedPane();
+        ImageIcon icon = null;
+        JPanel panel1 = new JPanel(false);
+        
+        GroupLayout gLayout = new GroupLayout(panel1);
+        panel1.setLayout(gLayout);
+        ParallelGroup hGroup = gLayout.createParallelGroup();
+        gLayout.setHorizontalGroup(hGroup);
+        SequentialGroup vGroup = gLayout.createSequentialGroup();
+        gLayout.setVerticalGroup(vGroup);
 
+        JPanel line = newLine();
+        line.add(makeTextPanel("Champion:"));
+        JTextField field = new JTextField();
+        field.setToolTipText("Enter champion name");
+        line.add(field);
+        
+        endLine(hGroup, vGroup, line);
+        
+        line = newLine();
+        line.add(makeTextPanel("Call text:"));
+        field = new JTextField();
+        field.setToolTipText("Enter text to say after entering lobby.");
+        line.add(field);
+        
+        endLine(hGroup, vGroup, line);
+        
+        //field.setBounds(100, 151, 68, field.getPreferredSize().height);
+        
+        tabbedPane.addTab("Blind pick lobby", icon, (JComponent)panel1,
+                "Lobby where lane is called and champion is picked");
+        tabbedPane.setMnemonicAt(0, KeyEvent.VK_B);
+
+        
+        tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+        //Add the tabbed pane to this panel.
+        pane.add(tabbedPane);
+        
+        //The following line enables to use scrolling tabs.
+        
+   }
+   protected static JPanel newLine() {
+     JPanel line = new JPanel();
+     line.setLayout(new GridLayout(1, 1));
+     line.setBorder(BorderFactory.createLineBorder(Color.red));
+     return line;
+   }
+   protected JPanel textLine(String label, String title, String setting) {
+     JPanel line = newLine();
+     line.add(makeTextPanel("Champion:"));
+     JTextField field = new JTextField();
+     field.setToolTipText("Enter champion name");
+     if(setting!=null) {
+       settings.bindToInput(setting, field);
+     }
+     line.add(field);
+     return line;
+   }
+   protected static void endLine(ParallelGroup h, SequentialGroup v, JComponent line) {
+     h.addComponent(line);
+     v.addComponent(line, GroupLayout.PREFERRED_SIZE,
+            GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE);
+     v.addGap(10);
+   }
+    protected static JComponent makeTextPanel(String text) {
+        JPanel panel = new JPanel(false);
+        JLabel filler = new JLabel(text);
+        filler.setHorizontalAlignment(JLabel.CENTER);
+        panel.setLayout(new GridLayout(1, 1));
+        panel.add(filler);
+        return panel;
+    }
+    
+    /** Returns an ImageIcon, or null if the path was invalid. */
+    protected static ImageIcon createImageIcon(String path) {
+        java.net.URL imgURL = Gui.class.getResource(path);
+        if (imgURL != null) {
+            return new ImageIcon(imgURL);
+        } else {
+            System.err.println("Couldn't find file: " + path);
+            return null;
+        }
+    }
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     // Generated using JFormDesigner Evaluation license - Jakub Mareda
     private JMenuBar menuBar1;
     private JMenu menu1;
     private JMenuItem menuItem1;
-    private JProgressBar progressBar1;
-    private JScrollPane scrollPane1;
-    private JTree tree1;
+
+
+
     private JTextField champField;
     private JTextField textField2;
     private JToggleButton toggleButton1;

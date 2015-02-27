@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package autoclick.computervision;
+package autoclick.comvis;
 
 import autoclick.Rect;
 import com.sun.jna.platform.win32.WinDef;

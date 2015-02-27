@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package autoclick.computervision;
+package autoclick.comvis;
 
 import autoclick.comvis.ScreenWatcher;
 import java.awt.image.BufferedImage;

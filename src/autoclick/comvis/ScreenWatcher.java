@@ -7,7 +7,6 @@
 package autoclick.comvis;
 
 import autoclick.Rect;
-import autoclick.computervision.RectMatch;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.geom.AffineTransform;
@@ -87,7 +86,7 @@ public class ScreenWatcher {
     return findByAvgGrayscale(image, bigImage, 0.5f, true); 
   }
   
-  public static Rect findByAvgColor(double sum_small[], double integral_image[][][], int ws, int hs, int wb, int hb, float tolerance, boolean return_nearest, ArrayList<RectMatch> matches) {
+  public static Rect findByAvgColor(double sum_small[], double integral_image[][][], final int ws, final int hs, final int wb, final int hb, float tolerance, boolean return_nearest, ArrayList<RectMatch> matches) {
     //These variables will be used to return the best (nearest) match
     //If return_nearest is false, these will not be used
     double difference =  Double.MAX_VALUE;
@@ -99,12 +98,15 @@ public class ScreenWatcher {
     System.out.println("Tolerance: "+tolerance);
     //Number of pixels
     int no_pixels = ws*hs;
+    
+    System.out.println("Sum: ["+sum_small[0]+", "+sum_small[1]+", "+sum_small[2]+"]");
     //Divide the color sum by number of pixels to get average value
     for(byte i = 0; i<3; i++) {
       sum_small[i] = sum_small[i]/no_pixels; 
     }
     
-    //System.out.println("Small image sum: "+sum_small);
+    System.out.println("Pixels: "+ws+"*"+hs+" = "+no_pixels);
+    System.out.println("Average: ["+sum_small[0]+", "+sum_small[1]+", "+sum_small[2]+"]");
     
     //Loop and find the least different image
     //VVariable names:
@@ -140,7 +142,7 @@ public class ScreenWatcher {
           }
           if(matches!=null && diff<=tolerance) {
             matches.add(RectMatch.byWidthHeight(rect_x-1, rect_y-1, ws, hs, difference));
-            System.out.println("Diff "+diff+" <= tolerance. Adding ["+(rect_x-1)+", "+(rect_y-1)+"]");
+            //System.out.println("Diff "+diff+" <= tolerance. Adding ["+(rect_x-1)+", "+(rect_y-1)+"]");
           }
         }
         //Find first match below tolerance - ONLY USE WHEN YOUR SEARCHED OBJECT IS VERY UNIQUE
@@ -152,7 +154,7 @@ public class ScreenWatcher {
       }
     }
     if(return_nearest) {
-      //System.out.println("Lowest difference: "+difference+". Wolerance: "+tolerance);
+      //System.out.println("Lowest difference: "+difference+". Tolerance: "+tolerance);
       if(difference<=tolerance) {
         return Rect.byWidthHeight(difference_pos[0]-1, difference_pos[1]-1, ws, hs);
       }      
@@ -176,15 +178,18 @@ public class ScreenWatcher {
     int sw = image.getWidth();
     return findByAvgColor_isolated_matches(colorSum(image), integral_image, sw, sh, tolerance);
   }
-  public static ArrayList<RectMatch> findByAvgColor_isolated_matches(double[] sum_small, double[][][] integral_image, int sw, int sh, float tolerance) {
+  public static ArrayList<RectMatch> findByAvgColor_isolated_matches(double[] sum_small, double[][][] integral_image, final int ws, final int hs, float tolerance) {
     ArrayList<RectMatch> matches = new ArrayList<>();
     int bh = integral_image.length;
     int bw = integral_image[0].length;
-    findByAvgColor(sum_small, integral_image, sw, sh, bw, bh, tolerance, true, matches);
+    findByAvgColor(sum_small, integral_image, ws, hs, bw, bh, tolerance, true, matches);
+    System.out.println("findByAvgColor_isolated_matches obtained "+matches.size()+" matches.");
     return bestMatches(matches);
   }
   public static ArrayList<RectMatch> bestMatches(ArrayList<RectMatch> matches) {
+    System.out.println("Grouping "+matches.size()+" rectangles.");
     ArrayList<ArrayList<Rect>> grouped = Rect.groupOverlapingRects(matches.toArray(new RectMatch[0]));
+    System.out.println(grouped.size()+" groups.");
     ArrayList<RectMatch> best_matches = new ArrayList<>();
 
     ArrayList<Rect> current;
@@ -408,6 +413,30 @@ public class ScreenWatcher {
         int value = ((int)Math.round((((double)iimg[y][x])/max)*255))%256;
         //Basically duplicate the value 3 times over the size of int
         result.setRGB(x, y, value|(value<<8)|(value<<16));
+      }
+    }
+    return result;
+  }
+  /**Draws colored integral image made from the normal image
+   * @param source normal image
+   * @return rendered integral image **/ 
+  public static BufferedImage drawIntegralImage(double[][][] image, double[] max) {
+
+    int height = image.length;
+    int width = image[0].length;
+    
+    BufferedImage result = new BufferedImage(width,height,BufferedImage.TYPE_INT_RGB);
+    System.out.println("Sum: ["+max[0]+", "+max[1]+", "+max[2]+"]");
+    
+    for(int y=0,ly=image.length; y<ly; y++) {
+      for(int x=0,lx=image[x].length; x<lx; x++) {
+        int[] color = {0,0,0};
+        color[0]=(int)(Math.round(255*image[y][x][0]/max[0]));
+        color[1]=(int)(Math.round(255*image[y][x][1]/max[1]));
+        color[2]=(int)(Math.round(255*image[y][x][2]/max[2]));
+        //int value = ((int)Math.round((((double)iimg[y][x])/max)*255))%256;
+        //Basically duplicate the value 3 times over the size of int
+        result.setRGB(x, y, color[0]|(color[1]<<8)|(color[2]<<16));
       }
     }
     return result;

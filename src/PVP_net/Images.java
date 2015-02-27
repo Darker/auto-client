@@ -12,6 +12,7 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import javax.imageio.ImageIO;
 
 /**
@@ -29,6 +30,7 @@ public enum Images {
   
   public final String path;
   private BufferedImage img = null;
+  private HashMap<Float, BufferedImage> scaled;
   private double color_sum[] = null;
   
   Images(String path) {
@@ -64,7 +66,15 @@ public enum Images {
       return -1; 
     }
   }
+  @Override
+  public String toString() {
+    return name()+"["+getWidth()+" x "+getHeight()+"](\""+path+"\")";
+    
+  }
   public BufferedImage getImgScaled(float scale) throws IOException {
+    if(scaled.containsKey(scale)) {
+      return scaled.get(scale);
+    }
     getImg();
     int w = img.getWidth();
     int h = img.getHeight();
@@ -72,7 +82,11 @@ public enum Images {
     AffineTransform at = new AffineTransform();
     at.scale(scale, scale);
     AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
-    return scaleOp.filter(img, after);
+    
+    
+    BufferedImage img_scaled = scaleOp.filter(img, after);
+    scaled.put(scale, img_scaled);
+    return img_scaled;
   }
   
 }

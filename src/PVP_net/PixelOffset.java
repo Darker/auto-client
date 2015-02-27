@@ -1,3 +1,5 @@
+package PVP_net;
+
 
 import autoclick.ColorPixel;
 import autoclick.Rect;
@@ -55,7 +57,7 @@ public enum PixelOffset {
     TeamBuilder_MatchFound(0.4996663788286509D, 0.49961873194195505D, new Color(255, 255, 255, 1)),
     TeamBuilder_MatchFound2(0.5072922050781281D, 0.5353329777965776D, new Color(255, 255, 255, 1)),
     //Chat betweeen the players invited in a game
-    InviteChat (0.28172646939211915D, 0.9192680520887154D, new Color(255, 255, 255, 1)),
+    InviteChat (0.4950512695332547D, 0.9208058039244397D, new Color(255, 255, 255, 1)),
     //Start button for a game with invited players
     InviteStart (0.7237508300449225D, 0.9146547965815433D, new Color(204, 110, 22, 1)),
     ;

@@ -1,3 +1,5 @@
+import automat_settings.Settings;
+import PVP_net.PixelOffset;
 import PVP_net.Images;
 import PVP_net.TeamBuilderPlayerSlot;
 import autoclick.ColorPixel;
@@ -6,7 +8,7 @@ import autoclick.ColorPixel;
  import autoclick.MSWindow;
  import autoclick.Rect;
 import autoclick.comvis.ScreenWatcher;
-import autoclick.computervision.RectMatch;
+import autoclick.comvis.RectMatch;
  import autoclick.exceptions.APIError;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,17 +21,22 @@ import java.util.ArrayList;
    //User32 user32 = this.window.getUser32();
    //Kernel32 kernel = this.window.getKernel32();
    Gui gui;
+   private Settings settings;
    
-   public Automat(Gui acgui)
+   //Logger for thread
+   
+   
+   public Automat(Gui acgui, Settings settings)
    {
+     this.settings = settings;
      this.gui = acgui;
    }
    
    @Override
    public void run()
    {
-     System.out.println("Auto call thread started!");
-     
+     System.out.println("Automation started!");
+     //Get PVP.net window
      window = MSWindow.windowFromName("PVP.net", false);
      if(window==null) {
        System.err.println("No PVP.net window found!");
@@ -38,7 +45,7 @@ import java.util.ArrayList;
      }
      System.out.println("PVP.net window available.");
      //long cID = this.window.FindWindow("PVP");
-     this.gui.getProgressBar1().setValue(0);
+     //this.gui.getProgressBar1().setValue(0);
      
      try
      {
@@ -78,7 +85,7 @@ import java.util.ArrayList;
    }
    private void end() {
        gui.setToggleButton1State(false);
-       gui.getProgressBar1().setValue(0);
+       //gui.getProgressBar1().setValue(0);
        gui.setTitle("Idle...");
    }
    
@@ -92,7 +99,7 @@ import java.util.ArrayList;
        interrupt();
        return;
      }*/
-     this.gui.getProgressBar1().setValue(5);
+     //this.gui.getProgressBar1().setValue(5);
      
      
      
@@ -232,7 +239,7 @@ import java.util.ArrayList;
      else if(mode==null) {
        System.out.println("Mode was null. I assume user has started game manually.");   
      }
-     this.gui.getProgressBar1().setValue(30);
+     //this.gui.getProgressBar1().setValue(30);
      if (interrupted()) {
        System.out.println("Interupted after picking mode!");
      }
@@ -327,7 +334,7 @@ import java.util.ArrayList;
                //SelectItem("accept");
 
                click(PixelOffset.AcceptButton);
-               this.gui.getProgressBar1().setValue(60);
+               //this.gui.getProgressBar1().setValue(60);
                accepted = time;
                gui.setTitle("Match accepted, waiting for lobby.");
                tb = false;
@@ -335,7 +342,7 @@ import java.util.ArrayList;
              }
              else if(checkPoint(PixelOffset.TeamBuilder_AcceptGroup,25)) {
                click(PixelOffset.TeamBuilder_AcceptGroup);
-               this.gui.getProgressBar1().setValue(60);
+               //this.gui.getProgressBar1().setValue(60);
                gui.setTitle("Group accepted, waiting for lobby.");
                System.out.println("Group accepted, waiting for lobby.");
                accepted = time;
@@ -409,7 +416,7 @@ import java.util.ArrayList;
      }
    }
    public void normal_lobby() throws InterruptedException, APIError {
-     this.gui.getProgressBar1().setValue(70);
+     //this.gui.getProgressBar1().setValue(70);
      if(this.gui.chatTextField().getText().length()>0) {
        sleep(this.gui.getDelay());
        click(PixelOffset.LobbyChat);
@@ -425,7 +432,7 @@ import java.util.ArrayList;
      }
      else
        System.out.println("No chat message to type, skipping this step.");
-     this.gui.getProgressBar1().setValue(85);
+     //this.gui.getProgressBar1().setValue(85);
 
      if (this.gui.getChampField().getText().length() > 1)
      {
@@ -632,30 +639,43 @@ import java.util.ArrayList;
        System.err.println("Can't find required image! Invite lobby can't be automated!"); 
        return;
      }
-     
+     //Declare the two arrays of matches
+     ArrayList<RectMatch> accepted_all, pending_all;
      while(checkPoint(PixelOffset.InviteChat, 1) && checkPoint(PixelOffset.InviteStart, 8)) {
+       System.out.println("Taking screenshot from window.");
        integral_image = ScreenWatcher.integralImage(window.screenshot());
-       ArrayList<RectMatch> accepted_all = ScreenWatcher.findByAvgColor_isolated_matches(
-                    accepted,
-                    integral_image,
-                    Images.INVITE_ACCEPTED.getWidth(),
-                    Images.INVITE_ACCEPTED.getHeight(),
-                    0.00009f);
-       ArrayList<RectMatch> pending_all = ScreenWatcher.findByAvgColor_isolated_matches(
-                    pending,
+       //System.out.println("Analysing the screenshot.");
+       System.out.println("  Invited players: ");
+       
+
+       pending_all = ScreenWatcher.findByAvgColor_isolated_matches(
+                    pending.clone(),
                     integral_image,
                     Images.INVITE_PENDING.getWidth(),
                     Images.INVITE_PENDING.getHeight(),
                     0.00009f);
+       System.out.println("    Pending: "+pending_all.size());
+       
+       accepted_all = ScreenWatcher.findByAvgColor_isolated_matches(
+                    accepted.clone(),
+                    integral_image,
+                    Images.INVITE_ACCEPTED.getWidth(),
+                    Images.INVITE_ACCEPTED.getHeight(),
+                    0.00009f);
+       System.out.println("    Accepted: "+accepted_all.size());
+       
        //Only start if all players accepted or declined and at least one accepted
        if(accepted_all.size()>0 && pending_all.isEmpty()) {
          System.out.println("All players have been invited and are in lobby. Time to start!");
          gui.setTitle("Game started!");
          click(PixelOffset.InviteStart);
-         break;
+         return;
        }
+       System.out.println("Next test in 1.2 seconds.");
        sleep(1200L);
+       System.out.println("Timeout over, next test?");
      }
+     System.out.println("Lobby has exit spontaneously.");
    }
    private void teamBuilder_say(String message) throws InterruptedException {
      click(PixelOffset.TeamBuilder_Chat);
@@ -676,7 +696,7 @@ import java.util.ArrayList;
      Rect cRec = window.getRect();
      double height = cRec.width;
      double width = cRec.height;
-     this.gui.getProgressBar1().setValue(this.gui.getProgressBar1().getValue() + 3);
+     //this.gui.getProgressBar1().setValue(this.gui.getProgressBar1().getValue() + 3);
      switch (item)
      {
      case "chat": 
@@ -809,4 +829,6 @@ import java.util.ArrayList;
        return false;
      }
    }
+   
+   
  }

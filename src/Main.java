@@ -1,6 +1,8 @@
+import automat_settings.Settings;
 import com.incors.plaf.alloy.AlloyLookAndFeel;
 import com.incors.plaf.alloy.AlloyTheme;
 import com.incors.plaf.alloy.themes.glass.GlassTheme;
+import java.io.IOException;
 import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -12,12 +14,19 @@ import sirius.constants.IWMConsts;
  public class Main
    implements IWMConsts, IMKConsts
  {
+   //Some application constants
+   public static final String SETTINGS_FILE = "data/settings.bin";
+   
    public Thread ac;
    public Gui gui;
+   private Settings settings;
+   
+ 
    
    public Main()
      throws InterruptedException
    {
+   
      //Normal program
      startGUI();
    }
@@ -41,14 +50,22 @@ import sirius.constants.IWMConsts;
      if ((ac == null) || (!ac.isAlive()))
      {
        System.out.println("Starting tool..");
-       ac = new Automat(this.gui);
+       ac = new Automat(gui, settings);
        ac.start();
      }
    }
    
    private void startGUI()
    {
-     this.gui = new Gui(this);
+     settings = new Settings();
+     try {
+       settings.loadFromFile(SETTINGS_FILE);
+     }
+     catch(IOException e) {
+       //Do nothing, this is expected for first run 
+     }
+     
+     gui = new Gui(this, settings);
      
      SwingUtilities.invokeLater(new Runnable()
      {

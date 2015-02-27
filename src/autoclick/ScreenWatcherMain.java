@@ -7,17 +7,26 @@
 package autoclick;
 
 
+import PVP_net.Images;
 import autoclick.comvis.ScreenWatcher;
-import autoclick.computervision.RectMatch;
+import autoclick.comvis.RectMatch;
+import autoclick.exceptions.APIError;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
+import static java.lang.Thread.sleep;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 
 
@@ -26,7 +35,7 @@ import javax.imageio.ImageIO;
  * @author Jakub
  */
 public class ScreenWatcherMain {
-   public static void main(String[] args)
+   public static void main(String[] args) throws Exception
    {
      /*TestRectangles();
      if(true)
@@ -35,12 +44,12 @@ public class ScreenWatcherMain {
      BufferedImage thing = loadFromPath(/*"CVTestSearchObject.png"*/"launcher_screens/search_objects/pending.png");
      BufferedImage thing2 = loadFromPath(/*"CVTestSearchObject.png"*/"launcher_screens/search_objects/accepted.png");
      //The big image to search in
-     BufferedImage screenshot = loadFromPath(/*"screenshot.png"*/"launcher_screens/INVITE-ACCEPTED.png");
+     BufferedImage screenshot = loadFromPath(/*"screenshot.png"*/"launcher_screens/INVITE-PENDING.png");
      
      if(thing!=null && screenshot!=null && thing2!=null) {
        //TestSearchColorAll(thing, screenshot);
        //TestSearch(thing, screenshot);
-       TestBestMatches(thing, thing2, screenshot);
+       TestBestWhile(thing, thing2, screenshot);
      }
    }
    public static void TestRectangles() {
@@ -118,6 +127,59 @@ public class ScreenWatcherMain {
      drawResult(screenshot, (ArrayList<Rect>)(Object)matches2, Color.GREEN);
      saveToPath("ScreenWatcher.BestMatches.png", screenshot);
      saveToPath("ScreenWatcher.Test1.png", thing1);
+   }
+   public static void TestBestWhile(BufferedImage thing1, BufferedImage thing2, BufferedImage screenshot) throws APIError, InterruptedException {
+     System.out.println("Inviting players now. ");
+     double[][][] integral_image;
+     double[] accepted, pending;
+     try {
+       accepted = Images.INVITE_ACCEPTED.getColorSum();
+       pending = Images.INVITE_PENDING.getColorSum();
+     }
+     catch(IOException e) {
+       System.err.println("Can't find required image! Invite lobby can't be automated!"); 
+       return;
+     }
+     //Declare the two arrays of matches
+     ArrayList<RectMatch> accepted_all, pending_all;
+     while(true) {
+       System.out.println("Taking screenshot from window.");
+       integral_image = ScreenWatcher.integralImage(screenshot);
+       //displayImage(screenshot);
+       //displayImage(ScreenWatcher.drawIntegralImage(integral_image, ScreenWatcher.colorSum(screenshot)));
+       System.out.println("Analysing the screenshot.");
+       //System.out.println(Images.INVITE_PENDING);
+       System.out.println("  Invited players: ");
+       
+
+       pending_all = ScreenWatcher.findByAvgColor_isolated_matches(
+                    pending.clone(),
+                    integral_image,
+                    Images.INVITE_PENDING.getWidth(),
+                    Images.INVITE_PENDING.getHeight(),
+                    0.00009f);
+       System.out.println("    Pending: "+pending_all.size());
+       //System.out.println(Images.INVITE_ACCEPTED);
+       accepted_all = ScreenWatcher.findByAvgColor_isolated_matches(
+                    accepted.clone(),
+                    integral_image,
+                    Images.INVITE_ACCEPTED.getWidth(),
+                    Images.INVITE_ACCEPTED.getHeight(),
+                    0.00009f);
+       System.out.println("    Accepted: "+accepted_all.size());
+       
+       //Only start if all players accepted or declined and at least one accepted
+       if(accepted_all.size()>0 && pending_all.isEmpty()) {
+         System.out.println("All players have been invited and are in lobby. Time to start!");
+         return;
+       }
+       System.out.println("Next test in 1.2 seconds.");
+       sleep(1200L);
+       System.out.println("Timeout over, next test?");
+       if(false)
+         break;
+     }
+     System.out.println("Lobby has exit spontaneously.");
    }
    public static void TestSearchColorAll(BufferedImage thing, BufferedImage screenshot) {
      double start = System.nanoTime();
@@ -336,6 +398,15 @@ public class ScreenWatcherMain {
        return false;
      }
      return true;
+   }
+   public static void displayImage(Image image) {
+     JLabel label = new JLabel(new ImageIcon(image));
+
+     JPanel panel = new JPanel();
+     panel.add(label);
+
+     JScrollPane scrollPane = new JScrollPane(panel);
+     JOptionPane.showMessageDialog(null, scrollPane);
    }
    static BufferedImage cloneImage(BufferedImage bi) {
      ColorModel cm = bi.getColorModel();
