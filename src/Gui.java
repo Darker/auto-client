@@ -1,3 +1,4 @@
+import GUI.*;
 import automat_settings.Settings;
 import java.awt.Color;
  import java.awt.Container;
@@ -115,21 +116,10 @@ import javax.swing.LayoutStyle;
      return this.toggleButton1;
    }
    
-   public JTextField getChampField()
-   {
-     return this.champField;
-   }
+
    
-   public JTextField chatTextField()
-   {
-     return this.textField2;
-   }
-   
-   public JTextField getTextField2()
-   {
-     return this.textField2;
-   }
-   
+ 
+  
    private void DelaySelected(ActionEvent e)
    {
      this.chatDialog.setVisible(true);
@@ -149,8 +139,6 @@ import javax.swing.LayoutStyle;
    {
      return this.spinner1;
    }
-   
-
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
@@ -158,8 +146,6 @@ import javax.swing.LayoutStyle;
         menuBar1 = new JMenuBar();
         menu1 = new JMenu();
         menuItem1 = new JMenuItem();
-        champField = new JTextField();
-        textField2 = new JTextField();
         toggleButton1 = new JToggleButton();
         chatDialog = new Dialog(this);
         label1 = new JLabel();
@@ -170,7 +156,7 @@ import javax.swing.LayoutStyle;
         setTitle("Auto call");
         Container contentPane = getContentPane();
         contentPane.setLayout(null);
-        //createTabs(contentPane);
+        createTabs(contentPane);
 
         //======== menuBar1 ========
         {
@@ -194,7 +180,7 @@ import javax.swing.LayoutStyle;
         setJMenuBar(menuBar1);
 
         //---- champField ----
-        champField.setToolTipText("Enter Champion Name");
+        /*champField.setToolTipText("Enter Champion Name");
         contentPane.add(champField);
         settings.bindToInput("champ_name", champField, true);
         champField.setBounds(1, 151, 68, champField.getPreferredSize().height);
@@ -203,7 +189,7 @@ import javax.swing.LayoutStyle;
         textField2.setToolTipText("Enter AutoCall Text");
         contentPane.add(textField2);
         settings.bindToInput("call_text", textField2, true);
-        textField2.setBounds(71, 151, 69, 20);
+        textField2.setBounds(71, 151, 69, 20);*/
 
         //---- toggleButton1 ----
         toggleButton1.setText("Start");
@@ -299,7 +285,34 @@ import javax.swing.LayoutStyle;
     //http://docs.oracle.com/javase/tutorial/uiswing/examples/components/TabbedPaneDemoProject/src/components/TabbedPaneDemo.java
     public void createTabs(Container pane) {
         pane.setLayout(new GridLayout(1, 1));
+        System.out.println("Creating tabbed window.");
+        TabbedWindow win = new TabbedWindow();
         
+        win.newTab("Blind pick lobby", "Lobby where lane is called and champion is picked");
+        
+        
+        FieldDef field = new FieldDef("Champion:", "Enter champion name", "champ_name");
+        field.addField(new JTextField());
+        field.attachToSettings(settings);
+        
+        System.out.println(" Adding first line.");
+        win.addLine(field);
+        
+        
+        field = new FieldDef("Call text:", "Enter text to say after entering lobby.", "call_text");
+        field.addField(new JTextField());
+        field.attachToSettings(settings);
+        
+        System.out.println(" Adding second line.");
+        win.addLine(field);
+        
+        
+        
+        System.out.println(" Adding to panel.");
+        pane.add(win.container);
+        win.close();
+        System.out.println("Done.");
+        /*
         JTabbedPane tabbedPane = new JTabbedPane();
         ImageIcon icon = null;
         JPanel panel1 = new JPanel(false);
@@ -312,7 +325,7 @@ import javax.swing.LayoutStyle;
         gLayout.setVerticalGroup(vGroup);
 
         JPanel line = newLine();
-        line.add(makeTextPanel("Champion:"));
+        line.add(makeTextPanel());
         JTextField field = new JTextField();
         field.setToolTipText("Enter champion name");
         line.add(field);
@@ -337,7 +350,7 @@ import javax.swing.LayoutStyle;
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         //Add the tabbed pane to this panel.
         pane.add(tabbedPane);
-        
+        */
         //The following line enables to use scrolling tabs.
         
    }
@@ -365,12 +378,13 @@ import javax.swing.LayoutStyle;
      v.addGap(10);
    }
     protected static JComponent makeTextPanel(String text) {
-        JPanel panel = new JPanel(false);
+        //JPanel panel = new JPanel(false);
         JLabel filler = new JLabel(text);
         filler.setHorizontalAlignment(JLabel.CENTER);
-        panel.setLayout(new GridLayout(1, 1));
-        panel.add(filler);
-        return panel;
+        return filler;
+        //panel.setLayout(new GridLayout(1, 1));
+        //panel.add(filler);
+        //return panel;
     }
     
     /** Returns an ImageIcon, or null if the path was invalid. */
@@ -391,8 +405,8 @@ import javax.swing.LayoutStyle;
 
 
 
-    private JTextField champField;
-    private JTextField textField2;
+    //private JTextField champField;
+    //private JTextField textField2;
     private JToggleButton toggleButton1;
     private Dialog chatDialog;
     private JLabel label1;

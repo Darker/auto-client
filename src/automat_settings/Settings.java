@@ -46,7 +46,7 @@ public class Settings implements java.io.Serializable {
    * @param defaultValue value to return if the setting is nonexistent or not Integer
    * @return defaultValue on failure
    */
-  public int getIntSetting(String name, final int defaultValue) {
+  public int getInt(String name, final int defaultValue) {
     if(settings.containsKey(name)) {
       Object value = settings.get(name);
       if(value instanceof Integer) {
@@ -55,7 +55,7 @@ public class Settings implements java.io.Serializable {
     }
     return defaultValue;
   }
-  public float getFloatSetting(String name, final float defaultValue) {
+  public float getFloat(String name, final float defaultValue) {
     if(settings.containsKey(name)) {
       Object value = settings.get(name);
       if(value instanceof Float) {
@@ -64,7 +64,7 @@ public class Settings implements java.io.Serializable {
     }
     return defaultValue;
   }
-  public String getStringSetting(String name) {
+  public String getString(String name) {
     if(settings.containsKey(name)) {
       Object value = settings.get(name);
       if(value instanceof String) {
@@ -73,7 +73,7 @@ public class Settings implements java.io.Serializable {
     }
     return null;
   }
-  public String getStringEquivalentSetting(String name) {
+  public String getStringEquivalent(String name) {
     if(settings.containsKey(name)) {
       Object value = settings.get(name);
       if(value instanceof String) {
@@ -82,11 +82,18 @@ public class Settings implements java.io.Serializable {
       else
         return value.toString();
     }
-    return null;
+    return "";
   }
   public Object getSetting(String name) {
     return settings.get(name);
   }
+  public boolean empty(String name) {
+    Object val = settings.get(name);
+    if(val!=null) {
+      return false;
+    }
+    return true;
+  } 
   /** Set setting to any object value. 
    * @param name setting name
    * @param value setting value
@@ -94,7 +101,7 @@ public class Settings implements java.io.Serializable {
    */
   public Object setSetting(String name, Object value) {
     Object old = settings.get(name);
-    if(old.equals(value)) {
+    if(old!=null && old.equals(value)) {
       return old;   
     }
     changed = true;

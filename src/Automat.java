@@ -417,14 +417,14 @@ import java.util.ArrayList;
    }
    public void normal_lobby() throws InterruptedException, APIError {
      //this.gui.getProgressBar1().setValue(70);
-     if(this.gui.chatTextField().getText().length()>0) {
+     if(settings.getStringEquivalent("call_text").length()>0) {
        sleep(this.gui.getDelay());
        click(PixelOffset.LobbyChat);
        click(PixelOffset.LobbyChat);
        sleep(10L);
        click(PixelOffset.LobbyChat);
-       System.out.println("Typping '"+gui.chatTextField().getText()+"' in chat window.");
-       window.typeString(this.gui.chatTextField().getText());
+       System.out.println("Typping '"+settings.getString("call_text")+"' in chat window.");
+       window.typeString(settings.getString("call_text"));
        Enter();
        //if(true){ return; }
        //System.out.println(this.gui.chatTextField().getText());
@@ -434,11 +434,11 @@ import java.util.ArrayList;
        System.out.println("No chat message to type, skipping this step.");
      //this.gui.getProgressBar1().setValue(85);
 
-     if (this.gui.getChampField().getText().length() > 1)
+     if (settings.getStringEquivalent("call_text").length() > 1)
      {
        click(PixelOffset.Blind_SearchChampion);
        sleep(20L);
-       window.typeString(this.gui.getChampField().getText());
+       window.typeString(settings.getStringEquivalent("call_text"));
        sleep(200L);
        click(PixelOffset.LobbyChampionSlot1);
 
@@ -450,9 +450,9 @@ import java.util.ArrayList;
      gui.setTitle("Waiting for ready button. (Team builder)");
      
      click(PixelOffset.TeamBuilder_Chat);
-     if(this.gui.chatTextField().getText().length()>0) {
+     if(settings.getStringEquivalent("call_text").length()>0) {
        sleep(50L);
-       window.typeString(this.gui.chatTextField().getText());
+       window.typeString(settings.getStringEquivalent("call_text"));
        Enter();
      }
      sleep(50L);
@@ -580,8 +580,8 @@ import java.util.ArrayList;
          //React to individual changes
          //Greet new players here
          if(!oldslots[i].isJoined && slots[i].isJoined) {
-           if(this.gui.chatTextField().getText().length()>0)
-             teamBuilder_say(this.gui.chatTextField().getText());
+           if(!settings.getStringEquivalent("call_text").isEmpty())
+             teamBuilder_say(settings.getStringEquivalent("call_text"));
            System.out.println("    A new player appeared in slot #"+(i+1));
            //System.out.println("Matchpoint: "+PixelOffset.TeamBuilder_CaptainLobby_slot_kickPlayer.offset(0, i*offset).toSource());
          }
@@ -601,8 +601,8 @@ import java.util.ArrayList;
          sleep(500L);
        }
        else if(joined==4) {
-         if(this.gui.getChampField().getText().length() > 0) {
-           teamBuilder_say(this.gui.getChampField().getText());
+         if(settings.getStringEquivalent("champ_name").length() > 0) {
+           teamBuilder_say(settings.getStringEquivalent("call_text"));
          }
          allReadyCalled = true;
        }
