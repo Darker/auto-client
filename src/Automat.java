@@ -84,7 +84,7 @@ import java.util.ArrayList;
      }*/
    }
    private void end() {
-       gui.setToggleButton1State(false);
+       gui.displayToolAction(false);
        //gui.getProgressBar1().setValue(0);
        gui.setTitle("Idle...");
    }
@@ -434,11 +434,11 @@ import java.util.ArrayList;
        System.out.println("No chat message to type, skipping this step.");
      //this.gui.getProgressBar1().setValue(85);
 
-     if (settings.getStringEquivalent("call_text").length() > 1)
+     if (settings.getStringEquivalent("champ_name").length() > 1)
      {
        click(PixelOffset.Blind_SearchChampion);
        sleep(20L);
-       window.typeString(settings.getStringEquivalent("call_text"));
+       window.typeString(settings.getStringEquivalent("champ_name"));
        sleep(200L);
        click(PixelOffset.LobbyChampionSlot1);
 

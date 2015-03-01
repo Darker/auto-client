@@ -9,13 +9,11 @@ import java.awt.GridLayout;
  import java.awt.Rectangle;
  import java.awt.event.ActionEvent;
  import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
  import java.beans.PropertyChangeEvent;
 import java.io.IOException;
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
  import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.ParallelGroup;
 import javax.swing.GroupLayout.SequentialGroup;
@@ -29,7 +27,6 @@ import javax.swing.JComponent;
  import javax.swing.JMenuItem;
 import javax.swing.JPanel;
  import javax.swing.JSpinner;
-import javax.swing.JTabbedPane;
  import javax.swing.JTextField;
  import javax.swing.JToggleButton;
 import javax.swing.LayoutStyle;
@@ -90,26 +87,31 @@ import javax.swing.LayoutStyle;
      }
    }
    
-   private void toggleButton1StateChanged(ChangeEvent e) {
-   
-   
-   
-   
+   public void displayToolAction(boolean state) {
+     toggleButton1.setText(state ? "Stop" : "Start");
+     toggleButton1.setSelected(state);
+   }
+   public void displayToolAction() {
+     displayToolAction(ac.ToolRunning());
    }
    
-   private void ToolAction(ActionEvent e)
+   private boolean ToolAction()
    {
-     this.toggleButton1.setText(this.toggleButton1.isSelected() ? "Stop" : "Start");
-     if (this.toggleButton1.isSelected()) {
+     boolean toolState = ac.ToolRunning();
+     displayToolAction(!toolState);
+     
+     if (!toolState) {
        ac.StartTool();
      } else {
        ac.StopTool();
      }
+     return !toolState;
    }
-   public void setToggleButton1State(boolean state) {
-     toggleButton1.setSelected(state);
-     toggleButton1.setText(state ? "Stop" : "Start");
+
+   private boolean ToolAction(ActionEvent e) {
+     return ToolAction();
    }
+ 
    
    public JToggleButton getToggleButton1()
    {
@@ -144,8 +146,7 @@ import javax.swing.LayoutStyle;
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         // Generated using JFormDesigner Evaluation license - Jakub Mareda
         menuBar1 = new JMenuBar();
-        menu1 = new JMenu();
-        menuItem1 = new JMenuItem();
+
         toggleButton1 = new JToggleButton();
         chatDialog = new Dialog(this);
         label1 = new JLabel();
@@ -153,7 +154,7 @@ import javax.swing.LayoutStyle;
         button1 = new JButton();
 
         //======== this ========
-        setTitle("Auto call");
+        setTitle("Application - stopped");
         Container contentPane = getContentPane();
         contentPane.setLayout(null);
         createTabs(contentPane);
@@ -163,6 +164,8 @@ import javax.swing.LayoutStyle;
 
             //======== menu1 ========
             {
+                menu1 = new JMenu();
+                menuItem1 = new JMenuItem();
                 menu1.setText("Settings");
 
                 //---- menuItem1 ----
@@ -174,8 +177,22 @@ import javax.swing.LayoutStyle;
                     }
                 });
                 menu1.add(menuItem1);
+                
+
             }
             menuBar1.add(menu1);
+            
+            /*// Start button
+            JMenuItem startbut = new JMenuItem();
+            startbut.setText("Start");
+            startbut.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    ToolAction();
+                }
+            });
+            menuBar1.add(startbut);*/
+            
         }
         setJMenuBar(menuBar1);
 
@@ -194,22 +211,17 @@ import javax.swing.LayoutStyle;
         //---- toggleButton1 ----
         toggleButton1.setText("Start");
         toggleButton1.setToolTipText("Start/Stop tool");
-        toggleButton1.setFocusable(false);
+        toggleButton1.setFocusable(true);
         toggleButton1.setFocusPainted(false);
-        toggleButton1.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                toggleButton1StateChanged(e);
-            }
-        });
         toggleButton1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 ToolAction(e);
             }
         });
-        contentPane.add(toggleButton1);
-        toggleButton1.setBounds(142, 151, 69, 19);
+        menuBar1.add(toggleButton1);
+        //contentPane.add(toggleButton1);
+        //toggleButton1.setBounds(142, 151, 69, 19);
 
         { // compute preferred size
             Dimension preferredSize = new Dimension();

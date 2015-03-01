@@ -24,20 +24,21 @@ import sirius.constants.IWMConsts;
  
    
    public Main()
-     throws InterruptedException
    {
    
      //Normal program
      startGUI();
    }
    
+   public boolean ToolRunning() {
+     return ac != null && ac.isAlive() && !ac.isInterrupted();
+   }
    public void StopTool()
    {
     
      if ((ac != null) && (ac.isAlive()) && (!ac.isInterrupted()))
      {
        System.out.println("Stopping tool..");
-       
        ac.interrupt();
      }
      else {
@@ -62,7 +63,7 @@ import sirius.constants.IWMConsts;
        settings.loadFromFile(SETTINGS_FILE);
      }
      catch(IOException e) {
-       //Do nothing, this is expected for first run 
+       //Do nothing, this is expected for first run, before the settings file is created 
      }
      
      gui = new Gui(this, settings);
@@ -87,7 +88,6 @@ import sirius.constants.IWMConsts;
    }
    
    public static void main(String[] args)
-     throws InterruptedException
    {
      Main ac = new Main();
    }
