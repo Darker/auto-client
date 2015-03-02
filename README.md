@@ -21,6 +21,7 @@ auto calls your lane and automaticaly accepts players in team-builder
 ## Planned features
 **Ordered by descending probability of being ever implemented**
 
+ - Disable/enable start button depending on whether the launcher is available or not
  - Auto-requeue
  - Automatically pick runes, masteries and summoner spells for given champion and map
  - [*Technical*] cache screenshot before multiple pixels are being queried
