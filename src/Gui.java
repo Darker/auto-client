@@ -1,4 +1,5 @@
 import GUI.*;
+import PVP_net.Setnames;
 import automat_settings.Settings;
 import java.awt.Color;
  import java.awt.Container;
@@ -320,7 +321,7 @@ import javax.swing.LayoutStyle;
         
         win.newTab("Team builder", "All teambuilder automation");
         
-        field = new FieldDef("Enabled:", "Enable or disable this function.", "tb_enabled");
+        field = new FieldDef("Enabled:", "Enable or disable this function.", Setnames.TEAMBUILDER_ENABLED.name);
         field.addField(new JCheckBox());
         field.attachToSettings(settings);
         win.addLine(field);
@@ -335,6 +336,13 @@ import javax.swing.LayoutStyle;
         field.attachToSettings(settings);
         win.addLine(field);
         
+        
+        win.newTab("Invite friends", "Start automatically when everybody accepts.");
+        
+        field = new FieldDef("Auto start:", "Enable or disable this function.", Setnames.INVITE_ENABLED.name);
+        field.addField(new JCheckBox());
+        field.attachToSettings(settings);
+        win.addLine(field);
 
         pane.add(win.container);
         win.close();

@@ -640,6 +640,18 @@ import java.util.ArrayList;
        return false;*/
    }
    public void invite_lobby() throws APIError, InterruptedException {
+     //Handle disabled invite lobby
+     if(!settings.getBoolean(Setnames.INVITE_ENABLED.name, (boolean)Setnames.INVITE_ENABLED.def)) {
+       System.out.println("Invite lobby automation disabled, waiting.");
+       gui.setTitle("Automation disabled (Invite)");
+       while(checkPoint(PixelOffset.InviteChat, 1) && checkPoint(PixelOffset.InviteStart, 8)) {
+         sleep(1000L);
+       }
+       return;
+     }
+     
+     
+     
      System.out.println("Inviting players now. ");
      gui.setTitle("Waiting for players. (Invite)");
      double[][][] integral_image = null;
@@ -655,6 +667,8 @@ import java.util.ArrayList;
      //Declare the two arrays of matches
      ArrayList<RectMatch> accepted_all, pending_all;
      while(checkPoint(PixelOffset.InviteChat, 1) && checkPoint(PixelOffset.InviteStart, 8)) {
+
+       
        System.out.println("Taking screenshot from window.");
        integral_image = ScreenWatcher.integralImage(window.screenshot());
        //System.out.println("Analysing the screenshot.");
