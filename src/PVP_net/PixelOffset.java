@@ -2,7 +2,6 @@ package PVP_net;
 
 
 import autoclick.ColorPixel;
-import autoclick.Rect;
 import java.awt.Color;
 
 /*

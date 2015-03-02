@@ -11,7 +11,9 @@ package PVP_net;
  * @author Jakub
  */
 public enum Setnames {
-  TEAMBUILDER_ENABLED("tb_enabled", false);
+  TEAMBUILDER_ENABLED("tb_enabled", false),
+  INVITE_ENABLED("invite_enabled", false),
+  ;
   
   public final String name;
   public final Object def;
