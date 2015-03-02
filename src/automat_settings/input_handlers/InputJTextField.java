@@ -4,8 +4,11 @@
  * and open the template in the editor.
  */
 
-package automat_settings;
+package automat_settings.input_handlers;
 
+import automat_settings.Input;
+import automat_settings.SettingsInputVerifier;
+import automat_settings.ValueChanged;
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
 import javax.swing.JTextField;
@@ -14,18 +17,18 @@ import javax.swing.JTextField;
  *
  * @author Jakub
  */
-public class InputJTextField implements Input{
+public class InputJTextField implements Input {
   private final JTextField field;
   private final ValueChanged onchange;
   private SettingsInputVerifier<Object> verifier;
+  
+
   //Indicate whether events have been bound to input
   private boolean bound = false;
   public InputJTextField(JTextField input, ValueChanged onchange, SettingsInputVerifier<Object> subverifier) {
     field = input;
     this.onchange = onchange;
     verifier = subverifier;
-    
-
   }
   /**
    * Binds the events to the field using InputVerifier

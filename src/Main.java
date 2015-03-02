@@ -1,8 +1,13 @@
+import automat_settings.InputHandlers;
 import automat_settings.Settings;
+import automat_settings.input_handlers.InputJCheckBox;
+import automat_settings.input_handlers.InputJTextField;
 import com.incors.plaf.alloy.AlloyLookAndFeel;
 import com.incors.plaf.alloy.AlloyTheme;
 import com.incors.plaf.alloy.themes.glass.GlassTheme;
 import java.io.IOException;
+import javax.swing.JCheckBox;
+import javax.swing.JTextField;
 import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -72,7 +77,7 @@ import sirius.constants.IWMConsts;
      {
        public void run()
        {
-         AlloyLookAndFeel.setProperty("alloy.licenseCode", "a#Phyrum_Tea#1cl1e0j#9u3t2k");
+         /*AlloyLookAndFeel.setProperty("alloy.licenseCode", "a#Phyrum_Tea#1cl1e0j#9u3t2k");
          try
          {
            AlloyTheme al = new GlassTheme();
@@ -80,7 +85,7 @@ import sirius.constants.IWMConsts;
            LookAndFeel alloyLnF = new AlloyLookAndFeel(new GlassTheme());
            UIManager.setLookAndFeel(alloyLnF);
          }
-         catch (UnsupportedLookAndFeelException ex) {}
+         catch (UnsupportedLookAndFeelException ex) {}*/
          Main.this.gui.setDefaultCloseOperation(3);
          Main.this.gui.setVisible(true);
        }
@@ -89,6 +94,10 @@ import sirius.constants.IWMConsts;
    
    public static void main(String[] args)
    {
+     //Register GUI settings handlers
+     InputHandlers.register(InputJTextField.class,  JTextField.class);
+     InputHandlers.register(InputJCheckBox.class,  JCheckBox.class);
+     //Start program
      Main ac = new Main();
    }
  }

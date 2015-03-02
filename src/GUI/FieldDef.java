@@ -48,8 +48,8 @@ public class FieldDef {
     this.field = field;
   }
   public void attachToSettings(Settings set) {
-    if(field!=null && setting_name!=null && field instanceof JTextField) {
-      set.bindToInput(setting_name, (JTextField)field);
+    if(field!=null && setting_name!=null) {
+      set.bindToInput(setting_name, field, true);
     }   
   }
 }

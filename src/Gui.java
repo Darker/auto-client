@@ -19,6 +19,7 @@ import javax.swing.GroupLayout.ParallelGroup;
 import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.ImageIcon;
  import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
  import javax.swing.JFrame;
  import javax.swing.JLabel;
@@ -71,6 +72,7 @@ import javax.swing.LayoutStyle;
           }
         }
      });
+     setSize(500, 300);
    }
    
    private void ModeSelected(PropertyChangeEvent e)
@@ -306,7 +308,6 @@ import javax.swing.LayoutStyle;
         FieldDef field = new FieldDef("Champion:", "Enter champion name", "champ_name");
         field.addField(new JTextField());
         field.attachToSettings(settings);
-        
         System.out.println(" Adding first line.");
         win.addLine(field);
         
@@ -314,13 +315,27 @@ import javax.swing.LayoutStyle;
         field = new FieldDef("Call text:", "Enter text to say after entering lobby.", "call_text");
         field.addField(new JTextField());
         field.attachToSettings(settings);
-        
         System.out.println(" Adding second line.");
         win.addLine(field);
         
+        win.newTab("Team builder", "All teambuilder automation");
         
+        field = new FieldDef("Enabled:", "Enable or disable this function.", "tb_enabled");
+        field.addField(new JCheckBox());
+        field.attachToSettings(settings);
+        win.addLine(field);
         
-        System.out.println(" Adding to panel.");
+        field = new FieldDef("Greet new player:", "As captain, you'll automatically call this to newcomers", "tb_cap_greet");
+        field.addField(new JTextField());
+        field.attachToSettings(settings);
+        win.addLine(field);
+        
+        field = new FieldDef("Lock call:", "Sentence you call when everybody should lock in.", "tb_cap_lock");
+        field.addField(new JTextField());
+        field.attachToSettings(settings);
+        win.addLine(field);
+        
+
         pane.add(win.container);
         win.close();
         System.out.println("Done.");

@@ -8,6 +8,7 @@ package automat_settings;
 
 
 
+import automat_settings.input_handlers.InputJTextField;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
@@ -60,6 +61,15 @@ public class Settings implements java.io.Serializable {
       Object value = settings.get(name);
       if(value instanceof Float) {
         return (Float)value; 
+      }
+    }
+    return defaultValue;
+  }
+  public boolean getBoolean(String name, final boolean defaultValue) {
+    if(settings.containsKey(name)) {
+      Object value = settings.get(name);
+      if(value instanceof Boolean) {
+        return (Boolean)value; 
       }
     }
     return defaultValue;
@@ -156,17 +166,26 @@ public class Settings implements java.io.Serializable {
     System.err.println("listenOnInput is deprecated!");
   }
 
-  public void bindToInput(final String setting_name, final JTextField input, final SettingsInputVerifier<Object> verif) {    
+  public void bindToInput(final String setting_name, final JComponent input, final SettingsInputVerifier<Object> verif) {    
     //boundInputs.put(setting_name, input);
-    Input in = new InputJTextField(input, 
+    Input in;
+    try {
+    in = InputHandlers.fromJComponent(input, 
       new ValueChanged() {
         @Override
         public void changed(Object o) {
+          //System.out.println("Change event!");
           setSetting(setting_name, o);
         }
       },
       verif
-    );
+    );}
+    //Silent fail
+    catch(NoSuchMethodException e) {
+      System.err.println("No handler for this input field!");
+      return;
+    };
+    
     boundInputs.put(setting_name, in);
     if(verif!=null) {
       if(verif!=SettingsInputVerifier.INVALID_VERIFIER) {
@@ -179,10 +198,10 @@ public class Settings implements java.io.Serializable {
       }
     }
   }
-  public void bindToInput(final String setting_name, final JTextField input, final boolean auto_update) {
+  public void bindToInput(final String setting_name, final JComponent input, final boolean auto_update) {
     bindToInput(setting_name, input, auto_update?SettingsInputVerifier.INVALID_VERIFIER:null);
   }
-  public void bindToInput(final String setting_name, final JTextField input) {
+  public void bindToInput(final String setting_name, final JComponent input) {
     bindToInput(setting_name, input, SettingsInputVerifier.INVALID_VERIFIER);
   }
   

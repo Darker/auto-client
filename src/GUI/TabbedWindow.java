@@ -28,8 +28,7 @@ public class TabbedWindow {
   private boolean closed = false;
   public TabbedWindow() {
     container = new JTabbedPane();
-    
-    
+
   }
   
   public JPanel newTab(String text, String tooltip, ImageIcon icon) {

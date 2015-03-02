@@ -1,6 +1,7 @@
 import automat_settings.Settings;
 import PVP_net.PixelOffset;
 import PVP_net.Images;
+import PVP_net.Setnames;
 import PVP_net.TeamBuilderPlayerSlot;
 import autoclick.ColorPixel;
  import java.awt.Color;
@@ -296,6 +297,7 @@ import java.util.ArrayList;
              //Here detect teambuilder lobby
              else if(checkPoint(PixelOffset.TeamBuilder_CaptainIcon, 5)) {
                System.out.println("Team builder lobby detected.");
+               
                if(!isInterrupted())
                  //Function returns true if it sucessfully matched you into game
                  if(teamBuilder_lobby()) {
@@ -338,7 +340,7 @@ import java.util.ArrayList;
                accepted = time;
                gui.setTitle("Match accepted, waiting for lobby.");
                tb = false;
-               
+               play_button = false;
              }
              else if(checkPoint(PixelOffset.TeamBuilder_AcceptGroup,25)) {
                click(PixelOffset.TeamBuilder_AcceptGroup);
@@ -347,6 +349,7 @@ import java.util.ArrayList;
                System.out.println("Group accepted, waiting for lobby.");
                accepted = time;
                tb = true;
+               play_button = false;
              }
              /*else if (pixelCheckS(new Color(255, 255, 255), width * 0.7361D, height * 0.91875D, 1))
              {
@@ -354,6 +357,7 @@ import java.util.ArrayList;
                this.gui.getProgressBar1().setValue(40);
              }*/
              else if(checkPoint(PixelOffset.TeamBuilder_CaptainLobby_Invited, 23)) {
+               
                if( teamBuilder_captain_lobby()) {
                  System.out.println("Game started as captain, the job is over.");
                  end();
@@ -367,6 +371,7 @@ import java.util.ArrayList;
              //If this is a lobby with invited players
              else if(checkPoint(PixelOffset.InviteChat, 1) && checkPoint(PixelOffset.InviteStart, 8)) {
                invite_lobby();
+               play_button = false;
                
              }
              //If play button wasn't there and sudenly appeared, the program shall quit
@@ -375,9 +380,7 @@ import java.util.ArrayList;
                end();
                break;
              }
-             else {
-               play_button = false;
-             }
+
              //Please kick me, I need to test something :)
              /*Color cCol = window.getColor((int)(width * PixelOffset.PlayButton.x), (int)(height * PixelOffset.PlayButton.y));
              if ((cCol.getRed() > 70) && (cCol.getGreen() < 10) && (cCol.getBlue() < 5) && (!isInterrupted()))
@@ -447,8 +450,18 @@ import java.util.ArrayList;
    
    public boolean teamBuilder_lobby() throws InterruptedException {
      System.out.println("In team builder lobby now.");
+     //Check if the teambuilder is enabled
+     if(!settings.getBoolean(Setnames.TEAMBUILDER_ENABLED.name, (boolean)Setnames.TEAMBUILDER_ENABLED.def)) {
+       gui.setTitle("Team builder - actions are disabled");
+       while(true) {
+         if(!checkPoint(PixelOffset.TeamBuilder_CaptainIcon, 11)) {
+           System.out.println("The group was disbanded.");
+           return false;
+         }
+         sleep(1000L);
+       }
+     }
      gui.setTitle("Waiting for ready button. (Team builder)");
-     
      click(PixelOffset.TeamBuilder_Chat);
      if(settings.getStringEquivalent("call_text").length()>0) {
        sleep(50L);
@@ -580,8 +593,8 @@ import java.util.ArrayList;
          //React to individual changes
          //Greet new players here
          if(!oldslots[i].isJoined && slots[i].isJoined) {
-           if(!settings.getStringEquivalent("call_text").isEmpty())
-             teamBuilder_say(settings.getStringEquivalent("call_text"));
+           if(!settings.getStringEquivalent("tb_cap_greet").isEmpty())
+             teamBuilder_say(settings.getStringEquivalent("tb_cap_greet"));
            System.out.println("    A new player appeared in slot #"+(i+1));
            //System.out.println("Matchpoint: "+PixelOffset.TeamBuilder_CaptainLobby_slot_kickPlayer.offset(0, i*offset).toSource());
          }
@@ -601,8 +614,8 @@ import java.util.ArrayList;
          sleep(500L);
        }
        else if(joined==4) {
-         if(settings.getStringEquivalent("champ_name").length() > 0) {
-           teamBuilder_say(settings.getStringEquivalent("call_text"));
+         if(settings.getStringEquivalent("tb_cap_lock").length() > 0) {
+           teamBuilder_say(settings.getStringEquivalent("tb_cap_lock"));
          }
          allReadyCalled = true;
        }
