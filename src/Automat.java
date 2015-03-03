@@ -419,6 +419,7 @@ import java.util.ArrayList;
      }
    }
    public void normal_lobby() throws InterruptedException, APIError {
+     boolean ARAM = false;
      //this.gui.getProgressBar1().setValue(70);
      if(settings.getStringEquivalent("call_text").length()>0) {
        sleep(this.gui.getDelay());
