@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package PVP_net;
+package cz.autoclient.PVP_net;
 
 import cz.autoclient.autoclick.Rect;
 

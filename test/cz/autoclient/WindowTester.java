@@ -1,6 +1,6 @@
 package cz.autoclient;
 
-import cz.autoclient.Main;
+import cz.autoclient.PVP_net.Constants;
 import cz.autoclient.autoclick.MSWindow;
 import cz.autoclient.autoclick.MouseButton;
 import cz.autoclient.autoclick.Rect;
@@ -35,7 +35,7 @@ public class WindowTester {
        //test.typeString("PoJus.'\\#`&[]*-č");
        Rect rect = test.getRect();
        System.out.println(rect);
-       System.out.println("Ratio = " + rect.right + "/" + PVP_net.Constants.normalSize.right + " = " + PVP_net.Constants.sizeCoeficient(test.getRect()));
+       System.out.println("Ratio = " + rect.right + "/" + Constants.normalSize.right + " = " + Constants.sizeCoeficient(test.getRect()));
     
      }
    }
