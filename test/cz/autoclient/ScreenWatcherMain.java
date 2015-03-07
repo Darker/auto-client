@@ -42,25 +42,26 @@ public class ScreenWatcherMain {
      if(true)
        return;/* */
      //The small image to search for
-     BufferedImage thing = loadFromPath(/*"CVTestSearchObject.png"*/"launcher_screens/search_objects/pending.png");
-     BufferedImage thing2 = loadFromPath(/*"CVTestSearchObject.png"*/"launcher_screens/search_objects/accepted.png");
+     //BufferedImage thing = loadFromPath(/*"CVTestSearchObject.png"*/"launcher_screens/search_objects/pending.png");
+     //BufferedImage thing2 = loadFromPath(/*"CVTestSearchObject.png"*/"launcher_screens/search_objects/accepted.png");
      //The big image to search in
-     BufferedImage screenshot = loadFromPath(/*"screenshot.png"*/"launcher_screens/INVITE-PENDING.png");
+     //BufferedImage screenshot = loadFromPath(/*"screenshot.png"*/"launcher_screens/INVITE-PENDING.png");
      
-     if(thing!=null && screenshot!=null && thing2!=null) {
+     //if(thing!=null && screenshot!=null && thing2!=null) {
        //TestSearchColorAll(thing, screenshot);
        //TestSearch(thing, screenshot);
-       TestBestWhile(thing, thing2, screenshot);
-     }
+       //TestBestWhile(thing, thing2, screenshot);
+       TestRectangles();
+     //}
    }
    public static void TestRectangles() {
      ArrayList<Rect> test = new ArrayList<>();
-     /*test.add(new Rect(10,50,50,10));
+     test.add(new Rect(10,50,50,10));
      test.add(new Rect(30,80,80,40));
      test.add(new Rect(60,100,100,60));
      test.add(new Rect(80,90,130,40));
-     //test.add(new Rect(8,30,120,70));
-     test.add(new Rect(130,150,190,100));*/
+     test.add(new Rect(8,30,120,70));
+     test.add(new Rect(130,150,190,100));
      //Three overlaping
      /*for(int i=0; i<20*7; i+=7) {
        test.add(new Rect(10+i,150+i,150+i,10+i));
@@ -68,10 +69,11 @@ public class ScreenWatcherMain {
      test.add(new Rect(290,299,299,290));
      */
      //Actual rectangles from CV output
-     test.add(new Rect(188, 354+50, 211+50, 330));
-     test.add(new Rect(188, 356+50, 211+50, 332));
-     test.add(new Rect(189, 356+50, 212+50, 332));
+     /*test.add(new Rect(188, 354+50, 211+50, 330));
      test.add(new Rect(190, 357+50, 213+50, 333));
+     test.add(new Rect(188, 356+50, 211+50, 332));
+     test.add(new Rect(189, 356+50, 212+50, 332));*/
+     
      
      /*for(int i=0; i<test.size(); i++) {
        for(int j=0; j<test.size(); j++) {
@@ -112,7 +114,7 @@ public class ScreenWatcherMain {
        }
      }
        
-     saveToPath("rectangles.png", debug);
+     displayImage(debug);
    }
    public static void TestBestMatches(BufferedImage thing1, BufferedImage thing2, BufferedImage screenshot) {
      double[][][] ii = ScreenWatcher.integralImage(screenshot);

@@ -75,8 +75,8 @@ public class Rect {
    * @param scale float parameter of the scale ratio, where 1 is equal rectangle
    * @return rescaled rectangle
    */
-  public Rect rescaleSize(float size) {
-    return new Rect(top, (int)(right*size), (int)(bottom*size), left);
+  public Rect rescaleSize(float scale) {
+    return new Rect(top, (int)(right*scale), (int)(bottom*scale), left);
     
   }
   
@@ -94,8 +94,11 @@ public class Rect {
   
   public static ArrayList<ArrayList<Rect>> groupOverlapingRects(Rect rects[], boolean return_loners) {
     Rect currentRect;
+    //Group associated with the rectangle we're currently checking for
     ArrayList<Rect> currentGroup;
+    //All groups
     ArrayList<ArrayList<Rect>> results = new ArrayList<>();
+    
     int results_iterator = -1;
     //length-1 because the last one never needs to be checked
 
@@ -111,10 +114,10 @@ public class Rect {
           currentGroup.add(rects[j]);
         }
       }
+      //If we are also interested in lonely rectangles
       if(currentGroup==null&&return_loners) {
         currentGroup = new ArrayList<>();
         currentGroup.add(currentRect);
-        //System.out.println(i+": Created the entry anyway, because even lonely rect has a right to be returned.");
       }
       if(currentGroup!=null) {
         //Check if the current group isn't fully contained within the previous group
@@ -123,16 +126,24 @@ public class Rect {
           results.add(currentGroup);
           results_iterator++;
         }
-        /*else {
-          System.out.println(i+": Current entry is ignored because it's already included in another group.");
-          System.out.println(arrayInArray(currentGroup,  results));
-        }*/
       }
     }
     //Try to add the last rectangle if it isn't in any former group
-      //Unfinished, I have bigger problems now
-    
-   
+    if(return_loners) {
+      boolean add = true;
+      Rect last = rects[rects.length-1];
+      for(int i=0,l=results.size(); i<l;i++) {
+        if(results.get(i).contains(last)) {
+          add = false;
+          break;
+        }
+      }
+      if(add) {
+        ArrayList<Rect> dd = new ArrayList<>();
+        dd.add(last);
+        results.add(dd);
+      }
+    }
     return results; 
   }
   public static ArrayList<ArrayList<Rect>> groupOverlapingRects(Rect rects[]) {

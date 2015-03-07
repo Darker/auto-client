@@ -61,13 +61,20 @@ public interface Window {
   public void disable();
   /** Enable window interaction**/
   public void enable();
-  /**Is enabled or disabled?**/
+  /**Is enabled or disabled
+   * @return true if the input is not blocked**/
   public boolean isEnabled();
   
   public boolean isMinimized();
   /** If true, the window is visible and rendered.
-   * The user may interact with dfferent window however. **/
+   * The user may interact with dfferent window however.
+   * @return true if the window can be seen on screen**/
   public boolean isVisible();
+  
+  /** Check whether this Window object still links to some real valid window
+   * @return true if window related to this object still exists in the system
+   */
+  public boolean isValid();
   
   public void move(int x, int y) throws APIError;
   public void resize(int w, int h) throws APIError;

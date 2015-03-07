@@ -192,6 +192,10 @@ public class MSWindow extends Common implements Window  {
     return UserExt.IsWindowVisible(hwnd);
   }
   
+  public boolean isValid() {
+    return UserExt.IsWindow(hwnd);
+  }
+  
   
   private ShowWindow getWindowPlacement() {
    WinDefExt.WINDOWPLACEMENT placement = new WinDefExt.WINDOWPLACEMENT();
@@ -358,7 +362,7 @@ public class MSWindow extends Common implements Window  {
   /**
    * Creates autoclick.Rect object describing dimensions of this window.
    * @return Rect object describing window size and on-screen position
-   * @throws autoclick.exceptions.APIError - when internal API function returns false
+   * @throws APIError - when internal API function returns false
    */
   @Override
   public Rect getRect() throws APIError
@@ -387,6 +391,14 @@ public class MSWindow extends Common implements Window  {
   protected static GDI32 GDI = GDI32.INSTANCE;
   protected static GDI32Ext GDIExt = GDI32Ext.INSTANCE;
   public static MSWindow windowFromName(final String name,final boolean strict) {
+    if(strict) {
+      WinDef.HWND hwnd = UserExt.FindWindow(null, name);
+      if(hwnd==null)
+        return null;
+      else
+        return new MSWindow(hwnd);
+    }
+    else {
      //I'm not entirely sure why we use array here, but
      //my guess is, that normal non-final variable would not be
      //accessible in the callback...
@@ -432,6 +444,7 @@ public class MSWindow extends Common implements Window  {
      
      
      return WindowID[0]==0L?null:new MSWindow(WindowID[0]);
+    }
   }
 
 

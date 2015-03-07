@@ -1,5 +1,8 @@
 package cz.autoclient;
 
+import cz.autoclient.autoclick.Window;
+import cz.autoclient.autoclick.Rect;
+import cz.autoclient.autoclick.MSWindow;
 import cz.autoclient.automat_settings.Settings;
 import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.PVP_net.Images;
@@ -9,7 +12,6 @@ import cz.autoclient.autoclick.exceptions.APIError;
 import cz.autoclient.autoclick.ColorPixel;
  import java.awt.Color;
 
-import cz.autoclient.autoclick.*;
 import cz.autoclient.autoclick.comvis.RectMatch;
 import cz.autoclient.autoclick.comvis.ScreenWatcher;
 
@@ -26,6 +28,7 @@ import java.util.ArrayList;
    Gui gui;
    private Settings settings;
    
+   private boolean pretendAccepted = false;
    //Logger for thread
    
    
@@ -88,8 +91,6 @@ import java.util.ArrayList;
    }
    private void end() {
        gui.displayToolAction(false);
-       //gui.getProgressBar1().setValue(0);
-       gui.setTitle("Idle...");
    }
    
    private void StartMode(String[] mode)
@@ -279,6 +280,10 @@ import java.util.ArrayList;
      for (;;)
      {
        time = System.currentTimeMillis()/1000L;
+       if(pretendAccepted == true) {
+         pretendAccepted = false;
+         accepted = time;        
+       }
        if (!isInterrupted())
        {
          sleep(accepted>0 ? 100L : 600L);
@@ -420,6 +425,9 @@ import java.util.ArrayList;
        System.out.println("Match handling interrupted.");
      }
    }
+   public synchronized void simulateAccepted() {
+     pretendAccepted = true;     
+   }
    public void normal_lobby() throws InterruptedException, APIError {
      boolean ARAM = false;
      //this.gui.getProgressBar1().setValue(70);
@@ -465,13 +473,13 @@ import java.util.ArrayList;
        }
      }
      gui.setTitle("Waiting for ready button. (Team builder)");
-     click(PixelOffset.TeamBuilder_Chat);
+     /*click(PixelOffset.TeamBuilder_Chat);
      if(settings.getStringEquivalent("call_text").length()>0) {
        sleep(50L);
        window.typeString(settings.getStringEquivalent("call_text"));
        Enter();
      }
-     sleep(50L);
+     sleep(50L);*/
      //Wait for ready button
      System.out.println("Waiting for ready button.");
      while(true) {

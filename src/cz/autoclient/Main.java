@@ -1,5 +1,6 @@
 package cz.autoclient;
 
+import cz.autoclient.GUI.StateGuard;
 import cz.autoclient.automat_settings.InputHandlers;
 import cz.autoclient.automat_settings.Settings;
 import cz.autoclient.automat_settings.input_handlers.InputJCheckBox;
@@ -19,15 +20,17 @@ import sirius.constants.IWMConsts;
    //Some application constants
    public static final String SETTINGS_FILE = "data/settings.bin";
    
-   public Thread ac;
+   public Automat ac;
    public Gui gui;
+   
    private Settings settings;
    
  
    
    public Main()
    {
-   
+     
+     
      //Normal program
      startGUI();
    }
@@ -67,11 +70,11 @@ import sirius.constants.IWMConsts;
      catch(IOException e) {
        //Do nothing, this is expected for first run, before the settings file is created 
      }
-     
      gui = new Gui(this, settings);
-     
+ 
      SwingUtilities.invokeLater(new Runnable()
      {
+       @Override
        public void run()
        {
          /*AlloyLookAndFeel.setProperty("alloy.licenseCode", "a#Phyrum_Tea#1cl1e0j#9u3t2k");
@@ -83,8 +86,8 @@ import sirius.constants.IWMConsts;
            UIManager.setLookAndFeel(alloyLnF);
          }
          catch (UnsupportedLookAndFeelException ex) {}*/
-         Main.this.gui.setDefaultCloseOperation(3);
-         Main.this.gui.setVisible(true);
+         gui.setDefaultCloseOperation(3);
+         gui.setVisible(true);
        }
      });
    }

@@ -3,6 +3,8 @@ package cz.autoclient;
 import cz.autoclient.GUI.*;
 import cz.autoclient.PVP_net.Setnames;
 import cz.autoclient.automat_settings.Settings;
+import cz.autoclient.dllinjection.DLLInjector;
+import cz.autoclient.dllinjection.InjectionResult;
 import java.awt.Color;
  import java.awt.Container;
  import java.awt.Dialog;
@@ -10,6 +12,7 @@ import java.awt.Color;
 import java.awt.GridLayout;
  import java.awt.Insets;
  import java.awt.Rectangle;
+import java.awt.SystemTray;
  import java.awt.event.ActionEvent;
  import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -35,15 +38,23 @@ import javax.swing.JPanel;
  import javax.swing.JToggleButton;
 import javax.swing.LayoutStyle;
  import javax.swing.SpinnerNumberModel;
- import javax.swing.event.ChangeEvent;
- import javax.swing.event.ChangeListener;
  
  public class Gui
    extends JFrame
  {
    private Main ac;
+   private StateGuard guard;
    private Settings settings;
    private String[] selected;
+   
+   private JMenuItem manu_threadcontrol_pretend_accepted;
+   private JMenuItem menu_dll_additions;
+   
+   /**
+    * Is set to true if the AutoClient anti-annoyance functions are in place
+    */
+   private boolean anoyance_disabled = false;
+   
    
    public String[] getSelectedMode()
    {
@@ -56,12 +67,21 @@ import javax.swing.LayoutStyle;
      this.settings = settings;
      
      initComponents();
+     
+     guard = new StateGuard(this.ac, this);
 
      this.addWindowListener(new WindowAdapter()
      {
         @Override
+        public void windowOpened(WindowEvent event)
+        {
+          System.out.println("Window opened, starting GUI guard.");
+          guard.start();
+        }
+        @Override
         public void windowClosing(WindowEvent event)
         {
+          guard.interrupt();
           if(settings==null) {
             System.out.println("Settings is null!");
             return;
@@ -70,11 +90,27 @@ import javax.swing.LayoutStyle;
             settings.loadSettingsFromBoundFields();
             settings.saveToFile(Main.SETTINGS_FILE, false);
           }
-          catch(IOException e) {
-             
-          }
+          catch(IOException e) {}
+        }
+        @Override
+        public void windowClosed(WindowEvent event)
+        {
+          System.out.println("This function is never called.");
+        }
+        @Override
+        public void windowActivated(WindowEvent event)
+        {
+          //guard.pause(false);
+          //System.out.println("Gained focus - unpausing thread.");
+        }
+        @Override
+        public void windowDeactivated(WindowEvent event)
+        {
+          //guard.pause(true);
+          //System.out.println("Lost focus - pausing thread.");
         }
      });
+
      setSize(500, 300);
    }
    
@@ -95,9 +131,38 @@ import javax.swing.LayoutStyle;
    public void displayToolAction(boolean state) {
      toggleButton1.setText(state ? "Stop" : "Start");
      toggleButton1.setSelected(state);
+     toggleButton1.setBackground(state? Color.RED:null);
+     //Enable/disable thread control
+     manu_threadcontrol_pretend_accepted.setEnabled(state);
+     
+     if(!state) {
+       setTitle("Stopped."); 
+     }
    }
    public void displayToolAction() {
      displayToolAction(ac.ToolRunning());
+   }
+   
+   public void displayClientAvailable(boolean available) {
+    toggleButton1.setEnabled(available);
+    if(available) {
+      toggleButton1.setToolTipText(Text.TOGGLE_BUTTON_TITLE_ENABLED.text);
+    }
+    else {
+      toggleButton1.setToolTipText(Text.TOGGLE_BUTTON_TITLE_DISABLED.text);
+    } 
+   }
+   
+   public void displayDllStatus(boolean loaded) {
+     if(loaded) {
+       menu_dll_additions.setText(Text.MENU_DLL_LOADED.text);
+       menu_dll_additions.setEnabled(false);
+     }
+     else {
+       menu_dll_additions.setText(Text.MENU_DLL_LOAD.text);
+       menu_dll_additions.setEnabled(true);
+     }
+     
    }
    
    private boolean ToolAction()
@@ -146,7 +211,11 @@ import javax.swing.LayoutStyle;
    {
      return this.spinner1;
    }
-
+   private void initTrayIcon() {
+     if (SystemTray.isSupported()) { 
+       
+     }
+   }
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         // Generated using JFormDesigner Evaluation license - Jakub Mareda
@@ -183,7 +252,48 @@ import javax.swing.LayoutStyle;
                 });
                 menu1.add(menuItem1);
                 
+                final JMenuItem menuItem2 = new JMenuItem();
+                menuItem2.setText(Text.MENU_DLL_LOAD.text);
+                menuItem2.setToolTipText(Text.MENU_DLL_TITLE.text);
+                menuItem2.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        menuItem2.setEnabled(false);
+                        menuItem2.setText("Injecting...");
 
+                        DLLInjector.inject(new InjectionResult() {
+                            @Override
+                            public void run(boolean result, String fail_reason) {
+                               if(result)
+                                 menuItem2.setText(Text.MENU_DLL_LOADED.text);
+                               else {
+                                 menuItem2.setEnabled(true);
+                                 menuItem2.setText("Injection failed: "+fail_reason);
+                               }
+                            }
+                        });
+                    }
+                });
+                menu1.add(menuItem2);
+                
+                menu_dll_additions = menuItem2;
+                
+                if(!DLLInjector.available()) {
+                  menuItem2.setToolTipText("This requires additional binary files. Read help to learn more.");
+                  menuItem2.setEnabled(false);
+                }
+
+                manu_threadcontrol_pretend_accepted = new JMenuItem();
+                manu_threadcontrol_pretend_accepted.setText("Detect game lobby");
+                manu_threadcontrol_pretend_accepted.setToolTipText("If the lobby has been already invoked, skip accept phase.");
+                manu_threadcontrol_pretend_accepted.setEnabled(false);
+                manu_threadcontrol_pretend_accepted.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                      Gui.this.ac.ac.simulateAccepted();
+                    }
+                });
+                menu1.add(manu_threadcontrol_pretend_accepted);
             }
             menuBar1.add(menu1);
             
@@ -215,13 +325,14 @@ import javax.swing.LayoutStyle;
 
         //---- toggleButton1 ----
         toggleButton1.setText("Start");
-        toggleButton1.setToolTipText("Start/Stop tool");
+        toggleButton1.setToolTipText(Text.TOGGLE_BUTTON_TITLE_DISABLED.text);
+        toggleButton1.setEnabled(false);
         toggleButton1.setFocusable(true);
         toggleButton1.setFocusPainted(false);
         toggleButton1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ToolAction(e);
+              ToolAction();
             }
         });
         menuBar1.add(toggleButton1);
@@ -302,7 +413,6 @@ import javax.swing.LayoutStyle;
     //http://docs.oracle.com/javase/tutorial/uiswing/examples/components/TabbedPaneDemoProject/src/components/TabbedPaneDemo.java
     public void createTabs(Container pane) {
         pane.setLayout(new GridLayout(1, 1));
-        System.out.println("Creating tabbed window.");
         TabbedWindow win = new TabbedWindow();
         
         win.newTab("Blind pick lobby", "Lobby where lane is called and champion is picked");
@@ -311,14 +421,11 @@ import javax.swing.LayoutStyle;
         FieldDef field = new FieldDef("Champion:", "Enter champion name", "champ_name");
         field.addField(new JTextField());
         field.attachToSettings(settings);
-        System.out.println(" Adding first line.");
         win.addLine(field);
-        
         
         field = new FieldDef("Call text:", "Enter text to say after entering lobby.", "call_text");
         field.addField(new JTextField());
         field.attachToSettings(settings);
-        System.out.println(" Adding second line.");
         win.addLine(field);
         
         win.newTab("Team builder", "All teambuilder automation");
@@ -348,7 +455,6 @@ import javax.swing.LayoutStyle;
 
         pane.add(win.container);
         win.close();
-        System.out.println("Done.");
         /*
         JTabbedPane tabbedPane = new JTabbedPane();
         ImageIcon icon = null;
