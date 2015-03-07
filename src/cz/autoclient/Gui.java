@@ -156,11 +156,19 @@ import javax.swing.LayoutStyle;
    public void displayDllStatus(boolean loaded) {
      if(loaded) {
        menu_dll_additions.setText(Text.MENU_DLL_LOADED.text);
+       
        menu_dll_additions.setEnabled(false);
      }
      else {
        menu_dll_additions.setText(Text.MENU_DLL_LOAD.text);
-       menu_dll_additions.setEnabled(true);
+       if(DLLInjector.available()) {
+         menu_dll_additions.setEnabled(true);
+         menu_dll_additions.setToolTipText(Text.MENU_DLL_TITLE.text);
+       }
+       else {
+         menu_dll_additions.setToolTipText(Text.MENU_DLL_TITLE_UNAVAILABLE.text);
+         menu_dll_additions.setEnabled(false);
+       }
      }
      
    }
@@ -253,8 +261,6 @@ import javax.swing.LayoutStyle;
                 menu1.add(menuItem1);
                 
                 final JMenuItem menuItem2 = new JMenuItem();
-                menuItem2.setText(Text.MENU_DLL_LOAD.text);
-                menuItem2.setToolTipText(Text.MENU_DLL_TITLE.text);
                 menuItem2.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
@@ -275,13 +281,8 @@ import javax.swing.LayoutStyle;
                     }
                 });
                 menu1.add(menuItem2);
-                
                 menu_dll_additions = menuItem2;
-                
-                if(!DLLInjector.available()) {
-                  menuItem2.setToolTipText("This requires additional binary files. Read help to learn more.");
-                  menuItem2.setEnabled(false);
-                }
+                displayDllStatus(false);
 
                 manu_threadcontrol_pretend_accepted = new JMenuItem();
                 manu_threadcontrol_pretend_accepted.setText("Detect game lobby");

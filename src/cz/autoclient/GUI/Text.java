@@ -19,6 +19,7 @@ public enum Text {
   MENU_DLL_LOADED("DLL injected."),
   MENU_DLL_LOAD("Disable Client attention requests"),
   MENU_DLL_TITLE("Disables taskbar flashing and focus stealing using DLL injection"),
+  MENU_DLL_TITLE_UNAVAILABLE("This requires additional binary files. Read help to learn more."),
 ;
   
   public final String text;
