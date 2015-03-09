@@ -1,5 +1,13 @@
 # PVP.bot - Client automation for lazy players
 **Auto call, auto accept and other automatic features for League of Legends (LoL) PVP.net Client launcher**
+ - Autocall your lane
+ - Autopick - automatically pick a champion
+ - Autoaccept - teambuilder games automatically accept players when captain
+ - Autoready - automatically press ready in teambuilder
+ - **Works when client is behind another window**
+ - **Doesn't move your mouse**
+
+
 
 For detailed information, [please refer to wiki](https://github.com/Darker/auto-client/wiki). On this page I'll
 rather post some technical info and SEO meaningless texts.
@@ -21,7 +29,7 @@ auto calls your lane and automaticaly accepts players in team-builder
 ## Planned features
 **Ordered by descending probability of being ever implemented**
 
- - Disable/enable start button depending on whether the launcher is available or not
+ - ~~Disable/enable start button depending on whether the launcher is available or not~~ **- done**
  - Auto-requeue
  - Automatically pick runes, masteries and summoner spells for given champion and map
  - [*Technical*] cache screenshot before multiple pixels are being queried
