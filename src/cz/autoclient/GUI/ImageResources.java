@@ -7,6 +7,7 @@
 package cz.autoclient.GUI;
 
 import java.awt.Image;
+import java.net.URL;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
@@ -16,24 +17,46 @@ import javax.swing.ImageIcon;
  * @author Jakub
  */
 public enum ImageResources {
-  ICON("IconHighRes.png");
+  ICON("icon.png"),
+
+  
+  ;
   //So according to [this guy](http://stackoverflow.com/a/17007533/607407) I
   //  should enter classpath beginning with slash to make sure it's absolute path from
   //  the root of my .jar
-  public static final String basepath = "/cz/autoclient/resources/";
-  //Cache everything to have less letters to write
-  public static final ClassLoader loader = ImageResources.class.getClassLoader();
-  public static final Class leclass = ImageResources.class;
+  public static final String basepath = "/";
+  //Cache class refference and use the same class refference every time
+  //  this should allow JVM to get some non-static functions optimized better
+  public static final Class leclass = ICON.getClass();
   //String is immutable so it's ok to make it a public constant
   public final String path;
+  //ImageIcon description/title
+  public final String title;
   //These will fill up on demand when needed
-  private ImageIcon icon;
+  private ImageIcon icon = null;
   private Image image = null;
   //If image has failed, we'll not try to load it again and will return null straight away
   private boolean image_failed = false;
   //Constructor concatenates the individual path with the global path
+  
+  
   ImageResources(String path) {
+    this(path, "");
+  }
+  ImageResources(String path, String title) {
     this.path = basepath+path;
+    this.title = title;
+    //Resources are retarder so I prefer to keep these debug lines in case I need them again
+    //System.out.println("Resource "+name()+" at '"+this.path+"'.");
+    //System.out.println("Class location: "+this.getClass().getResource(this.path));
+
+    /*URL[] urls = ((URLClassLoader) (Thread.currentThread().getContextClassLoader())).getURLs();
+    for (URL url : urls) {
+      System.out.println(url.getPath());
+    }*/
+  }
+  public URL getClasspath() {
+    return leclass.getResource(path);
   }
   
   public ImageIcon getIcon() {
@@ -42,7 +65,13 @@ public enum ImageResources {
         icon = new ImageIcon(image);
       }
       else {
-        icon = new ImageIcon(loader.getResource(path));
+        try {
+          icon = new ImageIcon(leclass.getResource(path));
+        }
+        catch(NullPointerException e) {
+          System.out.println("Can't tray!");
+          icon = null; 
+        }
       }
     }
     return icon;
@@ -57,6 +86,7 @@ public enum ImageResources {
       //Remember the image is unavailable
       if(image_failed)
         return null;
+      //System.out.println("  LoadImage(\""+leclass.getResource(".")+"\")");
       //Use whatever is stored in Icon if we have it
       if(icon!=null) {
         image = icon.getImage();
@@ -64,7 +94,7 @@ public enum ImageResources {
       //Load from .jar
       else {
         try {
-          image = ImageIO.read(leclass.getResourceAsStream("/images/grass.png"));
+          image = ImageIO.read(leclass.getResourceAsStream(path));
         }
         //While only IOException is reported it also can throw InvalidArgumentException
         // when read() argument is null

@@ -6,7 +6,7 @@
 
 package cz.autoclient.GUI;
 
-import cz.autoclient.automat_settings.Settings;
+import cz.autoclient.settings.Settings;
 import java.awt.Color;
 import java.awt.GridLayout;
 import javax.swing.BorderFactory;
