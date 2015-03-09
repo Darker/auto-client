@@ -18,6 +18,8 @@ public enum PixelOffset {
     PlayButton_red(0.5282632272641906D, 0.05335365853658536D, new Color(216, 38, 20, 1)),
     PlayButton_cancel(0.5587665322620996D, 0.06253177233521276D, new Color(205, 165, 102, 1)),
     PlayButton_SearchingForGame_Approx (0.42531457289624774D, 0.06710726787193565D, new Color(255, 255, 255, 1)),
+    //The button you can press after game mode has been selected
+    Play_Solo(0.5306054028901105D, 0.8869954957698297D, new Color(200, 81, 0, 1)),
     LobbyChat(0.495117D, 0.91875D, new Color(255, 255, 255, 1)),
     LobbyChat2(0.5387487383572218D, 0.9184036396562681D, new Color(255, 255, 255, 1)),
     LobbyQuit(0.11646860979241919D, 0.9207317073170731D),
