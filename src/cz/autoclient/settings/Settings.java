@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package cz.autoclient.automat_settings;
+package cz.autoclient.settings;
 
 
 import java.io.BufferedInputStream;
@@ -39,6 +39,7 @@ public class Settings implements java.io.Serializable {
    * Should never change from true to false! Indicates that settings have changed and should be saved in file.
    */
   private boolean changed = false;
+
   /**
    * Retrieve setting that IS Integer. If the setting does not exist or isn't Integer, returns default value.
    * @param name name of the setting
@@ -54,6 +55,7 @@ public class Settings implements java.io.Serializable {
     }
     return defaultValue;
   }
+
   public float getFloat(String name, final float defaultValue) {
     if(settings.containsKey(name)) {
       Object value = settings.get(name);
@@ -116,6 +118,22 @@ public class Settings implements java.io.Serializable {
     settings.put(name, value);
     System.out.println("AutomatSettings[\""+name+"\"] = "+value.toString());
     return old;
+  }
+  /** Set default value of that setting. This must be set every time after loading settings (it's not saved).
+   * In fact, this function just adds setting if setting is not set. This also does not trigger
+   * changed flag - when you save settings, these changes will not force save, but will be saved if
+   * save operation is performed.
+   * @param name setting name
+   * @param value setting value
+   * @return true if something was changed, false if the value was already set
+   */
+  public boolean setSettingDefault(String name, Object value) {
+    if(settings.containsKey(name)) {
+      return false;   
+    }
+    settings.put(name, value);
+    System.out.println("default AutomatSettings[\""+name+"\"] = "+value.toString());
+    return true;
   }
   /** Automatically update setting value as user types.
    * @param setting_name What is the name of associated setting?
@@ -206,17 +224,23 @@ public class Settings implements java.io.Serializable {
   public void displaySettingsOnBoundFields() {
     for (Map.Entry pair : boundInputs.entrySet()) {
       String name = (String)pair.getKey();
-      System.out.println("Trying to load setting '"+name+"' on input.");
+      //System.out.println("Trying to load setting '"+name+"' on input.");
       if(settings.containsKey(name)) {
         Input input = (Input)pair.getValue();
+        //System.out.println("   value='"+settings.get(name)+"'");
         input.setValue(settings.get(name));
       }
     }
   }
   public void loadSettingsFromBoundFields() {
     for (Map.Entry pair : boundInputs.entrySet()) {
+      
+      
       String name = (String)pair.getKey();
       Input input = (Input)pair.getValue();
+      
+      //System.out.println("Trying to load setting '"+name+"' from input.");
+      //System.out.println("   value='"+input.getValue()+"'");
       setSetting(name, input.getValue());
     }
   }

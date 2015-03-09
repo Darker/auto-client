@@ -2,19 +2,24 @@ package cz.autoclient;
 
 import cz.autoclient.GUI.*;
 import cz.autoclient.PVP_net.Setnames;
-import cz.autoclient.automat_settings.Settings;
+import cz.autoclient.settings.Settings;
 import cz.autoclient.dllinjection.DLLInjector;
 import cz.autoclient.dllinjection.InjectionResult;
+import java.awt.AWTException;
 import java.awt.Color;
  import java.awt.Container;
  import java.awt.Dialog;
  import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.GridLayout;
  import java.awt.Insets;
  import java.awt.Rectangle;
 import java.awt.SystemTray;
+import java.awt.TrayIcon;
  import java.awt.event.ActionEvent;
  import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
  import java.beans.PropertyChangeEvent;
@@ -26,6 +31,7 @@ import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.ImageIcon;
  import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
  import javax.swing.JFrame;
  import javax.swing.JLabel;
@@ -46,9 +52,20 @@ import javax.swing.LayoutStyle;
    private StateGuard guard;
    private Settings settings;
    private String[] selected;
+   //Is PVP.net window available?
+   private boolean pvp_net_window = false;
+   //Was our DLL loaded by the user?
+   private boolean dll_loaded = false;
    
    private JMenuItem manu_threadcontrol_pretend_accepted;
    private JMenuItem menu_dll_additions;
+   private JCheckBoxMenuItem menu_tray_enabled;
+   private JCheckBoxMenuItem menu_tray_minimize;
+   
+   private TrayIcon tray_icon;
+   //Remember whether tray icon has been added or not
+   private boolean tray_added = false;
+   private final SystemTray tray;
    
    /**
     * Is set to true if the AutoClient anti-annoyance functions are in place
@@ -65,8 +82,21 @@ import javax.swing.LayoutStyle;
    {
      this.ac = acmain;
      this.settings = settings;
-     
+     //The tray is final so it must be initialised in constructor
+     if(SystemTray.isSupported())
+       tray = SystemTray.getSystemTray();
+     else
+       tray = null;
+     initMenu();
      initComponents();
+     
+     //Display settings:
+     settings.displaySettingsOnBoundFields();
+     //There is many factors that determine whether the icon will be shown
+     // it must be both supported and enabled
+     // 
+     displayTrayEnabled();
+     
      
      guard = new StateGuard(this.ac, this);
 
@@ -81,7 +111,9 @@ import javax.swing.LayoutStyle;
         @Override
         public void windowClosing(WindowEvent event)
         {
+          //Stop updating GUI
           guard.interrupt();
+          //Save settings
           if(settings==null) {
             System.out.println("Settings is null!");
             return;
@@ -91,6 +123,9 @@ import javax.swing.LayoutStyle;
             settings.saveToFile(Main.SETTINGS_FILE, false);
           }
           catch(IOException e) {}
+          //Hide tray icon
+          if(canTray())
+            tray.remove(tray_icon);
         }
         @Override
         public void windowClosed(WindowEvent event)
@@ -108,6 +143,16 @@ import javax.swing.LayoutStyle;
         {
           //guard.pause(true);
           //System.out.println("Lost focus - pausing thread.");
+        }
+        @Override
+        public void windowIconified(WindowEvent event) {
+          if(Gui.this.canTray()) {
+            if(settings.getBoolean(Setnames.TRAY_ICON_MINIMIZE.name, false)) {
+              //Gui.this.setType(javax.swing.JFrame.Type.UTILITY);
+              Gui.this.setState(Frame.ICONIFIED);
+              Gui.this.setVisible(false);
+            }            
+          }
         }
      });
 
@@ -145,24 +190,58 @@ import javax.swing.LayoutStyle;
    
    public void displayClientAvailable(boolean available) {
     toggleButton1.setEnabled(available);
+    pvp_net_window = available;
     if(available) {
       toggleButton1.setToolTipText(Text.TOGGLE_BUTTON_TITLE_ENABLED.text);
+      displayDllStatus(dll_loaded);
     }
     else {
       toggleButton1.setToolTipText(Text.TOGGLE_BUTTON_TITLE_DISABLED.text);
+      menu_dll_additions.setEnabled(false);
     } 
+   }
+   public void displayTrayEnabled(boolean enabled, boolean minimize, boolean do_not_change_state) {
+     if(tray==null || !SystemTray.isSupported()) {
+       enabled = minimize = false;
+     }
+     if(!do_not_change_state) {
+       menu_tray_enabled.setState(enabled);         
+       menu_tray_minimize.setState(minimize); 
+     }
+     if(enabled) {
+       showTrayIcon(true);
+       menu_tray_minimize.setEnabled(true);
+     }
+     else {
+       showTrayIcon(false);
+       menu_tray_minimize.setEnabled(false);
+       menu_tray_minimize.setState(false);
+     }
+   }
+   public void displayTrayEnabled(boolean enabled, boolean minimize) {
+     displayTrayEnabled(enabled, minimize, false);
+   }
+   public void displayTrayEnabled(boolean enabled) {
+     displayTrayEnabled(enabled, settings.getBoolean(Setnames.TRAY_ICON_MINIMIZE.name, (Boolean)Setnames.TRAY_ICON_MINIMIZE.default_val), false);
+   }
+
+   public void displayTrayEnabled() {
+     displayTrayEnabled(
+         settings.getBoolean(Setnames.TRAY_ICON_ENABLED.name, (Boolean)Setnames.TRAY_ICON_ENABLED.default_val),
+         settings.getBoolean(Setnames.TRAY_ICON_MINIMIZE.name, (Boolean)Setnames.TRAY_ICON_MINIMIZE.default_val),
+         false);
    }
    
    public void displayDllStatus(boolean loaded) {
+     dll_loaded = loaded;
      if(loaded) {
        menu_dll_additions.setText(Text.MENU_DLL_LOADED.text);
-       
        menu_dll_additions.setEnabled(false);
      }
      else {
        menu_dll_additions.setText(Text.MENU_DLL_LOAD.text);
        if(DLLInjector.available()) {
-         menu_dll_additions.setEnabled(true);
+         menu_dll_additions.setEnabled(pvp_net_window);
          menu_dll_additions.setToolTipText(Text.MENU_DLL_TITLE.text);
        }
        else {
@@ -170,8 +249,8 @@ import javax.swing.LayoutStyle;
          menu_dll_additions.setEnabled(false);
        }
      }
-     
    }
+
    
    private boolean ToolAction()
    {
@@ -195,10 +274,6 @@ import javax.swing.LayoutStyle;
    {
      return this.toggleButton1;
    }
-   
-
-   
- 
   
    private void DelaySelected(ActionEvent e)
    {
@@ -220,16 +295,207 @@ import javax.swing.LayoutStyle;
      return this.spinner1;
    }
    private void initTrayIcon() {
-     if (SystemTray.isSupported()) { 
-       
+     if(tray_icon!=null)
+       return;
+     if (SystemTray.isSupported() && settings.getBoolean(Setnames.TRAY_ICON_ENABLED.name, true)) {
+       tray_icon = new TrayIcon(ImageResources.ICON.getImage());
+       tray_icon.setImageAutoSize(true);
+       tray_icon.addMouseListener(new MouseListener() {
+         @Override
+         public void mouseClicked( MouseEvent e ) {
+           Gui.this.setVisible(true);
+           Gui.this.setState (Frame.NORMAL);
+           //Gui.this.setType(java.awt.Window.Type.NORMAL);
+         }
+         @Override
+         public void mousePressed( MouseEvent e ) {}
+         @Override
+         public void mouseExited(MouseEvent e) {}
+         @Override
+         public void mouseReleased(MouseEvent e) {}
+         @Override
+         public void mouseEntered(MouseEvent e) {}
+       });
      }
+   }
+   private void showTrayIcon(boolean state) {
+     //Just make sure tray icon was created
+     initTrayIcon();
+     //If tray is not supported, return
+     if(!canTray())
+       return;
+     if(state && !tray_added) {
+       try {
+         tray.add(tray_icon);
+       } catch (AWTException e) {
+         //No tray icon
+         tray_icon = null;
+       }
+       if(tray_icon!=null)
+         tray_added = true;
+     }
+     else if(!state && tray_added) {
+       tray.remove(tray_icon); 
+       tray_added = false;
+     }
+   }
+   private boolean canTray() {
+     return tray!=null && tray_icon!=null; 
+   }
+   private void initMenu() {
+     menuBar1 = new JMenuBar();
+     //======== menuBar1 ========
+      {
+
+          //======== menu1 ========
+          {
+              menu1 = new JMenu();
+              
+              menu1.setText("Settings");
+
+              //---- menuItem1 ----
+              menuItem1 = new JMenuItem();
+              menuItem1.setText("Set Chat Delay");
+              menuItem1.addActionListener(new ActionListener() {
+                  @Override
+                  public void actionPerformed(ActionEvent e) {
+                      DelaySelected(e);
+                  }
+              });
+              menu1.add(menuItem1);
+
+              final JMenuItem menuItem2 = new JMenuItem();
+              menuItem2.addActionListener(new ActionListener() {
+                  @Override
+                  public void actionPerformed(ActionEvent e) {
+                      menuItem2.setEnabled(false);
+                      menuItem2.setText("Injecting...");
+
+                      DLLInjector.inject(new InjectionResult() {
+                          @Override
+                          public void run(boolean result, String fail_reason) {
+                             if(result)
+                               menuItem2.setText(Text.MENU_DLL_LOADED.text);
+                             else {
+                               menuItem2.setEnabled(true);
+                               menuItem2.setText("Injection failed: "+fail_reason);
+                             }
+                          }
+                      });
+                  }
+              });
+              menu1.add(menuItem2);
+              menu_dll_additions = menuItem2;
+              //Update dll aditions status
+              displayDllStatus(false);
+
+              manu_threadcontrol_pretend_accepted = new JMenuItem();
+              manu_threadcontrol_pretend_accepted.setText("Detect game lobby");
+              manu_threadcontrol_pretend_accepted.setToolTipText("If the lobby has been already invoked, skip accept phase.");
+              manu_threadcontrol_pretend_accepted.setEnabled(false);
+              manu_threadcontrol_pretend_accepted.addActionListener(new ActionListener() {
+                  @Override
+                  public void actionPerformed(ActionEvent e) {
+                    Gui.this.ac.ac.simulateAccepted();
+                  }
+              });
+              menu1.add(manu_threadcontrol_pretend_accepted);
+          }
+          menuBar1.add(menu1);
+          //======== menu2 ========
+          {
+              JMenu menu = new JMenu();
+              menu.setText("Display");
+              
+              menu_tray_enabled = new JCheckBoxMenuItem("Show in system tray");
+              menu_tray_enabled.addActionListener(new ActionListener() {
+                  @Override
+                  public void actionPerformed(ActionEvent e) {
+                    displayTrayEnabled(menu_tray_enabled.getState(), menu_tray_enabled.getState()&&menu_tray_minimize.getState(), true);
+                  }
+              });
+              menu.add(menu_tray_enabled);
+              settings.bindToInput(Setnames.TRAY_ICON_ENABLED.name,menu_tray_enabled, true);
+              
+              
+              menu_tray_minimize = new JCheckBoxMenuItem("Minimize to tray");
+              menu_tray_minimize.setToolTipText("When minimized, the application will disappear from task bar.");
+              menu_tray_minimize.addActionListener(new ActionListener() {
+                  @Override
+                  public void actionPerformed(ActionEvent e) {
+                    displayTrayEnabled(menu_tray_enabled.getState(), menu_tray_minimize.getState(), true);
+                  }
+              });
+              menu.add(menu_tray_minimize);
+              settings.bindToInput(Setnames.TRAY_ICON_MINIMIZE.name, menu_tray_minimize, true);
+              //Add this menu to the bar
+              menuBar1.add(menu);
+          }
+          //======== menu2 ========
+          {
+              JMenu menu = new JMenu();
+              menu.setText("Notifications");
+              
+              menu_tray_enabled = new JCheckBoxMenuItem("Show in system tray");
+              menu_tray_enabled.addActionListener(new ActionListener() {
+                  @Override
+                  public void actionPerformed(ActionEvent e) {
+                    displayTrayEnabled(menu_tray_enabled.getState(), menu_tray_enabled.getState()&&menu_tray_minimize.getState(), true);
+                  }
+              });
+              menu.add(menu_tray_enabled);
+              settings.bindToInput(Setnames.TRAY_ICON_ENABLED.name,menu_tray_enabled, true);
+              
+              
+              menu_tray_minimize = new JCheckBoxMenuItem("Minimize to tray");
+              menu_tray_minimize.setToolTipText("When minimized, the application will disappear from task bar.");
+              menu_tray_minimize.addActionListener(new ActionListener() {
+                  @Override
+                  public void actionPerformed(ActionEvent e) {
+                    displayTrayEnabled(menu_tray_enabled.getState(), menu_tray_minimize.getState(), true);
+                  }
+              });
+              menu.add(menu_tray_minimize);
+              settings.bindToInput(Setnames.TRAY_ICON_MINIMIZE.name, menu_tray_minimize, true);
+              //Add this menu to the bar
+              menuBar1.add(menu);
+          }
+      }
+      setJMenuBar(menuBar1);
+
+      //---- champField ----
+      /*champField.setToolTipText("Enter Champion Name");
+      contentPane.add(champField);
+      settings.bindToInput("champ_name", champField, true);
+      champField.setBounds(1, 151, 68, champField.getPreferredSize().height);
+
+      //---- textField2 ----
+      textField2.setToolTipText("Enter AutoCall Text");
+      contentPane.add(textField2);
+      settings.bindToInput("call_text", textField2, true);
+      textField2.setBounds(71, 151, 69, 20);*/
+
+      //---- toggleButton1 ----
+      toggleButton1 = new JToggleButton();
+      toggleButton1.setText("Start");
+      toggleButton1.setToolTipText(Text.TOGGLE_BUTTON_TITLE_DISABLED.text);
+      toggleButton1.setEnabled(false);
+      toggleButton1.setFocusable(true);
+      toggleButton1.setFocusPainted(false);
+      toggleButton1.addActionListener(new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            ToolAction();
+          }
+      });
+      menuBar1.add(toggleButton1);
    }
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         // Generated using JFormDesigner Evaluation license - Jakub Mareda
-        menuBar1 = new JMenuBar();
+        
 
-        toggleButton1 = new JToggleButton();
+        
         chatDialog = new Dialog(this);
         label1 = new JLabel();
         spinner1 = new JSpinner();
@@ -241,102 +507,7 @@ import javax.swing.LayoutStyle;
         contentPane.setLayout(null);
         createTabs(contentPane);
 
-        //======== menuBar1 ========
-        {
-
-            //======== menu1 ========
-            {
-                menu1 = new JMenu();
-                menuItem1 = new JMenuItem();
-                menu1.setText("Settings");
-
-                //---- menuItem1 ----
-                menuItem1.setText("Set Chat Delay");
-                menuItem1.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        DelaySelected(e);
-                    }
-                });
-                menu1.add(menuItem1);
-                
-                final JMenuItem menuItem2 = new JMenuItem();
-                menuItem2.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        menuItem2.setEnabled(false);
-                        menuItem2.setText("Injecting...");
-
-                        DLLInjector.inject(new InjectionResult() {
-                            @Override
-                            public void run(boolean result, String fail_reason) {
-                               if(result)
-                                 menuItem2.setText(Text.MENU_DLL_LOADED.text);
-                               else {
-                                 menuItem2.setEnabled(true);
-                                 menuItem2.setText("Injection failed: "+fail_reason);
-                               }
-                            }
-                        });
-                    }
-                });
-                menu1.add(menuItem2);
-                menu_dll_additions = menuItem2;
-                displayDllStatus(false);
-
-                manu_threadcontrol_pretend_accepted = new JMenuItem();
-                manu_threadcontrol_pretend_accepted.setText("Detect game lobby");
-                manu_threadcontrol_pretend_accepted.setToolTipText("If the lobby has been already invoked, skip accept phase.");
-                manu_threadcontrol_pretend_accepted.setEnabled(false);
-                manu_threadcontrol_pretend_accepted.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                      Gui.this.ac.ac.simulateAccepted();
-                    }
-                });
-                menu1.add(manu_threadcontrol_pretend_accepted);
-            }
-            menuBar1.add(menu1);
-            
-            /*// Start button
-            JMenuItem startbut = new JMenuItem();
-            startbut.setText("Start");
-            startbut.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    ToolAction();
-                }
-            });
-            menuBar1.add(startbut);*/
-            
-        }
-        setJMenuBar(menuBar1);
-
-        //---- champField ----
-        /*champField.setToolTipText("Enter Champion Name");
-        contentPane.add(champField);
-        settings.bindToInput("champ_name", champField, true);
-        champField.setBounds(1, 151, 68, champField.getPreferredSize().height);
-
-        //---- textField2 ----
-        textField2.setToolTipText("Enter AutoCall Text");
-        contentPane.add(textField2);
-        settings.bindToInput("call_text", textField2, true);
-        textField2.setBounds(71, 151, 69, 20);*/
-
-        //---- toggleButton1 ----
-        toggleButton1.setText("Start");
-        toggleButton1.setToolTipText(Text.TOGGLE_BUTTON_TITLE_DISABLED.text);
-        toggleButton1.setEnabled(false);
-        toggleButton1.setFocusable(true);
-        toggleButton1.setFocusPainted(false);
-        toggleButton1.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-              ToolAction();
-            }
-        });
-        menuBar1.add(toggleButton1);
+ 
         //contentPane.add(toggleButton1);
         //toggleButton1.setBounds(142, 151, 69, 19);
 
@@ -408,8 +579,7 @@ import javax.swing.LayoutStyle;
         }
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
         
-        //Display settings:
-        settings.displaySettingsOnBoundFields();
+
     }
     //http://docs.oracle.com/javase/tutorial/uiswing/examples/components/TabbedPaneDemoProject/src/components/TabbedPaneDemo.java
     public void createTabs(Container pane) {

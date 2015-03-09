@@ -4,28 +4,29 @@
  * and open the template in the editor.
  */
 
-package cz.autoclient.automat_settings.input_handlers;
+package cz.autoclient.settings.input_handlers;
 
-import cz.autoclient.automat_settings.Input;
-import cz.autoclient.automat_settings.SettingsInputVerifier;
-import cz.autoclient.automat_settings.ValueChanged;
-import javax.swing.InputVerifier;
+import cz.autoclient.settings.Input;
+import cz.autoclient.settings.SettingsInputVerifier;
+import cz.autoclient.settings.ValueChanged;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
-import javax.swing.JTextField;
 
 /**
  *
  * @author Jakub
  */
-public class InputJTextField implements Input {
-  private final JTextField field;
+public class InputJCheckBox implements Input {
+  private final JCheckBox field;
   private final ValueChanged onchange;
   private SettingsInputVerifier<Object> verifier;
   
 
   //Indicate whether events have been bound to input
   private boolean bound = false;
-  public InputJTextField(JTextField input, ValueChanged onchange, SettingsInputVerifier<Object> subverifier) {
+  public InputJCheckBox(JCheckBox input, ValueChanged onchange, SettingsInputVerifier<Object> subverifier) {
     field = input;
     this.onchange = onchange;
     verifier = subverifier;
@@ -41,11 +42,11 @@ public class InputJTextField implements Input {
     //Event to be called if new value is valid
     final ValueChanged onchange = this.onchange;
     //Only works when you leave the field
-    field.setInputVerifier(new InputVerifier() {
+    /*field.setInputVerifier(new InputVerifier() {
       @Override
       public boolean verify(JComponent in) {
         if(verif==null) {
-          onchange.changed((String)((JTextField)in).getText());
+          onchange.changed((Boolean)((JCheckBox)in).isSelected());
           return true;
         }
         //If verification fails, return false and ignore the value
@@ -54,6 +55,22 @@ public class InputJTextField implements Input {
         //Sucessful verification means we get the value and update it
         onchange.changed(verif.value(in));
         return true;
+      }
+    });*/
+    final JCheckBox in = field;
+    field.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        
+        if(verif==null) {
+          onchange.changed((Boolean)field.isSelected());
+          return;
+        }
+        //If verification fails, return false and ignore the value
+        if(!verif.verify(in))
+          return;
+        //Sucessful verification means we get the value and update it
+        onchange.changed(verif.value(in));
       }
     });
   }
@@ -65,7 +82,7 @@ public class InputJTextField implements Input {
   @Override
   public Object getValue() {
     if(verifier==null)
-      return field.getText();
+      return field.isSelected();
     else if(validate())
       return verifier.value(field);
     else
@@ -73,7 +90,10 @@ public class InputJTextField implements Input {
   }
   @Override
   public void setValue(Object value) {
-    field.setText(value.toString());
+    if(value instanceof Boolean) 
+      field.setSelected((Boolean) value);
+    else
+      field.setSelected(value!=null);
   }
 
   @Override

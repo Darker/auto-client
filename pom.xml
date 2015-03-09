@@ -11,11 +11,17 @@
   <properties>
     <src.dir>src/</src.dir>
     <test.dir>test/</test.dir>
+    <resource.dir>resources/</resource.dir>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <build>
     <testSourceDirectory>${test.dir}</testSourceDirectory>
     <sourceDirectory>${src.dir}</sourceDirectory>
+    <resources>
+      <resource>
+        <directory>${resource.dir}</directory>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

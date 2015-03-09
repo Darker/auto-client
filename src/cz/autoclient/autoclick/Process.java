@@ -13,5 +13,7 @@ package cz.autoclient.autoclick;
 public interface Process {
   public boolean terminate();
   public Window showConsole();
-  
+  public int getPID();
+  public String getName();
+  public int getMemory();
 }

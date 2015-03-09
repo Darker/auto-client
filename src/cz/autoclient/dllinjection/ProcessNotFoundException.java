@@ -41,4 +41,14 @@ public class ProcessNotFoundException extends Exception {
     super(msg);
     this.name = name;
   }
+  
+  @Override
+  public String toString() {
+    if(name!=null) {
+      return this.getMessage()+" ["+name+"]";
+    }
+    else
+      return 
+        super.toString();
+  }
 }

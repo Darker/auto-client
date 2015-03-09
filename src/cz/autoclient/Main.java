@@ -1,13 +1,15 @@
 package cz.autoclient;
 
-import cz.autoclient.GUI.StateGuard;
-import cz.autoclient.automat_settings.InputHandlers;
-import cz.autoclient.automat_settings.Settings;
-import cz.autoclient.automat_settings.input_handlers.InputJCheckBox;
-import cz.autoclient.automat_settings.input_handlers.InputJTextField;
+import cz.autoclient.GUI.ImageResources;
+import cz.autoclient.PVP_net.Setnames;
+import cz.autoclient.settings.InputHandlers;
+import cz.autoclient.settings.Settings;
+import cz.autoclient.settings.input_handlers.*;
+import java.awt.Image;
 
 import java.io.IOException;
 import javax.swing.JCheckBox;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import sirius.constants.IMKConsts;
@@ -29,8 +31,12 @@ import sirius.constants.IWMConsts;
    
    public Main()
    {
+     Image im = ImageResources.ICON.getImage();
      
-     
+     if(im==null)
+       System.out.println("Resources do not work!");
+     else
+       System.out.println("Resources OK.");
      //Normal program
      startGUI();
    }
@@ -70,6 +76,8 @@ import sirius.constants.IWMConsts;
      catch(IOException e) {
        //Do nothing, this is expected for first run, before the settings file is created 
      }
+     //Fill empty fields with default values
+     Setnames.setDefaults(settings);
      gui = new Gui(this, settings);
  
      SwingUtilities.invokeLater(new Runnable()
@@ -97,6 +105,7 @@ import sirius.constants.IWMConsts;
      //Register GUI settings handlers
      InputHandlers.register(InputJTextField.class,  JTextField.class);
      InputHandlers.register(InputJCheckBox.class,  JCheckBox.class);
+     InputHandlers.register(InputJCheckBoxMenuItem.class,  JCheckBoxMenuItem.class);
      //Start program
      Main ac = new Main();
    }

@@ -1,8 +1,9 @@
 package cz.autoclient;
 
-import cz.autoclient.automat_settings.Input;
-import cz.autoclient.automat_settings.InputHandlers;
-import cz.autoclient.automat_settings.input_handlers.*;
+import cz.autoclient.settings.input_handlers.InputJTextField;
+import cz.autoclient.settings.input_handlers.InputJCheckBox;
+import cz.autoclient.settings.Input;
+import cz.autoclient.settings.InputHandlers;
 import javax.swing.*;
 
 

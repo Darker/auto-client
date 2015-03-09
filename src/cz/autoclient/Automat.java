@@ -3,7 +3,7 @@ package cz.autoclient;
 import cz.autoclient.autoclick.Window;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.MSWindow;
-import cz.autoclient.automat_settings.Settings;
+import cz.autoclient.settings.Settings;
 import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.PVP_net.Images;
 import cz.autoclient.PVP_net.Setnames;
@@ -462,7 +462,7 @@ import java.util.ArrayList;
    public boolean teamBuilder_lobby() throws InterruptedException {
      System.out.println("In team builder lobby now.");
      //Check if the teambuilder is enabled
-     if(!settings.getBoolean(Setnames.TEAMBUILDER_ENABLED.name, (boolean)Setnames.TEAMBUILDER_ENABLED.def)) {
+     if(!settings.getBoolean(Setnames.TEAMBUILDER_ENABLED.name, (boolean)Setnames.TEAMBUILDER_ENABLED.default_val)) {
        gui.setTitle("Team builder - actions are disabled");
        while(true) {
          if(!checkPoint(PixelOffset.TeamBuilder_CaptainIcon, 11)) {
@@ -652,7 +652,7 @@ import java.util.ArrayList;
    }
    public void invite_lobby() throws APIError, InterruptedException {
      //Handle disabled invite lobby
-     if(!settings.getBoolean(Setnames.INVITE_ENABLED.name, (boolean)Setnames.INVITE_ENABLED.def)) {
+     if(!settings.getBoolean(Setnames.INVITE_ENABLED.name, (boolean)Setnames.INVITE_ENABLED.default_val)) {
        System.out.println("Invite lobby automation disabled, waiting.");
        gui.setTitle("Automation disabled (Invite)");
        while(checkPoint(PixelOffset.InviteChat, 1) && checkPoint(PixelOffset.InviteStart, 8)) {

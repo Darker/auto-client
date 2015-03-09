@@ -8,6 +8,7 @@ package cz.autoclient;
 
 import cz.autoclient.GUI.ImageResources;
 import java.awt.Image;
+import javax.swing.ImageIcon;
 
 /**
  *
@@ -16,11 +17,27 @@ import java.awt.Image;
 public class TestResources {
    public static void main(String[] args) throws Exception
    {
-     Image im = ImageResources.ICON.getImage();
+     //Remember if everything was OK
+     boolean ok = true;
      
-     if(im==null)
-       throw new Exception("Resources do not work!");
-     else
-       System.out.println("Resources OK.");
+     System.out.println("Checking resources: \n");
+     for(ImageResources ir : ImageResources.values()) {
+       Image im = ir.getImage();
+       ImageIcon ico = ir.getIcon();
+       System.out.println("  ["+ir.name()+"]\n  - path: "+ir.getClasspath());
+       if(im==null || ico==null) {
+         System.out.println("    - ERROR!");
+         if(im==null)
+           System.out.println("      Image failed.");
+         if(ico==null)
+           System.out.println("      ImageIcon failed.");
+         ok = false;
+       }
+       else
+         System.out.println("    - OK.");
+     }
+     if(!ok) {
+       throw new Exception("There were broken resources! Remove them from enum or add them to .jar.");
+     }
    }
 }
