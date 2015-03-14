@@ -5,7 +5,6 @@
  */
 
 package cz.autoclient.GUI;
-import cz.autoclient.Gui;
 import cz.autoclient.Main;
 import cz.autoclient.autoclick.MSWindow;
 import cz.autoclient.autoclick.Window;

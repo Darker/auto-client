@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 
 /**
  *
@@ -26,10 +27,14 @@ public enum Images {
   INVITE_ACCEPTED("launcher_screens/search_objects/accepted.png"),
   //Green text indicating player has not yet accepted or declined invite to game
   INVITE_PENDING("launcher_screens/search_objects/pending.png"),
+  /** Summoner spells **/
+  SUM_IGNITE("images/SummonerDot.png"),
+  
   VOID(null);
   
   public final String path;
   private BufferedImage img = null;
+  private ImageIcon icon = null;
   private HashMap<Float, BufferedImage> scaled;
   private double color_sum[] = null;
   
@@ -38,12 +43,20 @@ public enum Images {
   }
   
   public BufferedImage getImg() throws IOException {
-    if(this.img==null) {
+    if(img==null) {
        File file = new File(path);
-       BufferedImage thing = null;
-       this.img = ImageIO.read(file);
+       img = ImageIO.read(file);
     }
     return img;    
+  }
+  public ImageIcon getIcon() throws IOException {
+    if(img==null) {
+       getImg();
+    }
+    if(img!=null && icon==null) {
+      icon = new ImageIcon(img);
+    }
+    return icon; 
   }
   public double[] getColorSum() throws IOException {
     if(color_sum==null)

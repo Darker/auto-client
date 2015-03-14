@@ -13,7 +13,8 @@ import java.util.Map;
 import javax.swing.JMenu;
 
 /**
- *
+ * A collection of notifications. Can be used for casual mass operations on notifications as 
+ * well as for issuing notifications easily.
  * @author Jakub
  */
 public class Notifications {
@@ -30,6 +31,11 @@ public class Notifications {
     }
     notifs.add(notif);
   }
+  /**
+   * Issue notification based on definition. All kinds of notifications with this definition will be
+   * dispatched.
+   * @param names 
+   */
   public void notification(Notification.Def... names) {
     ArrayList<Notification> notifs;
     for (Notification.Def name : names) {
@@ -39,6 +45,11 @@ public class Notifications {
       }
     }    
   }
+  /**
+   * Loop through notifications and add notifications of one type to the menu.
+   * @param menu Jmenu that will be filled with notification toggle buttons
+   * @param template class type required for the notifications to be added. Use this to filter notifications.
+   */
   public void addToJMenu(JMenu menu, Class<? extends Notification> template) {
     for (Map.Entry pair : notifications.entrySet()) {
       ArrayList<Notification> list = (ArrayList)pair.getValue();

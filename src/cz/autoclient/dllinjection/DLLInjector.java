@@ -30,7 +30,9 @@ public class DLLInjector {
   //Paths to dll file and the injection program
   private static File dll;
   private static File injector;
-  
+  /** Configure directory where dll and the dll injection application are located.
+   * @param path 
+   */
   public static void setDirectory(String path) {
     if(!path.equals(directory)) {
       directory = path;
@@ -39,7 +41,10 @@ public class DLLInjector {
       injector = null;
     }
   }
-  
+  /**
+   * Will convert the String paths to File objects. The paths to 
+   * injector executable and injected DLL are kept as final to prevent easy abuse of this program.
+   */
   private static void createPaths() {
     if(version==32) {
       dll = new File(directory+"/"+DLL_32);

@@ -1,5 +1,7 @@
 package cz.autoclient;
 
+import cz.autoclient.GUI.Gui;
+import cz.autoclient.GUI.notifications.Notification;
 import cz.autoclient.autoclick.Window;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.MSWindow;
@@ -531,6 +533,11 @@ import java.util.ArrayList;
      
      //If all ready message was called, do not call it again (would be a lot of spam)
      boolean allReadyCalled = false;
+     //If all ready notification has been issued
+     boolean gameReadyNotified = false;
+     
+     byte old_ready = 0;
+     byte old_joined = 0;
      //Wait for the slots to be filled
      while(true) {
        if(!checkPoint(PixelOffset.TeamBuilder_CaptainLobby_Invited, 23)) {
@@ -551,7 +558,7 @@ import java.util.ArrayList;
              sleep(80L);
            }
            //WARNING - this match can be errorneous if previous match fails to match properly
-           else if(checkPoint(PixelOffset.TeamBuilder_CaptainLobby_slot_greenBorder.offset(0, i*offset), 25)) {
+           else if(checkPoint(PixelOffset.TeamBuilder_CaptainLobby_slot_greenBorder.offset(0, i*offset), 33)) {
              slots[i] = TeamBuilderPlayerSlot.Ready;
            }
            else if(checkPoint(PixelOffset.TeamBuilder_CaptainLobby_slot_blueBorder.offset(0, i*offset), 7)) {
@@ -560,17 +567,29 @@ import java.util.ArrayList;
            else {
              slots[i] = TeamBuilderPlayerSlot.ErrorPlayer; 
              System.out.println("Matching problems. Slot #"+(i+1));
-             ColorPixel point = PixelOffset.TeamBuilder_CaptainLobby_slot_acceptPlayer.offset(0, i*offset);
-             System.out.println("    "+point.toString("TeamBuilder_CaptainLobby_slot_acceptPlayer"));
-             try {
-               Rect rect = window.getRect();
-               Color a = window.getColor((int)(rect.width * point.x), (int)(rect.height * point.y));
-               System.out.println("    Expected: "+ColorPixel.ColorToSource(a));
-             }
-             catch(APIError e) {
-               
-             }
              
+             ColorPixel[] points = {
+               PixelOffset.TeamBuilder_CaptainLobby_slot_acceptPlayer.offset(0, i*offset),
+               PixelOffset.TeamBuilder_CaptainLobby_slot_greenBorder.offset(0, i*offset),
+               PixelOffset.TeamBuilder_CaptainLobby_slot_blueBorder.offset(0, i*offset)
+             };
+             String[] names = {
+               "TeamBuilder_CaptainLobby_slot_acceptPlayer",
+               "TeamBuilder_CaptainLobby_slot_greenBorder",
+               "TeamBuilder_CaptainLobby_slot_blueBorder"
+             };
+             for(byte ii=0; ii<points.length; ii++) {
+               ColorPixel point = points[ii];
+               System.out.println("    "+point.toString(names[ii]));
+               try {
+                 Rect rect = window.getRect();
+                 Color a = window.getColor((int)(rect.width * point.x), (int)(rect.height * point.y));
+                 System.out.println("     - Real color: "+ColorPixel.ColorToSource(a));
+               }
+               catch(APIError e) {
+
+               }
+             }
            }
          }
          //No summoner spell = no player in lobby at this slot
@@ -617,22 +636,32 @@ import java.util.ArrayList;
          //Update old slots to new slots here (it's probably shitty to update it before reading is finished)
          oldslots[i] = slots[i];
        }
+       if(old_joined<joined) {
+         gui.notification(Notification.Def.TB_PLAYER_JOINED);
+       }
        //If all have joined and are ready, start the game
        if(ready==4) {
-         System.out.println("Clicking play button!");
-         click(PixelOffset.TeamBuilder_Ready);
+         if(!gameReadyNotified)
+           gui.notification(Notification.Def.TB_GAME_CAN_START);
+         if(settings.getBoolean(Setnames.TEAMBUILDER_AUTOSTART_ENABLED.name, false)) {
+           System.out.println("Clicking play button!");
+           click(PixelOffset.TeamBuilder_Ready);
+         }
          //Wait for screen update
          sleep(500L);
+         gameReadyNotified = true;
        }
        else if(joined==4) {
-         if(settings.getStringEquivalent("tb_cap_lock").length() > 0) {
+         if(!allReadyCalled && settings.getStringEquivalent("tb_cap_lock").length() > 0) {
            teamBuilder_say(settings.getStringEquivalent("tb_cap_lock"));
          }
          allReadyCalled = true;
+         gameReadyNotified = false;
        }
        //Reset all ready message until somebody joins again
        else {
          allReadyCalled = false;
+         gameReadyNotified = false;
        }
        
        //Test if game is being searched, in which case break this loop
@@ -643,6 +672,8 @@ import java.util.ArrayList;
            return true;
          }
        }
+       old_ready = ready;
+       old_joined = joined;
      }
      
      /*if(true)

@@ -129,7 +129,7 @@ public class Settings implements java.io.Serializable {
    */
   public boolean setSettingDefault(String name, Object value) {
     if(settings.containsKey(name)) {
-      return false;   
+      return false;
     }
     settings.put(name, value);
     System.out.println("default AutomatSettings[\""+name+"\"] = "+value.toString());
@@ -159,27 +159,6 @@ public class Settings implements java.io.Serializable {
         return true;
       }
     });
-  }
-  /**
-   * Does some thing in old style.
-   *
-   * @deprecated use {@link #bindToInput()} instead.  
-   */
-  @Deprecated
-  public void listenOnInput(final String setting_name, final JTextField input, final SettingsInputVerifier<Object> verif) {
-    //Only works when you leave the field
-    input.setInputVerifier(new InputVerifier() {
-      @Override
-      public boolean verify(JComponent in) {
-        //If verification fails, return false and ignore the value
-        if(!verif.verify(in))
-          return false;
-        //Sucessful verification means we get the value and update it
-        setSetting(setting_name, verif.value(in));
-        return true;
-      }
-    });
-    System.err.println("listenOnInput is deprecated!");
   }
 
   public void bindToInput(final String setting_name, final JComponent input, final SettingsInputVerifier<Object> verif) {    

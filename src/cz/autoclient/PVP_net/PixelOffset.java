@@ -22,8 +22,12 @@ public enum PixelOffset {
     Play_Solo(0.5306054028901105D, 0.8869954957698297D, new Color(200, 81, 0, 1)),
     LobbyChat(0.495117D, 0.91875D, new Color(255, 255, 255, 1)),
     LobbyChat2(0.5387487383572218D, 0.9184036396562681D, new Color(255, 255, 255, 1)),
+    //Quit button for lobby (not allways available)s
     LobbyQuit(0.11646860979241919D, 0.9207317073170731D),
     LobbyChampionSlot1(0.25182702572064036D, 0.26219512195121947D),
+    //Summoner spell icons
+    Blind_SumSpell1 (0.4979340371027294D, 0.6088404678228453D),
+    Blind_SumSpell2 (0.5421364731680097D, 0.6117873045064729D),
     MatchFound(0.495117D, 0.515625D, new Color(255, 255, 255)),
     AcceptButton(0.39004512649241546D, 0.5599898226129755D, new Color(25, 60, 101, 1)),
     //Search champion field in blind queue

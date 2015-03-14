@@ -6,8 +6,6 @@
 
 package cz.autoclient;
 
-import com.google.caliper.Benchmark;
-import com.google.caliper.runner.CaliperMain;
 import cz.autoclient.autoclick.MSWindow;
 import cz.autoclient.autoclick.Window;
 
@@ -15,11 +13,11 @@ import cz.autoclient.autoclick.Window;
  *
  * @author Jakub
  */
-public class TestWindowValidSpeed extends Benchmark {
+public class TestWindowValidSpeed  {
    private Window window;
    private boolean valid = false;
    //Prepare properties and do some warmupt to force JVM compile the bytecode
-   @Override
+   //@Override
    protected void setUp() throws Exception {
      window = MSWindow.windowFromName("NetBeans", false);
      if(window.isValid()) {
@@ -47,7 +45,7 @@ public class TestWindowValidSpeed extends Benchmark {
      }
    }
    //The main function that starts Caliper and does the tests
-   public static void main(String[] args) {
+   /*public static void main(String[] args) {
      CaliperMain.main(TestWindowValidSpeed.class, args);
-   }
+   }*/
 }

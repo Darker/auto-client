@@ -1,6 +1,9 @@
 package cz.autoclient;
 
+import cz.autoclient.GUI.Gui;
 import cz.autoclient.GUI.ImageResources;
+import cz.autoclient.GUI.summoner_spells.ButtonSummonerSpellMaster;
+import cz.autoclient.GUI.summoner_spells.InputSummonerSpell;
 import cz.autoclient.PVP_net.Setnames;
 import cz.autoclient.settings.InputHandlers;
 import cz.autoclient.settings.Settings;
@@ -31,12 +34,6 @@ import sirius.constants.IWMConsts;
    
    public Main()
    {
-     Image im = ImageResources.ICON.getImage();
-     
-     if(im==null)
-       System.out.println("Resources do not work!");
-     else
-       System.out.println("Resources OK.");
      //Normal program
      startGUI();
    }
@@ -106,6 +103,8 @@ import sirius.constants.IWMConsts;
      InputHandlers.register(InputJTextField.class,  JTextField.class);
      InputHandlers.register(InputJCheckBox.class,  JCheckBox.class);
      InputHandlers.register(InputJCheckBoxMenuItem.class,  JCheckBoxMenuItem.class);
+     //My GUI handler for the Summoner Spell buttons
+     InputHandlers.register(InputSummonerSpell.class,  ButtonSummonerSpellMaster.class);
      //Start program
      Main ac = new Main();
    }

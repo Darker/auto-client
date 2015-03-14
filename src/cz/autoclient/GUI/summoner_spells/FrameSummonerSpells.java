@@ -1,0 +1,104 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package cz.autoclient.GUI.summoner_spells;
+
+import cz.autoclient.GUI.ToolTipTimer;
+import cz.autoclient.PVP_net.SummonerSpell;
+import cz.autoclient.settings.Settings;
+import java.awt.Container;
+import java.awt.GridLayout;
+import java.awt.Point;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import javax.swing.BorderFactory;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+
+/**
+ *
+ * @author Jakub
+ */
+public class FrameSummonerSpells extends JDialog {
+  private static final javax.swing.border.Border border = BorderFactory.createEmptyBorder(3, 3, 3, 3);
+  
+  protected final Settings settings;
+  protected final ButtonSummonerSpellMaster parent;
+  public FrameSummonerSpells(ButtonSummonerSpellMaster par, Settings set) {
+    super(SwingUtilities.getWindowAncestor(par));
+    
+    parent = par;
+    settings = set;
+    // Remove title bar, close buttons...
+    setUndecorated(true); 
+    setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+    //Set some styles
+    JPanel contentPane = (JPanel)getContentPane();
+    contentPane.setBorder(border);
+    //Will populate the selection of objects in grid layout
+    createButtons();
+    //Will make the frame as large as the content
+    pack();
+    //Do not appear by default
+    super.setVisible(false); 
+    //Hide when deactivated
+    this.addWindowListener(new WindowAdapter()
+     {
+       @Override
+       public void windowDeactivated(WindowEvent e) {
+         FrameSummonerSpells.this.setVisible(false);
+       }
+     });
+  }
+  @Override
+  public void setVisible(boolean visible) {
+    if(visible) {
+      //Get location of the button
+      Point location = parent.getLocationOnScreen();
+      //Move the popup at the location of the
+      //Also move vertically so it appears UNDER the button
+      setLocation(location.x, location.y+parent.getSize().height);
+    }
+    super.setVisible(visible); 
+  }
+  private void createButtons() {
+    //Get all existing SummonerSpells
+    SummonerSpell[] values = SummonerSpell.values();
+    //Calculate number of rows and cells for the frame grid
+    int width = (int)Math.ceil(Math.sqrt(values.length)),
+        height = (int)Math.round(Math.sqrt(values.length));
+    //Layout will automatically distribute spells evenly in the grid
+    GridLayout layout = new GridLayout(height, width, 5, 5);
+    //Get content panel to add buttons in
+    Container contentPane = getContentPane();
+    contentPane.setLayout(layout);
+    //Temporary variable
+    ButtonSummonerSpell b;
+    //Listener for clicks
+    ActionListener list = new buttonOnclick();
+    //Create all the buttons
+    for(int i=0, l=values.length; i<l; i++) {
+      b = new ButtonSummonerSpell(values[i]);
+      b.addActionListener(list);
+      b.addMouseListener(ToolTipTimer.INSTANT_TOOLTIP);
+      b.setToolTipText(values[i].name);
+      contentPane.add(b);
+    }
+    
+  }
+  private class buttonOnclick implements ActionListener {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      parent.setSpellSafe(((ButtonSummonerSpell)e.getSource()).getSpell());
+      FrameSummonerSpells.this.setVisible(false);
+    }
+  }
+}

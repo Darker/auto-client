@@ -1,49 +1,55 @@
-package cz.autoclient;
+package cz.autoclient.GUI;
 
-import cz.autoclient.GUI.*;
+import cz.autoclient.GUI.tabs.TabbedWindow;
+import cz.autoclient.GUI.tabs.FieldDef;
+import cz.autoclient.GUI.notifications.Notification;
+import cz.autoclient.GUI.notifications.NotificationTrayBaloon;
+import cz.autoclient.GUI.notifications.Notifications;
+import cz.autoclient.GUI.summoner_spells.ButtonSummonerSpellMaster;
+import cz.autoclient.GUI.tabs.MultiFieldDef;
+import cz.autoclient.Main;
 import cz.autoclient.PVP_net.Setnames;
+import cz.autoclient.PVP_net.SummonerSpell;
 import cz.autoclient.settings.Settings;
 import cz.autoclient.dllinjection.DLLInjector;
 import cz.autoclient.dllinjection.InjectionResult;
 import java.awt.AWTException;
 import java.awt.Color;
- import java.awt.Container;
- import java.awt.Dialog;
- import java.awt.Dimension;
+import java.awt.Container;
+import java.awt.Dialog;
+import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GridLayout;
- import java.awt.Insets;
- import java.awt.Rectangle;
+import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
- import java.awt.event.ActionEvent;
- import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
- import java.beans.PropertyChangeEvent;
 import java.io.IOException;
 import javax.swing.BorderFactory;
- import javax.swing.GroupLayout;
+import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.ParallelGroup;
 import javax.swing.GroupLayout.SequentialGroup;
-import javax.swing.ImageIcon;
- import javax.swing.JButton;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
- import javax.swing.JFrame;
- import javax.swing.JLabel;
- import javax.swing.JMenu;
- import javax.swing.JMenuBar;
- import javax.swing.JMenuItem;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
- import javax.swing.JSpinner;
- import javax.swing.JTextField;
- import javax.swing.JToggleButton;
+import javax.swing.JSpinner;
+import javax.swing.JTextField;
+import javax.swing.JToggleButton;
 import javax.swing.LayoutStyle;
- import javax.swing.SpinnerNumberModel;
+import javax.swing.SpinnerNumberModel;
  
  public class Gui
    extends JFrame
@@ -51,7 +57,7 @@ import javax.swing.LayoutStyle;
    private Main ac;
    private StateGuard guard;
    private Settings settings;
-   private String[] selected;
+   private Notifications notifications = new Notifications();
    //Is PVP.net window available?
    private boolean pvp_net_window = false;
    //Was our DLL loaded by the user?
@@ -82,6 +88,8 @@ import javax.swing.LayoutStyle;
    {
      this.ac = acmain;
      this.settings = settings;
+     
+     setIconImage(ImageResources.ICON.getImage());
      //The tray is final so it must be initialised in constructor
      if(SystemTray.isSupported())
        tray = SystemTray.getSystemTray();
@@ -99,7 +107,10 @@ import javax.swing.LayoutStyle;
      
      
      guard = new StateGuard(this.ac, this);
-
+     
+     //notifications.notification(Notification.Def.GROUP_JOINED);
+     
+     //notification(Notification.Def.TB_GAME_CAN_START);
      this.addWindowListener(new WindowAdapter()
      {
         @Override
@@ -133,18 +144,6 @@ import javax.swing.LayoutStyle;
           System.out.println("This function is never called.");
         }
         @Override
-        public void windowActivated(WindowEvent event)
-        {
-          //guard.pause(false);
-          //System.out.println("Gained focus - unpausing thread.");
-        }
-        @Override
-        public void windowDeactivated(WindowEvent event)
-        {
-          //guard.pause(true);
-          //System.out.println("Lost focus - pausing thread.");
-        }
-        @Override
         public void windowIconified(WindowEvent event) {
           if(Gui.this.canTray()) {
             if(settings.getBoolean(Setnames.TRAY_ICON_MINIMIZE.name, false)) {
@@ -157,20 +156,6 @@ import javax.swing.LayoutStyle;
      });
 
      setSize(500, 300);
-   }
-   
-   private void ModeSelected(PropertyChangeEvent e)
-   {
-     if (e.getOldValue() != null) {
-       try
-       {
-         this.selected = e.getNewValue().toString().replace("[", "").replace("]", "").replace(" ", "").split(",");
-         setTitle("AC: " + e.getNewValue().toString().split(",")[(e.getNewValue().toString().split(",").length - 1)].replace("]", "").replace(" ", ""));
-       }
-       catch (NullPointerException e2) {}
-     } else {
-       setTitle("AutoCall");
-     }
    }
    
    public void displayToolAction(boolean state) {
@@ -206,16 +191,14 @@ import javax.swing.LayoutStyle;
      }
      if(!do_not_change_state) {
        menu_tray_enabled.setState(enabled);         
-       menu_tray_minimize.setState(minimize); 
+       menu_tray_minimize.setState(enabled&&minimize); 
      }
+     menu_tray_minimize.setEnabled(enabled);
      if(enabled) {
        showTrayIcon(true);
-       menu_tray_minimize.setEnabled(true);
      }
      else {
-       showTrayIcon(false);
-       menu_tray_minimize.setEnabled(false);
-       menu_tray_minimize.setState(false);
+       showTrayIcon(false);;
      }
    }
    public void displayTrayEnabled(boolean enabled, boolean minimize) {
@@ -284,15 +267,13 @@ import javax.swing.LayoutStyle;
    {
      this.chatDialog.setVisible(false);
    }
+   public void notification(Notification.Def... names) {
+     notifications.notification(names);
+   }
    
    public int getDelay()
    {
      return (int)(((Double)this.spinner1.getValue()).doubleValue() * 1000.0D);
-   }
-   
-   public JSpinner getSpinner1()
-   {
-     return this.spinner1;
    }
    private void initTrayIcon() {
      if(tray_icon!=null)
@@ -411,7 +392,18 @@ import javax.swing.LayoutStyle;
               menu_tray_enabled.addActionListener(new ActionListener() {
                   @Override
                   public void actionPerformed(ActionEvent e) {
-                    displayTrayEnabled(menu_tray_enabled.getState(), menu_tray_enabled.getState()&&menu_tray_minimize.getState(), true);
+                    boolean enabled = menu_tray_enabled.getState();
+                    boolean minimize = menu_tray_minimize.getState();
+                    if(!enabled)
+                      menu_tray_minimize.setState(false);
+                    displayTrayEnabled(enabled, minimize, true);
+                    if(!enabled && minimize) {
+                      //Send event to inform other checkbox that it's been disabled
+                      e.setSource(menu_tray_minimize);
+                      for(ActionListener a: menu_tray_minimize.getActionListeners()) {
+                        a.actionPerformed(e);
+                      }
+                    }
                   }
               });
               menu.add(menu_tray_enabled);
@@ -431,49 +423,24 @@ import javax.swing.LayoutStyle;
               //Add this menu to the bar
               menuBar1.add(menu);
           }
-          //======== menu2 ========
+          //======== Notifications menu ========
+          initTrayIcon() ;
           {
               JMenu menu = new JMenu();
               menu.setText("Notifications");
-              
-              menu_tray_enabled = new JCheckBoxMenuItem("Show in system tray");
-              menu_tray_enabled.addActionListener(new ActionListener() {
-                  @Override
-                  public void actionPerformed(ActionEvent e) {
-                    displayTrayEnabled(menu_tray_enabled.getState(), menu_tray_enabled.getState()&&menu_tray_minimize.getState(), true);
-                  }
-              });
-              menu.add(menu_tray_enabled);
-              settings.bindToInput(Setnames.TRAY_ICON_ENABLED.name,menu_tray_enabled, true);
-              
-              
-              menu_tray_minimize = new JCheckBoxMenuItem("Minimize to tray");
-              menu_tray_minimize.setToolTipText("When minimized, the application will disappear from task bar.");
-              menu_tray_minimize.addActionListener(new ActionListener() {
-                  @Override
-                  public void actionPerformed(ActionEvent e) {
-                    displayTrayEnabled(menu_tray_enabled.getState(), menu_tray_minimize.getState(), true);
-                  }
-              });
-              menu.add(menu_tray_minimize);
-              settings.bindToInput(Setnames.TRAY_ICON_MINIMIZE.name, menu_tray_minimize, true);
-              //Add this menu to the bar
+              Notification.Def.createAll(notifications, NotificationTrayBaloon.class, settings, tray_icon);
+              //======== Tray Notifications menu ========
+              {
+                JMenu tray_notifs = new JMenu();
+                tray_notifs.setText("Tray bubble");
+                notifications.addToJMenu(tray_notifs, NotificationTrayBaloon.class);
+                tray_notifs.setEnabled(canTray());
+                menu.add(tray_notifs);
+              }
               menuBar1.add(menu);
           }
       }
       setJMenuBar(menuBar1);
-
-      //---- champField ----
-      /*champField.setToolTipText("Enter Champion Name");
-      contentPane.add(champField);
-      settings.bindToInput("champ_name", champField, true);
-      champField.setBounds(1, 151, 68, champField.getPreferredSize().height);
-
-      //---- textField2 ----
-      textField2.setToolTipText("Enter AutoCall Text");
-      contentPane.add(textField2);
-      settings.bindToInput("call_text", textField2, true);
-      textField2.setBounds(71, 151, 69, 20);*/
 
       //---- toggleButton1 ----
       toggleButton1 = new JToggleButton();
@@ -599,9 +566,23 @@ import javax.swing.LayoutStyle;
         field.attachToSettings(settings);
         win.addLine(field);
         
+        MultiFieldDef multifield = new MultiFieldDef("Summoner spells:");
+        ButtonSummonerSpellMaster spell1 = new ButtonSummonerSpellMaster(SummonerSpell.Ignite, settings);
+        ButtonSummonerSpellMaster spell2 = new ButtonSummonerSpellMaster(SummonerSpell.Ignite, settings); 
+        spell1.setTwin(spell2);
+        multifield.addField(spell1, settings, Setnames.BLIND_SUMMONER1);
+        multifield.addField(spell2, settings, Setnames.BLIND_SUMMONER2);
+        win.addLine(multifield);
+
+        
         win.newTab("Team builder", "All teambuilder automation");
         
         field = new FieldDef("Enabled:", "Enable or disable this function.", Setnames.TEAMBUILDER_ENABLED.name);
+        field.addField(new JCheckBox());
+        field.attachToSettings(settings);
+        win.addLine(field);
+        
+        field = new FieldDef("Auto-Start:", "Start a game when everybody is ready.", Setnames.TEAMBUILDER_AUTOSTART_ENABLED.name);
         field.addField(new JCheckBox());
         field.attachToSettings(settings);
         win.addLine(field);
@@ -699,17 +680,6 @@ import javax.swing.LayoutStyle;
         //panel.setLayout(new GridLayout(1, 1));
         //panel.add(filler);
         //return panel;
-    }
-    
-    /** Returns an ImageIcon, or null if the path was invalid. */
-    protected static ImageIcon createImageIcon(String path) {
-        java.net.URL imgURL = Gui.class.getResource(path);
-        if (imgURL != null) {
-            return new ImageIcon(imgURL);
-        } else {
-            System.err.println("Couldn't find file: " + path);
-            return null;
-        }
     }
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     // Generated using JFormDesigner Evaluation license - Jakub Mareda

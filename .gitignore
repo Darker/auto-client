@@ -3,3 +3,5 @@
 /target/
 *.exe
 /images/IconHighRes.png
+/LOLResources/*
+/images/unused/*
