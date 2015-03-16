@@ -102,6 +102,24 @@ public class MSWindow extends Common implements Window  {
                 makeLParam(x, y).intValue());
   }
   
+  @Override
+  public void mouseOver(int x, int y) {
+    sendMsg(
+                Messages.MOUSEHOVER,
+                0,
+                makeLParam(x, y).intValue());
+    sendMsg(
+                Messages.MOUSEMOVE,
+                0,
+                makeLParam(x, y).intValue());
+    sendMsg(
+                Messages.NCHITTEST,
+                0,
+                makeLParam(x, y).intValue());
+  }
+  
+  
+  
   public static int makeWinapiMouseEventFlags(boolean isControl, boolean isAlt, boolean isShift) {
     int flags = 0;
     if (isControl) 
@@ -386,6 +404,9 @@ public class MSWindow extends Common implements Window  {
   }
   private void sendMsg(int msg, int wparam, int lparam) {
     UserExt.SendMessage(hwnd, msg, new WinDef.WPARAM(wparam), new WinDef.LPARAM(lparam));
+  }
+  private void sendMsg(Messages msg, int wparam, int lparam) {
+    sendMsg(msg.code, wparam, lparam);
   }
   protected static User32Ext UserExt = User32Ext.INSTANCE;
   protected static GDI32 GDI = GDI32.INSTANCE;

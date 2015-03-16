@@ -2,6 +2,7 @@ package cz.autoclient;
 
 import cz.autoclient.GUI.Gui;
 import cz.autoclient.GUI.notifications.Notification;
+import cz.autoclient.PVP_net.Constants;
 import cz.autoclient.autoclick.Window;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.MSWindow;
@@ -9,6 +10,7 @@ import cz.autoclient.settings.Settings;
 import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.PVP_net.Images;
 import cz.autoclient.PVP_net.Setnames;
+import cz.autoclient.PVP_net.SummonerSpell;
 import cz.autoclient.PVP_net.TeamBuilderPlayerSlot;
 import cz.autoclient.autoclick.exceptions.APIError;
 import cz.autoclient.autoclick.ColorPixel;
@@ -16,6 +18,7 @@ import cz.autoclient.autoclick.ColorPixel;
 
 import cz.autoclient.autoclick.comvis.RectMatch;
 import cz.autoclient.autoclick.comvis.ScreenWatcher;
+import java.awt.image.BufferedImage;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,12 +60,7 @@ import java.util.ArrayList;
      
      try
      {
-       if (this.gui.getSelectedMode().length > 1) {
-           StartMode(this.gui.getSelectedMode());
-       }
-       else {
-           StartMode(null);
-       }
+       handleMatch();
      }
      catch (InterruptedException e)
      {
@@ -94,165 +92,7 @@ import java.util.ArrayList;
    private void end() {
        gui.displayToolAction(false);
    }
-   
-   private void StartMode(String[] mode)
-     throws InterruptedException, APIError
-   {
-     //This IF triggered even what the game wasn't running
-     // well, it was running but just as a process on background...
-     /*if (this.window.isRunning("League of Legends.exe")) {
-       System.out.println("The game is running, the thread must stop now!");
-       interrupt();
-       return;
-     }*/
-     //this.gui.getProgressBar1().setValue(5);
-     
-     
-     
-     if (mode!=null && ((mode[(mode.length - 1)].equals("Beginner")) || (mode[(mode.length - 1)].equals("Intermediate")) || (mode[(mode.length - 1)].equals("ARAM")) || (mode[(mode.length - 1)].equals("Draft")) || (mode[(mode.length - 1)].equals("Blind"))) && (!isInterrupted()))
-     {
-       Rect cRec = window.getRect();
-       int height = cRec.bottom - cRec.top;
-       int width = cRec.right - cRec.left;
-       switch (mode[(mode.length - 1)])
-       {
-       case "ARAM": 
-         SelectItem("home");
-         SelectItem("play");
-         SelectItem("pvp");
-         SelectItem("aram");
-         SelectItem("5v5");
-         SelectItem("blind");
-         SelectItem("match");
-         break;
-       case "Beginner": 
-         switch (mode[(mode.length - 2)])
-         {
-         case "5v5": 
-           SelectItem("home");
-           SelectItem("play");
-           SelectItem("ai");
-           SelectItem("classic");
-           SelectItem("5v5");
-           SelectItem("blind");
-           SelectItem("match");
-           break;
-         case "3v3": 
-           SelectItem("home");
-           SelectItem("play");
-           SelectItem("ai");
-           SelectItem("classic");
-           SelectItem("3v3");
-           SelectItem("blind");
-           SelectItem("match");
-           break;
-         case "Dominion": 
-           SelectItem("home");
-           SelectItem("play");
-           SelectItem("ai");
-           SelectItem("dominion");
-           SelectItem("5v5");
-           SelectItem("blind");
-           SelectItem("match");
-         }
-         break;
-       case "Intermediate": 
-         switch (mode[(mode.length - 2)])
-         {
-         case "5v5": 
-           SelectItem("home");
-           SelectItem("play");
-           SelectItem("ai");
-           SelectItem("classic");
-           SelectItem("5v5");
-           SelectItem("intermediate");
-           SelectItem("match");
-           break;
-         case "3v3": 
-           SelectItem("home");
-           SelectItem("play");
-           SelectItem("ai");
-           SelectItem("classic");
-           SelectItem("3v3");
-           SelectItem("intermediate");
-           SelectItem("match");
-           break;
-         case "Dominion": 
-           SelectItem("home");
-           SelectItem("play");
-           SelectItem("ai");
-           SelectItem("dominion");
-           SelectItem("5v5");
-           SelectItem("intermediate");
-           SelectItem("match");
-         }
-         break;
-       case "Draft": 
-         switch (mode[(mode.length - 2)])
-         {
-         case "5v5": 
-           SelectItem("home");
-           SelectItem("play");
-           SelectItem("pvp");
-           SelectItem("classic");
-           SelectItem("5v5");
-           SelectItem("draft");
-           SelectItem("match");
-           break;
-         case "Dominion": 
-           SelectItem("home");
-           SelectItem("play");
-           SelectItem("pvp");
-           SelectItem("dominion");
-           SelectItem("5v5");
-           SelectItem("draft");
-           SelectItem("match");
-         }
-         break;
-       case "Blind": 
-         switch (mode[(mode.length - 2)])
-         {
-         case "5v5": 
-           SelectItem("home");
-           SelectItem("play");
-           SelectItem("pvp");
-           SelectItem("classic");
-           SelectItem("5v5");
-           SelectItem("blind");
-           SelectItem("match");
-           break;
-         case "3v3": 
-           SelectItem("home");
-           SelectItem("play");
-           SelectItem("pvp");
-           SelectItem("classic");
-           SelectItem("3v3");
-           SelectItem("blind");
-           SelectItem("match");
-           break;
-         case "Dominion": 
-           SelectItem("home");
-           SelectItem("play");
-           SelectItem("pvp");
-           SelectItem("dominion");
-           SelectItem("5v5");
-           SelectItem("blind");
-           SelectItem("match");
-         }
-         break;
-       }
-     }
-     else if(mode==null) {
-       System.out.println("Mode was null. I assume user has started game manually.");   
-     }
-     //this.gui.getProgressBar1().setValue(30);
-     if (interrupted()) {
-       System.out.println("Interupted after picking mode!");
-     }
-     else {
-       handleMatch();
-     }
-   }
+
    
    public boolean pixelCheckS(Color rgb, double x, double y, int tolerance)
    {
@@ -431,6 +271,8 @@ import java.util.ArrayList;
      pretendAccepted = true;     
    }
    public void normal_lobby() throws InterruptedException, APIError {
+     if(settings.getBoolean(Setnames.NOTIF_MENU_BLIND_IN_LOBBY.name, false))
+       gui.notification(Notification.Def.BLIND_TEAM_JOINED);
      boolean ARAM = false;
      //this.gui.getProgressBar1().setValue(70);
      if(settings.getStringEquivalent("call_text").length()>0) {
@@ -459,9 +301,77 @@ import java.util.ArrayList;
        click(PixelOffset.LobbyChampionSlot1);
 
      }
+     
+     System.out.println("Setting summoner spells.");
+     
+     
+     //Set summoner spells
+     SummonerSpell[] spells = {
+       (SummonerSpell)settings.getSetting(Setnames.BLIND_SUMMONER1.name),
+       (SummonerSpell)settings.getSetting(Setnames.BLIND_SUMMONER2.name)
+     };
+
+     
+
+     //Loop that just does the same thing for both spells
+     for(int i=0; i<2; i++) {
+       SummonerSpell s = spells[i];
+       if(s!=null) {
+         //Crop the icon - the GUI disorts the icon borders so I ignore them
+         BufferedImage icon = s.image.getCropped(5);
+         if(icon!=null) {
+           click(i==0?PixelOffset.Blind_SumSpell1:PixelOffset.Blind_SumSpell2);
+           //Wait till the launcher screen redraws
+           sleep(500L);
+           //Use base resolution window - the icons are saved in base resolution too
+           BufferedImage screenshot = ScreenWatcher.resampleImageTo(
+                  window.screenshot(),
+                  Constants.smallestSize.width, Constants.smallestSize.height);
+           //double[][][] integral_image = ScreenWatcher.integralImage(screenshot);
+           //Some CV
+           Rect pos = ScreenWatcher.findByAvgColor(icon, screenshot, 0.001f, true, null);
+
+           if(pos!=null) {
+             //Get real screenshot
+             //screenshot = window.screenshot();
+             //De normalize the rectangle (don't forget we rescaled the screenshot prior to 
+             // searching the summoner spell)
+             pos = Constants.deNormalize(pos, window.getRect());
+             //Show some debug
+             //DebugDrawing.drawResult(screenshot, pos, Color.RED);
+             pos = pos.middle();
+             /*DebugDrawing.drawPoint(screenshot, pos.left, pos.top, 5, Color.YELLOW);
+             DebugDrawing.displayImage(screenshot);*/
+             //Click in the middle of the found rectangle
+             System.out.println("  Spell #"+(i+1)+" CLICKING!");
+             window.mouseDown(pos.left, pos.top);
+             sleep(90L);
+             window.mouseUp(pos.left, pos.top);
+             sleep(500L);
+           }
+           else {
+             System.out.println("  Spell #"+(i+1)+" not seen on screen.");
+             //DebugDrawing.displayImage(screenshot);
+             click(PixelOffset.Blind_SumSpell_CloseDialog);
+             sleep(80L);
+           }
+         }
+         else {
+           System.out.println("  Spell #"+(i+1)+" image corrupted.");
+         }
+       }
+       else {
+         System.out.println("  Spell #"+(i+1)+" is null."); 
+       }
+     }
+     //Set masteries:
+     
+     
+
    }
    
    public boolean teamBuilder_lobby() throws InterruptedException {
+     gui.notification(Notification.Def.TB_GROUP_JOINED);
      System.out.println("In team builder lobby now.");
      //Check if the teambuilder is enabled
      if(!settings.getBoolean(Setnames.TEAMBUILDER_ENABLED.name, (boolean)Setnames.TEAMBUILDER_ENABLED.default_val)) {
@@ -696,7 +606,7 @@ import java.util.ArrayList;
      
      System.out.println("Inviting players now. ");
      gui.setTitle("Waiting for players. (Invite)");
-     double[][][] integral_image = null;
+     double[][][] integral_image;
      double[] accepted, pending;
      try {
        accepted = Images.INVITE_ACCEPTED.getColorSum();
@@ -843,6 +753,19 @@ import java.util.ArrayList;
        System.err.println("Can't click because no window is available for clicking :("); 
      }
    }
+   /**
+    * Clicks at the top left corner of the rectangle. Use Rect.middle() to click in the middle.
+    * @param pos rectangle to click on.
+    */
+   private void click(Rect pos) {
+     try {
+       Rect rect = window.getRect();
+       window.click((int)(rect.width * pos.left), (int)(rect.height * pos.top));
+     }
+     catch(APIError e) {
+       System.err.println("Can't click because no window is available for clicking :("); 
+     }
+   }
    private boolean checkPoint(PixelOffset point) {
      if(point.color==null)
        return false;
@@ -898,6 +821,6 @@ import java.util.ArrayList;
        return false;
      }
    }
-   
+
    
  }

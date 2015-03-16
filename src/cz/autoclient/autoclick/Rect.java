@@ -77,9 +77,18 @@ public class Rect {
    */
   public Rect rescaleSize(float scale) {
     return new Rect(top, (int)(right*scale), (int)(bottom*scale), left);
-    
   }
   
+  /** Get rect moved and rescaled
+   * @param scale float parameter of the scale ratio, where 1 is equal rectangle
+   * @return rescaled rectangle
+   */
+  public Rect multiply(double scale) {
+    return Rect.byWidthHeight((int)Math.round(((double)top)*scale),
+                              (int)Math.round(((double)left)*scale),
+                              (int)Math.round(((double)width)*scale),
+                              (int)Math.round(((double)height)*scale));
+  }
   /** Check if two rectangles overlap (have nonempty intersection)
    * @param a forst rectangle
    * @param b second rectangle

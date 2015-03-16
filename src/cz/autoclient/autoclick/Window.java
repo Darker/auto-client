@@ -34,10 +34,13 @@ public interface Window {
   public void doubleclick(int x, int y, MouseButton button);
   public void doubleclick(int x, int y, MouseButton button, boolean isControl, boolean isAlt, boolean isShift);
   
+  
+  public void mouseOver(int x, int y);
   /** UNIVERSAL EVENT SENDING FUNC **/
   //Not used now. It would encourage to make non-cross platform applications
   
   /** KEYBOARD EVENTS **/
+  
   public void keyDown(int key);
   public void keyPress(int key);
   public void keyUp(int key);

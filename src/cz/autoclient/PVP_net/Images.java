@@ -27,9 +27,7 @@ public enum Images {
   INVITE_ACCEPTED("launcher_screens/search_objects/accepted.png"),
   //Green text indicating player has not yet accepted or declined invite to game
   INVITE_PENDING("launcher_screens/search_objects/pending.png"),
-  /** Summoner spells **/
-  SUM_IGNITE("images/SummonerDot.png"),
-  
+
   VOID(null);
   
   public final String path;

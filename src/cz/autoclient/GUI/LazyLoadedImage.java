@@ -7,6 +7,7 @@
 package cz.autoclient.GUI;
 
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -31,6 +32,7 @@ public class LazyLoadedImage {
   //These will fill up on demand when needed
   private ImageIcon icon = null;
   private Image image = null;
+  private BufferedImage b_image = null;
   //If image has failed, we'll not try to load it again and will return null straight away
   
   private boolean image_failed = false;
@@ -52,6 +54,22 @@ public class LazyLoadedImage {
   }
   public Image getImage() {
     return type==Type.FILE?getImageFile():getImageResource(); 
+  }
+  public BufferedImage getBufferedImage() {
+    if(b_image!=null)
+      return b_image;
+    
+    Image im = this.getImage();
+    if(im instanceof BufferedImage) {
+      return b_image = (BufferedImage)im;
+    }
+    else
+      return null;
+    //return type==Type.FILE?new BufferedImage(getImageFile()):new BufferedImage(getImageResource()); 
+  }
+  public BufferedImage getCropped(int frame) {
+    BufferedImage src = getBufferedImage();
+    return src!=null? src.getSubimage(frame, frame, src.getWidth()-2*frame, src.getHeight()-2*frame):null;
   }
   public Image getImageFile() {
     if(image==null && !image_failed) {

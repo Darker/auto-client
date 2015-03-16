@@ -27,7 +27,11 @@ public enum PixelOffset {
     LobbyChampionSlot1(0.25182702572064036D, 0.26219512195121947D),
     //Summoner spell icons
     Blind_SumSpell1 (0.4979340371027294D, 0.6088404678228453D),
+    
     Blind_SumSpell2 (0.5421364731680097D, 0.6117873045064729D),
+    //Fortunatelly, this one works for both spell dialogs
+    Blind_SumSpell_CloseDialog (0.650720718284894D, 0.20448429853646063D),
+    
     MatchFound(0.495117D, 0.515625D, new Color(255, 255, 255)),
     AcceptButton(0.39004512649241546D, 0.5599898226129755D, new Color(25, 60, 101, 1)),
     //Search champion field in blind queue

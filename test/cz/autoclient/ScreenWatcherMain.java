@@ -8,11 +8,14 @@ package cz.autoclient;
 
 
 import cz.autoclient.PVP_net.Images;
+import cz.autoclient.PVP_net.SummonerSpell;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.comvis.ScreenWatcher;
 import cz.autoclient.autoclick.comvis.RectMatch;
 import cz.autoclient.autoclick.exceptions.APIError;
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -22,6 +25,8 @@ import java.io.File;
 import java.io.IOException;
 import static java.lang.Thread.sleep;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -36,23 +41,28 @@ import javax.swing.JScrollPane;
  * @author Jakub
  */
 public class ScreenWatcherMain {
+   public static  final String path = "C:\\MYSELF\\programing\\java\\AutoCall\\debug\\launcher_screens\\";
+   
    public static void main(String[] args) throws Exception
    {
      /*TestRectangles();
      if(true)
        return;/* */
      //The small image to search for
-     //BufferedImage thing = loadFromPath(/*"CVTestSearchObject.png"*/"launcher_screens/search_objects/pending.png");
-     //BufferedImage thing2 = loadFromPath(/*"CVTestSearchObject.png"*/"launcher_screens/search_objects/accepted.png");
+     /*BufferedImage thing = loadFromPath("launcher_screens/search_objects/pending.png");
+     BufferedImage thing2 = loadFromPath("launcher_screens/search_objects/accepted.png");*/
      //The big image to search in
      //BufferedImage screenshot = loadFromPath(/*"screenshot.png"*/"launcher_screens/INVITE-PENDING.png");
+     BufferedImage screenshot = loadFromPath(path+"LOBBY-SPELL_1.png");
+     screenshot = ScreenWatcher.resampleImageTo(screenshot, 1024, 640);
+     BufferedImage thing = loadFromPath("images/SummonerBarrier.png");
      
-     //if(thing!=null && screenshot!=null && thing2!=null) {
-       //TestSearchColorAll(thing, screenshot);
+     if(thing!=null && screenshot!=null) {
+       TestSearchColorSumSpell(screenshot);
        //TestSearch(thing, screenshot);
        //TestBestWhile(thing, thing2, screenshot);
-       TestRectangles();
-     //}
+       //TestRectangles();
+     }
    }
    public static void TestRectangles() {
      ArrayList<Rect> test = new ArrayList<>();
@@ -183,6 +193,60 @@ public class ScreenWatcherMain {
          break;
      }
      System.out.println("Lobby has exit spontaneously.");
+   }
+   public static void TestSearchColorSingle(BufferedImage thing, BufferedImage screenshot) {
+     Rect pos1 = cz.autoclient.autoclick.comvis.ScreenWatcher.findByAvgColor(thing, screenshot, 0.1f, true);
+     if(pos1!=null) {
+        System.out.println("Found object: "+pos1);
+        drawResult(screenshot, pos1, Color.RED);
+        ScreenWatcherMain.displayImage(screenshot);
+     }
+     else {
+        System.err.println("Found nothing.");
+     }
+   }
+   public static void TestSearchColorSumSpell(BufferedImage screenshot) {
+     SummonerSpell[] spells = SummonerSpell.values();
+     Map<SummonerSpell, Rect> finds = new HashMap<>();
+     /** HIDE SOM SPELLS FOR TESTING **/
+     SummonerSpell[] hide = {SummonerSpell.Teleport, SummonerSpell.Smite, SummonerSpell.Clarity};
+     for(SummonerSpell spell : hide) {
+       BufferedImage im = spell.image.getCropped(5);
+       if(im==null) {
+         //System.err.println("["+spell.name+"] NO IMAGE!!!");
+         continue;
+       }
+       Rect pos = ScreenWatcher.findByAvgColor(im, screenshot, 0.005f, true);
+       if(pos!=null) {
+          //System.out.println("["+spell.name+"] Found object: "+pos);
+          filledRect(screenshot, pos, Color.BLACK);
+          drawText(screenshot, pos.left, pos.top, spell.name, Color.GRAY);
+       }
+       
+     }ScreenWatcherMain.displayImage(screenshot, "Hidden spells");
+     /** NOW SEARCH **/
+     for(SummonerSpell spell : spells) {
+       BufferedImage im = spell.image.getCropped(5);
+       if(im==null) {
+         System.err.println("["+spell.name+"] NO IMAGE!!!");
+         continue;
+       }
+       //displayImage(im);
+       
+       Rect pos = ScreenWatcher.findByAvgColor(im, screenshot, 0.0001f, true);
+       if(pos!=null) {
+          System.out.println("["+spell.name+"] Found object: "+pos);
+          drawResult(screenshot, pos, Color.RED);
+          drawText(screenshot, pos.left, pos.bottom, spell.name, Color.WHITE);
+          //ScreenWatcherMain.displayImage(screenshot, spell.name);
+          finds.put(spell, pos);
+          //ScreenWatcherMain.displayImage(screenshot);
+       }
+       else {
+          System.err.println("["+spell.name+"] Found nothing.");
+       }
+     }
+     ScreenWatcherMain.displayImage(screenshot);
    }
    public static void TestSearchColorAll(BufferedImage thing, BufferedImage screenshot) {
      double start = System.nanoTime();
@@ -372,15 +436,35 @@ public class ScreenWatcherMain {
      //Draw rectangle on discovered position
      Graphics2D graph = target.createGraphics();
      graph.setColor(color);
-     graph.drawRect((int)rect.top, (int)rect.left, (int)rect.width, (int)rect.height);
+     graph.drawRect((int)rect.left, (int)rect.top, (int)rect.width, (int)rect.height);
      graph.dispose();
    }
    public static void drawResult(BufferedImage target, ArrayList<Rect> rect, Color color) {
      for(int i=0,l=rect.size(); i<l; i++) {
        drawResult(target, rect.get(i), color); 
      }
-     
    }
+  public static void filledRect(BufferedImage target, Rect rect, Color color) {
+     //silent fail for invalid result
+     if(rect==null)
+       return;
+     //Draw rectangle on discovered position
+     Graphics2D graph = target.createGraphics();
+     graph.setColor(color);
+     graph.fillRect((int)rect.left, (int)rect.top, (int)rect.width, (int)rect.height);
+     graph.dispose();
+   }
+   public static void drawText(BufferedImage target, int x, int y, String string, Color color) {
+        Graphics2D g2d = target.createGraphics();
+
+        g2d.setPaint(color);
+        g2d.setFont(new Font("Courier New", Font.PLAIN, 12));
+        FontMetrics fm = g2d.getFontMetrics();
+        y = y+fm.getHeight();
+        g2d.drawString(string, x, y);
+        g2d.dispose();
+   }
+   
    public static BufferedImage loadFromPath(String path) {
      File img = new File(path);
      BufferedImage thing = null;
@@ -402,14 +486,18 @@ public class ScreenWatcherMain {
      }
      return true;
    }
-   public static void displayImage(Image image) {
+   public static void displayImage(Image image, String message) {
      JLabel label = new JLabel(new ImageIcon(image));
 
      JPanel panel = new JPanel();
      panel.add(label);
 
      JScrollPane scrollPane = new JScrollPane(panel);
-     JOptionPane.showMessageDialog(null, scrollPane);
+     
+     JOptionPane.showMessageDialog(null, scrollPane, message, javax.swing.JOptionPane.INFORMATION_MESSAGE);
+   }
+   public static void displayImage(Image image) {
+     displayImage(image, "Debug");
    }
    static BufferedImage cloneImage(BufferedImage bi) {
      ColorModel cm = bi.getColorModel();

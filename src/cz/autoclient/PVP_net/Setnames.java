@@ -23,11 +23,13 @@ public enum Setnames {
   BLIND_SUMMONER1("sumspell1", SummonerSpell.Teleport),
   BLIND_SUMMONER2("sumspell2", SummonerSpell.Flash),
   /**NOTFICATONS**/
-  NOTIF_MENU_TB_GROUP_JOINED("not_menu_tb_gr_join", false),
+  NOTIF_MENU_TB_GROUP_JOINED(false),
   
   //Notify when everybody is ready and the game can start (or was started, if auto start is enabled)
-  NOTIF_MENU_TB_READY_TO_START("not_menu_tb_game_canstart", true),
-  NOTIF_MENU_TB_PLAYER_JOINED("not_menu_tb_player_joined", false)
+  NOTIF_MENU_TB_READY_TO_START(true),
+  NOTIF_MENU_TB_PLAYER_JOINED(false),
+  
+  NOTIF_MENU_BLIND_IN_LOBBY(false),
   
   
   ;
@@ -36,6 +38,10 @@ public enum Setnames {
   public final Object default_val;
   Setnames(String n, Object d) {
     name = n;
+    default_val = d;    
+  }
+  Setnames(Object d) {
+    name = this.name().toLowerCase();
     default_val = d;    
   }
   public static void setDefaults(Settings settings) {

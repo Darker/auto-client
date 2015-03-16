@@ -12,14 +12,20 @@ import java.awt.TrayIcon;
 import java.lang.reflect.InvocationTargetException;
 import javax.swing.JCheckBoxMenuItem;
 
-/**
- *
+/** Abstract representation of notification. Extend from this class and make a notification
+ * that actually notifies users.
  * @author Jakub
  */
 public abstract class Notification {
   protected final JCheckBoxMenuItem menu_item;
   protected final Settings settings;
   protected final Def definition;
+  /**
+   * This constructor initiates the notification menu item that allows to toggle this 
+   * notification on and off.
+   * @param def
+   * @param sets 
+   */
   protected Notification(Def def, Settings sets) {
     settings = sets;
     definition = def;
@@ -41,30 +47,41 @@ public abstract class Notification {
   
   
   public enum Def {
-    GROUP_JOINED("TB: Group joined",
+    TB_GROUP_JOINED("TB: Group joined",
+                 "tb.solo.group_joined",
                  "Teambuilder group was joined, waiting for ready button.",
                  Setnames.NOTIF_MENU_TB_GROUP_JOINED,
                  TrayIcon.MessageType.INFO
     ),
     TB_GAME_CAN_START("TB: Game can start",
+                 "tb.captain.game_can_start",
                  "Everybody is ready. It's time to start the game!",
                  Setnames.NOTIF_MENU_TB_READY_TO_START,
                  TrayIcon.MessageType.INFO
     ),
     TB_PLAYER_JOINED("TB: A player joined the group",
+                 "tb.captain.player_joined",
                  "A player has joined your group, you might want to check him out.",
                  Setnames.NOTIF_MENU_TB_PLAYER_JOINED,
                  TrayIcon.MessageType.INFO
-    )
+    ),
+    BLIND_TEAM_JOINED("In lobby",
+                 "blind.lobby.joined",
+                 "You've been put in lobby with your teammates.",
+                 Setnames.NOTIF_MENU_BLIND_IN_LOBBY,
+                 TrayIcon.MessageType.INFO
+    ),
     ;
-    Def(String n, String t, Setnames setting, TrayIcon.MessageType type) {
+    Def(String n, String p, String t, Setnames setting, TrayIcon.MessageType type) {
       name = n;  
       text = t;
+      path = p;
       this.setting = setting;
       this.type = type;
     }
     public final String name;
     public final String text;
+    public final String path;
     public final Setnames setting;
     public final TrayIcon.MessageType type;
     

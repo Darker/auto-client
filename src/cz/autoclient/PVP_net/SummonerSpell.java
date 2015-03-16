@@ -17,7 +17,7 @@ public enum SummonerSpell {
   Ignite("Ignite", "SummonerDot.png"),
   Heal("Heal", "SummonerHeal.png"),
   Barrier("Barrier", "SummonerBarrier.png"),
-  Boost("Boost", "SummonerBoost.png"),
+  Boost("Cleanse", "SummonerBoost.png"),
   Clairvoyance("Clairvoyance", "SummonerClairvoyance.png"),
   Exhaust("Exhaust", "SummonerExhaust.png"),
   Flash("Flash", "SummonerFlash.png"),

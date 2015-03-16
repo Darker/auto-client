@@ -29,13 +29,14 @@ import javax.imageio.ImageIO;
 public class WindowTester {
    public static void main(String[] args) throws APIError
    {
+     
      MSWindow test = MSWindow.windowFromName("PVP.net", false);
      System.out.println(test==null?"Fail.":"Success");
      if(test!=null) {
        //test.typeString("PoJus.'\\#`&[]*-č");
        Rect rect = test.getRect();
        System.out.println(rect);
-       System.out.println("Ratio = " + rect.right + "/" + Constants.normalSize.right + " = " + Constants.sizeCoeficient(test.getRect()));
+       System.out.println("Ratio = " + rect.right + "/" + Constants.smallestSize.right + " = " + Constants.sizeCoeficient(test.getRect()));
     
      }
    }

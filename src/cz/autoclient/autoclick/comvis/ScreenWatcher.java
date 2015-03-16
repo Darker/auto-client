@@ -173,6 +173,12 @@ public class ScreenWatcher {
     double sum_small[] = colorSum(image);
     return findByAvgColor(sum_small, integral_image, image.getWidth(), image.getHeight(), bigImage.getWidth(), bigImage.getHeight(), tolerance, return_nearest, matches);
   }
+  public static Rect findByAvgColor(BufferedImage image, double[][][] integral_image, float tolerance, boolean return_nearest, ArrayList<RectMatch> matches) {
+    if(integral_image.length==0)
+      throw new IllegalArgumentException("Empty integral image can't be accepted.");
+    double sum_small[] = colorSum(image);
+    return findByAvgColor(sum_small, integral_image, image.getWidth(), image.getHeight(), integral_image[0].length, integral_image.length, tolerance, return_nearest, matches);
+  }
   public static ArrayList<RectMatch> findByAvgColor_isolated_matches(BufferedImage image, double[][][] integral_image, float tolerance) {
     int sh = image.getHeight();
     int sw = image.getWidth();

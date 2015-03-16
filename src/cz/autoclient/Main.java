@@ -34,6 +34,7 @@ import sirius.constants.IWMConsts;
    
    public Main()
    {
+ 
      //Normal program
      startGUI();
    }
