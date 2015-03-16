@@ -95,18 +95,18 @@ public class ScreenWatcher {
     //Multiply tolerance to make it equal to other values
     // 1 unit represents a color (0-255) in width/height image
     tolerance = tolerance*(float)Math.pow(255, 2)*3;
-    System.out.println("Tolerance: "+tolerance);
+    //System.out.println("Tolerance: "+tolerance);
     //Number of pixels
     int no_pixels = ws*hs;
     
-    System.out.println("Sum: ["+sum_small[0]+", "+sum_small[1]+", "+sum_small[2]+"]");
+    //System.out.println("Sum: ["+sum_small[0]+", "+sum_small[1]+", "+sum_small[2]+"]");
     //Divide the color sum by number of pixels to get average value
     for(byte i = 0; i<3; i++) {
       sum_small[i] = sum_small[i]/no_pixels; 
     }
     
-    System.out.println("Pixels: "+ws+"*"+hs+" = "+no_pixels);
-    System.out.println("Average: ["+sum_small[0]+", "+sum_small[1]+", "+sum_small[2]+"]");
+    //System.out.println("Pixels: "+ws+"*"+hs+" = "+no_pixels);
+    //System.out.println("Average: ["+sum_small[0]+", "+sum_small[1]+", "+sum_small[2]+"]");
     
     //Loop and find the least different image
     //VVariable names:
@@ -141,14 +141,14 @@ public class ScreenWatcher {
             difference_pos[1] = rect_y;          
           }
           if(matches!=null && diff<=tolerance) {
-            matches.add(RectMatch.byWidthHeight(rect_x-1, rect_y-1, ws, hs, difference));
+            matches.add(RectMatch.byWidthHeight(rect_y-1, rect_x-1, ws, hs, difference));
             //System.out.println("Diff "+diff+" <= tolerance. Adding ["+(rect_x-1)+", "+(rect_y-1)+"]");
           }
         }
         //Find first match below tolerance - ONLY USE WHEN YOUR SEARCHED OBJECT IS VERY UNIQUE
         else {
           if(diff<=tolerance) {
-            return Rect.byWidthHeight(rect_x-1, rect_y-1, ws, hs);
+            return Rect.byWidthHeight(rect_y-1, rect_x-1, ws, hs);
           }
         }
       }
@@ -156,7 +156,7 @@ public class ScreenWatcher {
     if(return_nearest) {
       //System.out.println("Lowest difference: "+difference+". Tolerance: "+tolerance);
       if(difference<=tolerance) {
-        return Rect.byWidthHeight(difference_pos[0]-1, difference_pos[1]-1, ws, hs);
+        return Rect.byWidthHeight(difference_pos[1]-1, difference_pos[0]-1, ws, hs);
       }      
     }
     //Nothing found - return null
@@ -264,16 +264,30 @@ public class ScreenWatcher {
 
   
   /** Utility methods **/
+  
+  /** Resample image smoothly by given ratio.
+   * 
+   * @param original image to resample
+   * @param xscale X axis resample rate. If greater than 1, result is larger
+   * @param yscale Y axis resample rate. If greater than 1, result is larger
+   * @return 
+   */
   public static BufferedImage resampleImage(BufferedImage original, double xscale, double yscale) {
     int w = original.getWidth();
     int h = original.getHeight();
     BufferedImage after = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
     AffineTransform at = new AffineTransform();
     at.scale(xscale, yscale);
+    System.out.println("["+xscale+", "+yscale+"]");
     AffineTransformOp scaleOp = 
        new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
     after = scaleOp.filter(original, after);
     return after;
+  }
+  public static BufferedImage resampleImageTo(BufferedImage original, int width, int height) {
+    int w = original.getWidth();
+    int h = original.getHeight();
+    return resampleImage(original, (double)width/(double)w, (double)height/(double)h);
   }
   /*
  * Where bi is your image, (x0,y0) is your upper left coordinate, and (w,h)
