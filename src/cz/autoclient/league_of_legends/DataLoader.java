@@ -46,6 +46,7 @@ public abstract class DataLoader {
     auto_download = download_if_missing;
 
     String filename = getFilename();
+    path.mkdirs();
     if(path.exists()&&path.isDirectory()) {
       file_path = new File(path.getAbsolutePath()+"/"+filename+".json");
       base_path = path;
@@ -77,11 +78,12 @@ public abstract class DataLoader {
         if(auto_download)
           forceUpdate();
         else
-          throw new IllegalArgumentException(file_path.getName()+".json not fond in "+file_path.getParent()); 
+          throw new IllegalArgumentException(file_path.getName()+" not fond in "+file_path.getParent()); 
       }
       else {
         try {
           data = fromFile(file_path);
+          System.out.println("Loading "+this.getClass().getName()+" from "+file_path);
         }
         catch(FileNotFoundException e) {
           throw new IllegalArgumentException(file_path.getName()+" in "+file_path.getParent()+" caused error:\n         "+e); 
