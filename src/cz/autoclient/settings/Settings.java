@@ -9,6 +9,7 @@ package cz.autoclient.settings;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -278,6 +279,9 @@ public class Settings implements java.io.Serializable {
   }
   
   public void saveToFile(String path) throws IOException {
+    File f = new File(path);
+    f.getParentFile().mkdir();
+    
     OutputStream file = new FileOutputStream(path);
     OutputStream buffer = new BufferedOutputStream(file);
     ObjectOutput output = new ObjectOutputStream(buffer);
@@ -291,7 +295,7 @@ public class Settings implements java.io.Serializable {
     if(forced || changed)
       saveToFile(path);
   }
-  public void loadFromFile(String path) throws IOException {
+  public void loadFromFile(String path) throws IOException {    
     InputStream file = new FileInputStream(path);
     InputStream buffer = new BufferedInputStream(file);
     ObjectInput input = new ObjectInputStream (buffer);

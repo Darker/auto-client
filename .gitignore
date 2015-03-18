@@ -2,7 +2,9 @@
 /build/*
 /target/
 *.exe
-/images/IconHighRes.png
 /LOLResources/*
 /images/unused/*
 /launcher_screens/*.png
+exclude.txt
+release.bat
+/release/tmp/*

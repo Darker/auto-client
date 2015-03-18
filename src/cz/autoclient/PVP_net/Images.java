@@ -24,9 +24,9 @@ import javax.swing.ImageIcon;
 public enum Images {
 
   //Green text indicating player has accepted invite to game
-  INVITE_ACCEPTED("launcher_screens/search_objects/accepted.png"),
+  INVITE_ACCEPTED("images/search_objects/accepted.png"),
   //Green text indicating player has not yet accepted or declined invite to game
-  INVITE_PENDING("launcher_screens/search_objects/pending.png"),
+  INVITE_PENDING("images/search_objects/pending.png"),
 
   VOID(null);
   

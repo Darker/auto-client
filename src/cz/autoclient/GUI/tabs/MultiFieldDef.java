@@ -8,12 +8,10 @@ package cz.autoclient.GUI.tabs;
 
 import cz.autoclient.PVP_net.Setnames;
 import cz.autoclient.settings.Settings;
-import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.util.ArrayList;
-import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
@@ -28,7 +26,7 @@ public class MultiFieldDef extends FieldDef {
   public MultiFieldDef(String label) {
     super(label, null, null);
     container.add(group);
-    group.setBorder(BorderFactory.createLineBorder(Color.BLUE));
+    //group.setBorder(BorderFactory.createLineBorder(Color.BLUE));
   }
   
   @Override
