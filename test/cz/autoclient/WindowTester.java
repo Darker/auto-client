@@ -8,13 +8,18 @@ import cz.autoclient.autoclick.Window;
 import cz.autoclient.autoclick.comvis.ScreenWatcher;
 import cz.autoclient.autoclick.exceptions.APIError;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -29,6 +34,21 @@ import javax.imageio.ImageIO;
 public class WindowTester {
    public static void main(String[] args) throws APIError
    {
+    /*JComboBox<String> combo = new JComboBox<>(new String[] {"bar", "item"});
+    combo.setEditable(true);
+
+    JButton button = new JButton("Get");
+    button.addActionListener((ActionEvent e) -> {
+        System.out.println(combo.getSelectedItem());
+    });
+
+    JFrame frame = new JFrame();
+    frame.setLayout(new FlowLayout());
+    frame.getContentPane().add(combo);
+    frame.getContentPane().add(button);
+    frame.pack();
+    frame.setVisible(true);*/
+     
      
      MSWindow test = MSWindow.windowFromName("PVP.net", false);
      System.out.println(test==null?"Fail.":"Success");

@@ -24,22 +24,30 @@ public class LazyLoadedImage {
   }
   public final String path;
   public final Type type;
+  /**
+   * Represent file location of this image. Null if this is resource image.
+   */
+  public final File file;
   
 
   //Cache class refference and use the same class refference every time
   //  this should allow JVM to get some non-static functions optimized better
   public static final Class leclass = Type.FILE.getClass();
   //These will fill up on demand when needed
-  private ImageIcon icon = null;
-  private Image image = null;
-  private BufferedImage b_image = null;
+  protected ImageIcon icon = null;
+  protected Image image = null;
+  protected BufferedImage b_image = null;
   //If image has failed, we'll not try to load it again and will return null straight away
   
-  private boolean image_failed = false;
+  protected boolean image_failed = false;
   
   public LazyLoadedImage(String path, Type type) {
     this.path = path;
     this.type = type;
+    if(type==Type.FILE)
+      file = new File(path);
+    else
+      file = null;
   }
   public LazyLoadedImage(String path) {
     this(path, Type.FILE);

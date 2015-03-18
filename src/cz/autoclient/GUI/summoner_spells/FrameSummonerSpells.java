@@ -73,8 +73,9 @@ public class FrameSummonerSpells extends JDialog {
     //Get all existing SummonerSpells
     SummonerSpell[] values = SummonerSpell.values();
     //Calculate number of rows and cells for the frame grid
-    int width = (int)Math.ceil(Math.sqrt(values.length)),
-        height = (int)Math.round(Math.sqrt(values.length));
+    //We add 1 to length because there will be allways the NULL button
+    int width = (int)Math.ceil(Math.sqrt(values.length+1)),
+        height = (int)Math.round(Math.sqrt(values.length+1));
     //Layout will automatically distribute spells evenly in the grid
     GridLayout layout = new GridLayout(height, width, 5, 5);
     //Get content panel to add buttons in
@@ -85,12 +86,22 @@ public class FrameSummonerSpells extends JDialog {
     //Listener for clicks
     ActionListener list = new buttonOnclick();
     //Create all the buttons
-    for(int i=0, l=values.length; i<l; i++) {
-      b = new ButtonSummonerSpell(values[i]);
-      b.addActionListener(list);
-      b.addMouseListener(ToolTipTimer.INSTANT_TOOLTIP);
-      b.setToolTipText(values[i].name);
-      contentPane.add(b);
+    for(int i=0, l=values.length; i<=l; i++) {
+      if(i<l) {
+        b = new ButtonSummonerSpell(values[i]);
+        b.addActionListener(list);
+        b.addMouseListener(ToolTipTimer.INSTANT_TOOLTIP);
+        b.setToolTipText(values[i].name);
+        contentPane.add(b);
+      }
+      else {
+        //The extra NULL button 
+        b = new ButtonSummonerSpell(null);
+        b.addActionListener(list);
+        b.addMouseListener(ToolTipTimer.INSTANT_TOOLTIP);
+        b.setToolTipText("Do not change spell");
+        contentPane.add(b);
+      }
     }
     
   }

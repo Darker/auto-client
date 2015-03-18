@@ -34,7 +34,7 @@ public class LazyLoadedSound {
         error = true;
         return null;
       }
-      media = new Media(path);
+      media = new Media(file.toURI().toString());
       //media.getError()
     }
     return media;

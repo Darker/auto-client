@@ -38,8 +38,6 @@ public class InputJTextField implements Input {
     bound = true;
     //Internal verifier
     final SettingsInputVerifier<Object> verif = this.verifier;
-    //Event to be called if new value is valid
-    final ValueChanged onchange = this.onchange;
     //Only works when you leave the field
     field.setInputVerifier(new InputVerifier() {
       @Override

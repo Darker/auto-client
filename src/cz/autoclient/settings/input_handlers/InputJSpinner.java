@@ -4,28 +4,31 @@
  * and open the template in the editor.
  */
 
-package cz.autoclient.GUI.summoner_spells;
+package cz.autoclient.settings.input_handlers;
 
-import cz.autoclient.PVP_net.SummonerSpell;
-import cz.autoclient.event.EventCallback;
 import cz.autoclient.settings.Input;
 import cz.autoclient.settings.SettingsInputVerifier;
 import cz.autoclient.settings.ValueChanged;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JSpinner;
 import javax.swing.JComponent;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  *
  * @author Jakub
  */
-public class InputSummonerSpell implements Input {
-  private final ButtonSummonerSpellMaster field;
+public class InputJSpinner implements Input {
+  private final JSpinner field;
   private final ValueChanged onchange;
   private SettingsInputVerifier<Object> verifier;
   
 
   //Indicate whether events have been bound to input
   private boolean bound = false;
-  public InputSummonerSpell(ButtonSummonerSpellMaster input, ValueChanged onchange, SettingsInputVerifier<Object> subverifier) {
+  public InputJSpinner(JSpinner input, ValueChanged onchange, SettingsInputVerifier<Object> subverifier) {
     field = input;
     this.onchange = onchange;
     verifier = subverifier;
@@ -38,17 +41,42 @@ public class InputSummonerSpell implements Input {
     bound = true;
     //Internal verifier
     final SettingsInputVerifier<Object> verif = this.verifier;
-
-    field.addEventListener("change", new EventCallback() {
+    //Event to be called if new value is valid
+    final ValueChanged onchange = this.onchange;
+    //Only works when you leave the field
+    /*field.setInputVerifier(new InputVerifier() {
       @Override
-      public void event(Object... parameters) {
-        if(parameters[0] instanceof SummonerSpell || parameters[0]==null) {
-          //SummonerSpell value = (SummonerSpell)parameters[0];  
-          onchange.changed(parameters[0]);
+      public boolean verify(JComponent in) {
+        if(verif==null) {
+          onchange.changed((Boolean)((JSpinner)in).isSelected());
+          return true;
+        }
+        //If verification fails, return false and ignore the value
+        if(!verif.verify(in))
+          return false;
+        //Sucessful verification means we get the value and update it
+        onchange.changed(verif.value(in));
+        return true;
+      }
+    });*/
+    
+    field.addChangeListener(
+      new ChangeListener() {
+        @Override
+        public void stateChanged(ChangeEvent e) {
+          if(verif==null) {
+            onchange.changed((Number)field.getValue());
+            return;
+          }
+          //If verification fails, return false and ignore the value
+          if(!verif.verify(field))
+            return;
+          //Sucessful verification means we get the value and update it
+          onchange.changed(verif.value(field));
         }
       }
-    });
-
+    );
+    
   }
   @Override
   public JComponent getField() {
@@ -58,7 +86,7 @@ public class InputSummonerSpell implements Input {
   @Override
   public Object getValue() {
     if(verifier==null)
-      return field.getSpell();
+      return field.getValue();
     else if(validate())
       return verifier.value(field);
     else
@@ -66,15 +94,8 @@ public class InputSummonerSpell implements Input {
   }
   @Override
   public void setValue(Object value) {
-    //tmp variable
-    SummonerSpell val;
-    if(value instanceof SummonerSpell)
-      field.setSpell((SummonerSpell) value);
-    else if(value instanceof String && (val = SummonerSpell.byName((String)value))!=null) {
-      field.setSpell(val);
-    }
-    else 
-      field.setSpell(null);
+    if(value instanceof Number) 
+      field.setValue(value);
   }
 
   @Override
@@ -104,4 +125,7 @@ public class InputSummonerSpell implements Input {
     bound = false;
     field.setInputVerifier(null);
   }
+
+
+  
 }

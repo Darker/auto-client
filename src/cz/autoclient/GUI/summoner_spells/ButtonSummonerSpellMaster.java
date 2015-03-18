@@ -56,7 +56,7 @@ public class ButtonSummonerSpellMaster extends ButtonSummonerSpell implements Ev
    * @param value The new spell used by this button
    */
   public void setSpellSafe(SummonerSpell value) {
-    if(twin!=null) {
+    if(twin!=null && value!=null) {
       SummonerSpell twin_value = twin.getSpell();
       if(twin_value==value) {
         twin.setSpell(spell); 
@@ -72,6 +72,12 @@ public class ButtonSummonerSpellMaster extends ButtonSummonerSpell implements Ev
   public void setSpell(SummonerSpell value) {
     super.setSpell(value);
     dispatchEvent("change", value);
+  }
+  /** Silent set spell. Does not trigger the event.
+   * @param value the new value just as in the original function
+   */
+  public void setSpellSilent(SummonerSpell value) {
+    super.setSpell(value);
   }
   
   private void showPopup() {

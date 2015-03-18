@@ -1,5 +1,8 @@
 package cz.autoclient.GUI;
 
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.swing.AutoCompleteSupport;
+import cz.autoclient.GUI.champion.ConfigurationManager;
 import cz.autoclient.GUI.tabs.TabbedWindow;
 import cz.autoclient.GUI.tabs.FieldDef;
 import cz.autoclient.GUI.notifications.Notification;
@@ -8,6 +11,7 @@ import cz.autoclient.GUI.notifications.Notifications;
 import cz.autoclient.GUI.summoner_spells.ButtonSummonerSpellMaster;
 import cz.autoclient.GUI.tabs.MultiFieldDef;
 import cz.autoclient.Main;
+import cz.autoclient.PVP_net.Constants;
 import cz.autoclient.PVP_net.Setnames;
 import cz.autoclient.PVP_net.SummonerSpell;
 import cz.autoclient.settings.Settings;
@@ -15,6 +19,7 @@ import cz.autoclient.dllinjection.DLLInjector;
 import cz.autoclient.dllinjection.InjectionResult;
 import java.awt.AWTException;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dialog;
 import java.awt.Dimension;
@@ -38,6 +43,7 @@ import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -50,6 +56,7 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.LayoutStyle;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingUtilities;
  
  public class Gui
    extends JFrame
@@ -77,6 +84,7 @@ import javax.swing.SpinnerNumberModel;
     * Is set to true if the AutoClient anti-annoyance functions are in place
     */
    private boolean anoyance_disabled = false;
+  private ConfigurationManager champ_config;
    
    
    public String[] getSelectedMode()
@@ -98,8 +106,7 @@ import javax.swing.SpinnerNumberModel;
      initMenu();
      initComponents();
      
-     //Display settings:
-     settings.displaySettingsOnBoundFields();
+
      //There is many factors that determine whether the icon will be shown
      // it must be both supported and enabled
      // 
@@ -108,8 +115,16 @@ import javax.swing.SpinnerNumberModel;
      
      guard = new StateGuard(this.ac, this);
      
-     //notifications.notification(Notification.Def.GROUP_JOINED);
-     
+     //After creating the GUI, render the settings
+     SwingUtilities.invokeLater(new Runnable()
+     {
+       @Override
+       public void run()
+       {
+        //Display settings:
+        settings.displaySettingsOnBoundFields();
+       }
+     });
      //notification(Notification.Def.TB_GAME_CAN_START);
      this.addWindowListener(new WindowAdapter()
      {
@@ -556,23 +571,48 @@ import javax.swing.SpinnerNumberModel;
         win.newTab("Blind pick lobby", "Lobby where lane is called and champion is picked");
         
         
-        FieldDef field = new FieldDef("Champion:", "Enter champion name", "champ_name");
+        MultiFieldDef multifield = new MultiFieldDef("Champion:");
+        JComboBox champion = new JComboBox();        
+        champion.enableInputMethods(true);
+        champion.setEditable(true);
+        initChampField(champion);
+        
+        multifield.addField(/*new JTextField()*/champion, settings, Setnames.BLIND_CHAMP_NAME);
+        
+        champ_config = new ConfigurationManager(champion, settings);
+        multifield.addField(champ_config.save, null, null);
+        multifield.addField(champ_config.delete, null, null);
+    
+        
+        multifield.packWeighted(0.5,0,0);
+        win.addLine(multifield);
+        
+        FieldDef field = new FieldDef("Call text:", "Enter text to say after entering lobby.", Setnames.BLIND_CALL_TEXT.name);
         field.addField(new JTextField());
         field.attachToSettings(settings);
         win.addLine(field);
         
-        field = new FieldDef("Call text:", "Enter text to say after entering lobby.", "call_text");
-        field.addField(new JTextField());
-        field.attachToSettings(settings);
-        win.addLine(field);
-        
-        MultiFieldDef multifield = new MultiFieldDef("Summoner spells:");
+        multifield = new MultiFieldDef("Summoner spells:");
         ButtonSummonerSpellMaster spell1 = new ButtonSummonerSpellMaster(SummonerSpell.Ignite, settings);
         ButtonSummonerSpellMaster spell2 = new ButtonSummonerSpellMaster(SummonerSpell.Ignite, settings); 
         spell1.setTwin(spell2);
         multifield.addField(spell1, settings, Setnames.BLIND_SUMMONER1);
         multifield.addField(spell2, settings, Setnames.BLIND_SUMMONER2);
         win.addLine(multifield);
+        
+        field = new FieldDef("Mastery page (0=ignore):", "Index of mastery page to be selected:", Setnames.BLIND_MASTERY.name);
+        JSpinner masteries = new JSpinner();
+        masteries.setModel(new SpinnerNumberModel(0.0, 0.0, 20.0, 1.0));
+        field.addField(masteries);
+        field.attachToSettings(settings);
+        win.addLine(field);
+        
+        field = new FieldDef("Rune page (0=ignore):", "Index of rune page to be selected:", Setnames.BLIND_RUNE.name);
+        JSpinner runes = new JSpinner();
+        runes.setModel(new SpinnerNumberModel(0.0, 0.0, 20.0, 1.0));
+        field.addField(runes);
+        field.attachToSettings(settings);
+        win.addLine(field);
 
         
         win.newTab("Team builder", "All teambuilder automation");
@@ -606,48 +646,20 @@ import javax.swing.SpinnerNumberModel;
         win.addLine(field);
 
         pane.add(win.container);
-        win.close();
-        /*
-        JTabbedPane tabbedPane = new JTabbedPane();
-        ImageIcon icon = null;
-        JPanel panel1 = new JPanel(false);
-        
-        GroupLayout gLayout = new GroupLayout(panel1);
-        panel1.setLayout(gLayout);
-        ParallelGroup hGroup = gLayout.createParallelGroup();
-        gLayout.setHorizontalGroup(hGroup);
-        SequentialGroup vGroup = gLayout.createSequentialGroup();
-        gLayout.setVerticalGroup(vGroup);
-
-        JPanel line = newLine();
-        line.add(makeTextPanel());
-        JTextField field = new JTextField();
-        field.setToolTipText("Enter champion name");
-        line.add(field);
-        
-        endLine(hGroup, vGroup, line);
-        
-        line = newLine();
-        line.add(makeTextPanel("Call text:"));
-        field = new JTextField();
-        field.setToolTipText("Enter text to say after entering lobby.");
-        line.add(field);
-        
-        endLine(hGroup, vGroup, line);
-        
-        //field.setBounds(100, 151, 68, field.getPreferredSize().height);
-        
-        tabbedPane.addTab("Blind pick lobby", icon, (JComponent)panel1,
-                "Lobby where lane is called and champion is picked");
-        tabbedPane.setMnemonicAt(0, KeyEvent.VK_B);
-
-        
-        tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-        //Add the tabbed pane to this panel.
-        pane.add(tabbedPane);
-        */
-        //The following line enables to use scrolling tabs.
-        
+        win.close();        
+   }
+   protected void initChampField(final JComboBox field) {
+     SwingUtilities.invokeLater(new Runnable()
+     {
+       @Override
+       public void run()
+       {
+         //Object[] elements = new Object[] {"Cat", "Dog", "Lion", "Mouse"};
+         String[] elements = Constants.lolData.getChampions().allNames();
+         //System.out.println("Champions loaded: "+elements.length);
+         AutoCompleteSupport.install(field, GlazedLists.eventListOf((Object[])elements));
+       }
+     });
    }
    protected static JPanel newLine() {
      JPanel line = new JPanel();
@@ -681,6 +693,33 @@ import javax.swing.SpinnerNumberModel;
         //panel.add(filler);
         //return panel;
     }
+    private static void debugInspectElement(Container c, int recur) {
+      Component[] comps = c.getComponents();
+      if(recur==0)
+        System.out.println("Inspecting "+c.getClass().getName()+": ");
+      for(Component comp:comps) {
+        System.out.print("  ");
+        if(recur>0) {
+          if(comp==comps[comps.length-1])
+            System.out.print("╚");
+          else
+            System.out.print("╠");
+          for(int i=0;i<recur; i++)
+            System.out.print(" ");
+        }
+        System.out.println(comp.getClass().getName());
+        if(comp instanceof Container) {
+          //System.out.println(" );
+          debugInspectElement((Container)comp, recur+2); 
+        }
+      }
+    }
+    public static void debugInspectElement(Container c) {
+      debugInspectElement(c, 0);
+    }
+    
+    
+    
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     // Generated using JFormDesigner Evaluation license - Jakub Mareda
     private JMenuBar menuBar1;

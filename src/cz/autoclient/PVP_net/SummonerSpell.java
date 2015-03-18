@@ -23,7 +23,7 @@ public enum SummonerSpell {
   Flash("Flash", "SummonerFlash.png"),
   Ghost("Ghost", "SummonerHaste.png"),
   Clarity("Clarity", "SummonerMana.png"),
-  Garrison("Garrison", "OdinGarrison.png"),
+  /*Garrison("Garrison", "OdinGarrison.png"),*/
   Smite("Smite", "SummonerSmite.png"),
   Teleport("Teleport", "SummonerTeleport.png"),
   ;

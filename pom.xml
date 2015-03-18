@@ -5,7 +5,7 @@
 
   <groupId>cz.autoclient</groupId>
   <artifactId>autoclient</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>2.0</version>
   <packaging>jar</packaging>
 
   <properties>
@@ -32,9 +32,47 @@
           <target>1.8</target>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.2-beta-4</version>
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+          <archive>
+            <manifest>
+              <mainClass>cz.autoclient.Main</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <classpathPrefix>src/</classpathPrefix>
+              <mainClass>cz.autoclient.Main</mainClass>
+            </manifest>
+          </archive>
+          <outputDirectory>${project.build.directory}/</outputDirectory>
+        </configuration>
+      </plugin>
     </plugins>
+
   </build>
-    
   <name>Auto Client</name>
   <url>http://maven.apache.org</url>
 
@@ -61,6 +99,16 @@
       <groupId>net.sf.opencsv</groupId>
       <artifactId>opencsv</artifactId>
       <version>2.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20090211</version>
+    </dependency>
+    <dependency>
+      <groupId>net.java.dev.glazedlists</groupId>
+      <artifactId>glazedlists_java15</artifactId>
+      <version>1.9.1</version>
     </dependency>
   </dependencies>
 </project>

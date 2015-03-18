@@ -29,8 +29,21 @@ public enum PixelOffset {
     Blind_SumSpell1 (0.4979340371027294D, 0.6088404678228453D),
     
     Blind_SumSpell2 (0.5421364731680097D, 0.6117873045064729D),
-    //Fortunatelly, this one works for both spell dialogs
+    //Fortunatelly, this one works for both spell 1 and spell 2 dialogs
     Blind_SumSpell_CloseDialog (0.650720718284894D, 0.20448429853646063D),
+    //Button for editing masteries in lobby
+    Masteries_Edit(0.40952916497216874D, 0.659577173474749D),
+    //The first mastery tab offset
+    Masteries_Big_First (0.29229661714686006D, 0.22546405904893319D),
+    //Spaces between mastery tabs
+    Masteries_Big_Spaces(0.0258D, 0D),
+    //Close button for the mastery editor
+    Masteries_Big_Close (0.9092088770144683D, 0.2199774437191499D),
+    //Open dropdown menu with runes
+    Blind_Runes_Dropdown (0.3163196802258168D, 0.6194746841507007D),
+    //First item in the rune dropdown menu
+    Blind_Runes_Dropdown_First (0.25385971622052933D, 0.6502242027276122D),
+    Blind_Runes_Dropdown_Spaces (0D, 0.0275D),
     
     MatchFound(0.495117D, 0.515625D, new Color(255, 255, 255)),
     AcceptButton(0.39004512649241546D, 0.5599898226129755D, new Color(25, 60, 101, 1)),

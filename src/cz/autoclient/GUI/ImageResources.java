@@ -6,10 +6,13 @@
 
 package cz.autoclient.GUI;
 
+import java.awt.BorderLayout;
 import java.awt.Image;
 import java.net.URL;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
 
 /**
  * Enum of resources used for GUI. These resources are packed in .jar and are for internal use.
@@ -18,9 +21,11 @@ import javax.swing.ImageIcon;
  */
 public enum ImageResources {
   ICON("icon.png"),
-
-  
+  SUMMONER_SPELLS_NOSPELL("nospell.png"),
+  SAVE("save.png"),
+  DELETE("delete.png"),
   ;
+  
   //So according to [this guy](http://stackoverflow.com/a/17007533/607407) I
   //  should enter classpath beginning with slash to make sure it's absolute path from
   //  the root of my .jar
@@ -75,6 +80,12 @@ public enum ImageResources {
       }
     }
     return icon;
+  }
+  public void addFlexibleIcon(JButton target) {
+    JLabel l = new JLabel();
+    l.setIcon(getIcon());
+    target.setLayout(new BorderLayout());
+    target.add(l);
   }
   /** Loads, or just retrieves from cache, the image.
    *  @return Image (not necesarily a BufferedImage) or null on failure

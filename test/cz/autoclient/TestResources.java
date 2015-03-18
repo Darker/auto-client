@@ -7,7 +7,10 @@
 package cz.autoclient;
 
 import cz.autoclient.GUI.ImageResources;
+import cz.autoclient.GUI.LazyLoadedRemoteImage;
+import cz.autoclient.autoclick.comvis.DebugDrawing;
 import java.awt.Image;
+import java.net.URL;
 import javax.swing.ImageIcon;
 
 /**
@@ -39,5 +42,13 @@ public class TestResources {
      if(!ok) {
        throw new Exception("There were broken resources! Remove them from enum or add them to .jar.");
      }
+     
+     //Check remote image
+     /*LazyLoadedRemoteImage im = new LazyLoadedRemoteImage("test.png", new URL("http://cs.ceskestar.xx/images/inzerat/42_0.png"));
+     if(im.getImage()!=null)
+       DebugDrawing.displayImage(im.getImage());
+     else
+       System.out.println("Remote image not available.");*/
+     
    }
 }

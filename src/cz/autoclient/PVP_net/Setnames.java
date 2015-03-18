@@ -20,8 +20,13 @@ public enum Setnames {
   TRAY_ICON_ENABLED("tray_enabled", true),
   TRAY_ICON_MINIMIZE("tray_minimize", false),
   
-  BLIND_SUMMONER1("sumspell1", SummonerSpell.Teleport),
-  BLIND_SUMMONER2("sumspell2", SummonerSpell.Flash),
+  BLIND_SUMMONER1("sumspell1", null),
+  BLIND_SUMMONER2("sumspell2", null),
+  BLIND_CHAMP_NAME(""),
+  BLIND_CALL_TEXT(""),
+  
+  BLIND_MASTERY("masterypg", 0),
+  BLIND_RUNE("runepg", 0),
   /**NOTFICATONS**/
   NOTIF_MENU_TB_GROUP_JOINED(false),
   
@@ -30,6 +35,8 @@ public enum Setnames {
   NOTIF_MENU_TB_PLAYER_JOINED(false),
   
   NOTIF_MENU_BLIND_IN_LOBBY(false),
+
+  
   
   
   ;
@@ -43,6 +50,10 @@ public enum Setnames {
   Setnames(Object d) {
     name = this.name().toLowerCase();
     default_val = d;    
+  }
+  Setnames() {
+    name = this.name().toLowerCase();
+    default_val = null;    
   }
   public static void setDefaults(Settings settings) {
     for(Setnames set : Setnames.values()) {

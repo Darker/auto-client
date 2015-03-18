@@ -20,4 +20,7 @@ public class InputDef {
     setting = s;
     field = f;
   }
+  public JComponent getField() {
+    return field;
+  }
 }

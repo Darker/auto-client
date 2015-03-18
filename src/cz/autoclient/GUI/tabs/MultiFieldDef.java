@@ -8,7 +8,12 @@ package cz.autoclient.GUI.tabs;
 
 import cz.autoclient.PVP_net.Setnames;
 import cz.autoclient.settings.Settings;
+import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.util.ArrayList;
+import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
@@ -23,9 +28,11 @@ public class MultiFieldDef extends FieldDef {
   public MultiFieldDef(String label) {
     super(label, null, null);
     container.add(group);
+    group.setBorder(BorderFactory.createLineBorder(Color.BLUE));
   }
   
   @Override
+  @Deprecated
   public void addField(JComponent field) {
     throw new UnsupportedOperationException("Not supported for multiple inputs.");
   }
@@ -33,9 +40,43 @@ public class MultiFieldDef extends FieldDef {
     InputDef f = new InputDef(field, set);
     if(tooltip!=null && !tooltip.isEmpty())
       field.setToolTipText(tooltip);
-    set.bindToInput(setting_name.name, field);
+    if(set!=null)
+      set.bindToInput(setting_name.name, field);
     group.add(field);
     fields.add(f);
+  }
+  public void packEven() {
+    
+    //Change the layout so that all elements are evenly distributed
+    group.setLayout(new GridLayout(1, fields.size()));
+  }
+  public void packWeighted(double... weights) {
+    GridBagLayout lay = new GridBagLayout();
+    
+    for(int i=0,l=fields.size(); i<l; i++) {
+      JComponent field = fields.get(i).getField();
+      
+      GridBagConstraints c = new GridBagConstraints();
+      //System.out.println("Settings for "+field.getClass().getName()+" at "+i+":");
+      if(weights.length>i && weights[i]>0) {
+        c.weightx = weights[i]; 
+        c.fill = GridBagConstraints.HORIZONTAL;
+        //System.out.println("      fill = GridBagConstraints.HORIZONTAL");
+        //System.out.println("      weightx = "+weights[i]);
+      }
+      else {
+        c.weightx = 0;
+        c.fill = GridBagConstraints.NONE;
+        
+        //System.out.println("      fill = GridBagConstraints.NONE");
+        //System.out.println("      weightx = 0.0");
+      }
+      c.gridx = i;
+      //System.out.println("      gridx = "+i);
+      
+      lay.setConstraints(field, c);
+    }
+    group.setLayout(lay);
   }
   public void addField(JComponent field, Settings set, Setnames setting_name) {
     addField(field, set, setting_name, null);

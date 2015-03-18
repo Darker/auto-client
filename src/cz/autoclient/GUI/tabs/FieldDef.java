@@ -31,7 +31,7 @@ public class FieldDef {
     label_text = lab;
     container = new JPanel();
     container.setLayout(new GridLayout(1, 1));
-    container.setBorder(BorderFactory.createLineBorder(Color.red));
+    //container.setBorder(BorderFactory.createLineBorder(Color.red));
 
     label = new JLabel(lab);
     label.setHorizontalAlignment(JLabel.CENTER);
@@ -51,4 +51,6 @@ public class FieldDef {
       set.bindToInput(setting_name, field, true);
     }   
   }
+
+
 }

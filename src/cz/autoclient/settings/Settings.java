@@ -19,6 +19,7 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
@@ -49,8 +50,8 @@ public class Settings implements java.io.Serializable {
   public int getInt(String name, final int defaultValue) {
     if(settings.containsKey(name)) {
       Object value = settings.get(name);
-      if(value instanceof Integer) {
-        return (Integer)value; 
+      if(value instanceof Number) {
+        return ((Number)value).intValue();
       }
     }
     return defaultValue;
@@ -104,6 +105,28 @@ public class Settings implements java.io.Serializable {
     }
     return true;
   } 
+  /** 
+   * Check if setting with given name and type exists. This can be used to prevent 
+   * type conversion errors when invalid type is supplied.
+   * @param name setting name
+   * @param type required type of the value
+   * @return true if value exists, is not null and represents given type
+   */
+  public boolean exists(String name, Class type) {
+    Object val = settings.get(name);
+    if(val!=null) {
+      return type.isInstance(val);
+    }
+    return false;
+  }
+  /** 
+   * Check if setting with given name exists.
+   * @param name setting name
+   * @return true if value exists, 
+   */
+  public boolean exists(String name) {
+    return settings.containsKey(name);
+  }
   /** Set setting to any object value. 
    * @param name setting name
    * @param value setting value
@@ -111,14 +134,16 @@ public class Settings implements java.io.Serializable {
    */
   public Object setSetting(String name, Object value) {
     Object old = settings.get(name);
-    if(old!=null && old.equals(value)) {
+    if(old==value || old!=null&&old.equals(value)) {
       return old;   
     }
     changed = true;
     settings.put(name, value);
-    System.out.println("AutomatSettings[\""+name+"\"] = "+value.toString());
+    System.out.println("AutomatSettings[\""+name+"\"] = "+(value!=null?value.toString():"null"));
+    //Thread.dumpStack();
     return old;
   }
+  
   /** Set default value of that setting. This must be set every time after loading settings (it's not saved).
    * In fact, this function just adds setting if setting is not set. This also does not trigger
    * changed flag - when you save settings, these changes will not force save, but will be saved if
@@ -132,7 +157,7 @@ public class Settings implements java.io.Serializable {
       return false;
     }
     settings.put(name, value);
-    System.out.println("default AutomatSettings[\""+name+"\"] = "+value.toString());
+    System.out.println("default AutomatSettings[\""+name+"\"] = "+(value!=null?value.toString():"null"));
     return true;
   }
   /** Automatically update setting value as user types.
@@ -177,7 +202,7 @@ public class Settings implements java.io.Serializable {
     );}
     //Silent fail
     catch(NoSuchMethodException e) {
-      System.err.println("No handler for this input field!");
+      System.err.println("No handler for "+input.getClass().getName());
       return;
     };
     
@@ -191,6 +216,22 @@ public class Settings implements java.io.Serializable {
         in.setVerifier(null);
         in.bind();
       }
+    }
+  }
+  public void copyTo(Settings target) {
+    if(target==this)
+      throw new IllegalArgumentException("Can't copy to self. Also, it makes no sense!");
+    for (Map.Entry pair : settings.entrySet()) {
+      target.setSetting((String)pair.getKey(), pair.getValue());
+    }
+  }
+  public void copyTo(Settings target, List<String> filter) {
+    if(target==this)
+      throw new IllegalArgumentException("Can't copy to self. Also, it makes no sense!");
+    for (Map.Entry pair : settings.entrySet()) {
+      String name = (String)pair.getKey();
+      if(filter.contains(name))
+        target.setSetting(name, pair.getValue());
     }
   }
   public void bindToInput(final String setting_name, final JComponent input, final boolean auto_update) {
@@ -208,6 +249,18 @@ public class Settings implements java.io.Serializable {
         Input input = (Input)pair.getValue();
         //System.out.println("   value='"+settings.get(name)+"'");
         input.setValue(settings.get(name));
+      }
+    }
+  }
+  /**
+   * Filtered display of settings. Use this if you just changed known set of settings and you want to
+   * update displayed values.
+   * @param filter names of settings to be updated
+   */
+  public void displaySettingsOnBoundFields(List<String> filter) {
+    for(String name: filter) {
+      if(boundInputs.containsKey(name)&&settings.containsKey(name)) {
+        boundInputs.get(name).setValue(settings.get(name));
       }
     }
   }
@@ -249,5 +302,13 @@ public class Settings implements java.io.Serializable {
       this.settings.putAll(set);
     }
     catch(ClassNotFoundException e) {};  
+  }
+  
+  /**Custom serialization - only write the hash map, everything else is irrelevant **/
+  private void writeObject(ObjectOutputStream oos) throws IOException {
+    oos.writeObject(settings);
+  }
+  private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+    settings = (HashMap<String, Object>)ois.readObject(); 
   }
 }

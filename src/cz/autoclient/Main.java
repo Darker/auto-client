@@ -13,6 +13,8 @@ import java.awt.Image;
 import java.io.IOException;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComboBox;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import sirius.constants.IMKConsts;
@@ -92,6 +94,7 @@ import sirius.constants.IWMConsts;
            UIManager.setLookAndFeel(alloyLnF);
          }
          catch (UnsupportedLookAndFeelException ex) {}*/
+         
          gui.setDefaultCloseOperation(3);
          gui.setVisible(true);
        }
@@ -104,6 +107,8 @@ import sirius.constants.IWMConsts;
      InputHandlers.register(InputJTextField.class,  JTextField.class);
      InputHandlers.register(InputJCheckBox.class,  JCheckBox.class);
      InputHandlers.register(InputJCheckBoxMenuItem.class,  JCheckBoxMenuItem.class);
+     InputHandlers.register(InputJSpinner.class,  JSpinner.class);
+     InputHandlers.register(InputJComboBox.class,  JComboBox.class);
      //My GUI handler for the Summoner Spell buttons
      InputHandlers.register(InputSummonerSpell.class,  ButtonSummonerSpellMaster.class);
      //Start program

@@ -6,6 +6,7 @@
 
 package cz.autoclient.GUI.summoner_spells;
 
+import cz.autoclient.GUI.ImageResources;
 import cz.autoclient.PVP_net.SummonerSpell;
 import java.awt.event.ActionEvent;
 import javax.swing.BorderFactory;
@@ -18,19 +19,23 @@ import javax.swing.border.Border;
  */
 public class ButtonSummonerSpell extends JButton {
   
-  private static final Border emptyBorder = BorderFactory.createEmptyBorder();
+  public static final Border emptyBorder = BorderFactory.createEmptyBorder();
   protected SummonerSpell spell;
 
   
   public ButtonSummonerSpell(SummonerSpell spell) {
-    super(spell.getIcon());
+    super(spell!=null?spell.getIcon():ImageResources.SUMMONER_SPELLS_NOSPELL.getIcon());
+      
     this.spell = spell;
     this.setBorder(emptyBorder);
     this.setContentAreaFilled(false);
   }
   
   public void setSpell(SummonerSpell spell) {
-    this.setIcon(spell.getIcon());
+    if(spell!=null)
+      this.setIcon(spell.getIcon());
+    else 
+      this.setIcon(ImageResources.SUMMONER_SPELLS_NOSPELL.getIcon());
     this.spell = spell; 
   }
   public SummonerSpell getSpell() {

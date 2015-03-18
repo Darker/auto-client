@@ -106,13 +106,13 @@ import java.util.ArrayList;
    private void handleMatch()
      throws InterruptedException, APIError
    {
-     Rect cRec = window.getRect();
+     /*Rect cRec = window.getRect();
      int height = cRec.height;
-     int width = cRec.width;
+     int width = cRec.width;*/
      long accepted = -1;
      //If the accepted mode is team builder
      boolean tb = false;
-     long time = 0;
+     long time;
      
      //If the play button is there, do not do anything
      boolean play_button = true;
@@ -275,14 +275,14 @@ import java.util.ArrayList;
        gui.notification(Notification.Def.BLIND_TEAM_JOINED);
      boolean ARAM = false;
      //this.gui.getProgressBar1().setValue(70);
-     if(settings.getStringEquivalent("call_text").length()>0) {
+     if(settings.getStringEquivalent(Setnames.BLIND_CALL_TEXT.name).length()>0) {
        sleep(this.gui.getDelay());
        click(PixelOffset.LobbyChat);
        click(PixelOffset.LobbyChat);
        sleep(10L);
        click(PixelOffset.LobbyChat);
-       System.out.println("Typping '"+settings.getString("call_text")+"' in chat window.");
-       window.typeString(settings.getString("call_text"));
+       System.out.println("Typping '"+settings.getString(Setnames.BLIND_CALL_TEXT.name)+"' in chat window.");
+       window.typeString(settings.getString(Setnames.BLIND_CALL_TEXT.name));
        Enter();
        //if(true){ return; }
        //System.out.println(this.gui.chatTextField().getText());
@@ -292,11 +292,11 @@ import java.util.ArrayList;
        System.out.println("No chat message to type, skipping this step.");
      //this.gui.getProgressBar1().setValue(85);
 
-     if (settings.getStringEquivalent("champ_name").length() > 1)
+     if (settings.getStringEquivalent(Setnames.BLIND_CHAMP_NAME.name).length() > 1)
      {
        click(PixelOffset.Blind_SearchChampion);
        sleep(20L);
-       window.typeString(settings.getStringEquivalent("champ_name"));
+       window.typeString(settings.getStringEquivalent(Setnames.BLIND_CHAMP_NAME.name));
        sleep(200L);
        click(PixelOffset.LobbyChampionSlot1);
 
@@ -365,9 +365,21 @@ import java.util.ArrayList;
        }
      }
      //Set masteries:
-     
-     
-
+     int mastery = settings.getInt(Setnames.BLIND_MASTERY.name, 0);
+     if(mastery>0) {
+       click(PixelOffset.Masteries_Edit);
+       sleep(100);
+       click(PixelOffset.Masteries_Big_First.offset(PixelOffset.Masteries_Big_Spaces.x*(mastery-1), 0));
+       sleep(100);
+       click(PixelOffset.Masteries_Big_Close);
+     }
+     //Set runes:
+     int rune = settings.getInt(Setnames.BLIND_RUNE.name, 0);
+     if(rune>0) {
+       click(PixelOffset.Blind_Runes_Dropdown);
+       sleep(800);
+       click(PixelOffset.Blind_Runes_Dropdown_First.offset(0, PixelOffset.Blind_Runes_Dropdown_Spaces.y*(rune-1)));
+     }
    }
    
    public boolean teamBuilder_lobby() throws InterruptedException {
@@ -386,9 +398,9 @@ import java.util.ArrayList;
      }
      gui.setTitle("Waiting for ready button. (Team builder)");
      /*click(PixelOffset.TeamBuilder_Chat);
-     if(settings.getStringEquivalent("call_text").length()>0) {
+     if(settings.getStringEquivalent(Setnames.BLIND_CALL_TEXT.name).length()>0) {
        sleep(50L);
-       window.typeString(settings.getStringEquivalent("call_text"));
+       window.typeString(settings.getStringEquivalent(Setnames.BLIND_CALL_TEXT.name));
        Enter();
      }
      sleep(50L);*/
@@ -414,7 +426,7 @@ import java.util.ArrayList;
            sleep(500L);
            /*click(PixelOffset.PlayButton_cancel);
            sleep(800L);
-           return false*/;
+           return false;*/
            
            if(checkPoint(PixelOffset.TeamBuilder_MatchFound, 2) && checkPoint(PixelOffset.TeamBuilder_MatchFound2, 2)) {
              System.out.println("Match found!");
@@ -667,73 +679,6 @@ import java.util.ArrayList;
    {
      this.window.keyDown(13);
      this.window.keyUp(13);
-   }
-   
-   private void SelectItem(String item)
-     throws InterruptedException,APIError
-   {
-     Rect cRec = window.getRect();
-     double height = cRec.width;
-     double width = cRec.height;
-     //this.gui.getProgressBar1().setValue(this.gui.getProgressBar1().getValue() + 3);
-     switch (item)
-     {
-     case "chat": 
-       click(PixelOffset.LobbyChat);
-       break;
-     case "search": 
-       this.click(PixelOffset.Blind_SearchChampion);
-       break;
-     case "slot1": 
-       window.click((int)(width * 0.253125D), (int)(height * 0.2575D));
-       break;
-     case "play": 
-       this.window.click((int)(width * 0.5D), (int)(height * 0.051562D));
-       break;
-     case "match": 
-       this.window.click((int)(width * 0.592773D), (int)(height * 0.8875D));
-       break;
-     case "pvp": 
-       this.window.click((int)(width * 0.2568D), (int)(height * 0.15D));
-       break;
-     case "ai": 
-       this.window.click((int)(width * 0.2568D), (int)(height * 0.2175D));
-       break;
-     case "classic": 
-       this.window.click((int)(width * 0.373047D), (int)(height * 0.18125D));
-       break;
-     case "home": 
-       this.window.click((int)(width * 0.067383D), (int)(height * 0.051562D));
-       break;
-     case "aram": 
-       this.window.click((int)(width * 0.373047D), (int)(height * 0.26875D));
-       break;
-     case "dominion": 
-       this.window.click((int)(width * 0.373047D), (int)(height * 0.225D));
-       break;
-     case "accept": 
-       this.click(PixelOffset.AcceptButton);
-       break;
-     case "again": 
-       this.window.click((int)(width * 0.875D), (int)(height * 0.92D));
-       break;
-     case "3v3": 
-       this.window.click((int)(width * 0.539062D), (int)(height * 0.25125D));
-       break;
-     case "5v5": 
-       this.window.click((int)(width * 0.5625D), (int)(height * 0.195312D));
-       break;
-     case "blind": 
-       this.window.click((int)(width * 0.725586D), (int)(height * 0.2525D));
-       break;
-     case "intermediate": 
-       this.window.click((int)(width * 0.725586D), (int)(height * 0.22375D));
-       break;
-     case "draft": 
-       this.window.click((int)(width * 0.725586D), (int)(height * 0.3025D));
-       break;
-     }
-     sleep(75L);
    }
    private void click(PixelOffset pos) {
      try {
