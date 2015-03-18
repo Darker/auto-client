@@ -35,6 +35,8 @@ auto calls your lane and automaticaly accepts players in team-builder
 **Ordered by descending probability of being ever implemented**
 
  - ~~Disable/enable start button depending on whether the launcher is available or not~~ **- done**
+ - Sound notifications
+ - More flexible solution for dll injection
  - Auto-requeue
  - ~~Automatically pick runes, masteries and summoner spells for given champion and map~~ **- done**
  - Automatically fetch runes and masteries names and replace the indexes with them
