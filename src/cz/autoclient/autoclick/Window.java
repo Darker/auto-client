@@ -11,6 +11,7 @@ package cz.autoclient.autoclick;
 import cz.autoclient.autoclick.exceptions.APIError;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.util.List;
 
 /**
  *
@@ -36,6 +37,31 @@ public interface Window {
   
   
   public void mouseOver(int x, int y);
+  
+  /**Default methodss **/
+  
+  public default void slowClick(int x, int y, int delay) {
+    mouseDown(x,y);
+    try {
+      Thread.sleep(delay);
+    }
+    catch(InterruptedException e) {};
+    mouseUp(x,y);
+  }
+  /**
+   * Clicks at the top left corner of the rectangle. Use Rect.middle() to click in the middle.
+   * @param window
+   * @param pos rectangle to click on.
+   */
+  public default void slowClick(Rect pos, int delay) {
+    slowClick(pos.left, pos.top, delay);
+  }
+  
+  public default void click(Rect pos) {
+    //Rect rect = getRect();
+    click(pos.left, pos.top);
+  }
+  
   /** UNIVERSAL EVENT SENDING FUNC **/
   //Not used now. It would encourage to make non-cross platform applications
   
@@ -101,6 +127,30 @@ public interface Window {
   public BufferedImage screenshotCrop(int x, int y, int w, int h) throws APIError;
   public Rect getRect() throws APIError;
   
+  /** WINDOW PROPERTIES **/
+  public String getTitle();
+  
+  /** OTHER WINDOWS **/
+  
+  /**
+   * Generates list of child windows of this window. Child windows
+   * are for example dialogs.
+   * @return List of Window objects.
+   */
+  public List<Window> getChildWindows();
+  
+  public default void everyChild(WindowCallback c, boolean recursive) {
+    List<Window> children = getChildWindows();
+    for(Window child:children) {
+      c.run(child);
+      if(recursive)
+        child.everyChild(c, true);
+    }
+  }
+  
+  public default void everyChild(WindowCallback c) {
+    everyChild(c, true);
+  }
   /** STATIC METHODS FOR GETTING WINDOWS **/
   //Will not declare abstract static methods now for backwards compatibility
   //Once it is a standard, this will be redesigned

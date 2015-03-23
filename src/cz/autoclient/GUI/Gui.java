@@ -340,120 +340,133 @@ import javax.swing.SwingUtilities;
    }
    private void initMenu() {
      menuBar1 = new JMenuBar();
-     //======== menuBar1 ========
-      {
+     //======== menu1 ========
+     {
+       menu1 = new JMenu();
 
-          //======== menu1 ========
-          {
-              menu1 = new JMenu();
-              
-              menu1.setText("Settings");
+       menu1.setText("Settings");
 
-              //---- menuItem1 ----
-              menuItem1 = new JMenuItem();
-              menuItem1.setText("Set Chat Delay");
-              menuItem1.addActionListener(new ActionListener() {
-                  @Override
-                  public void actionPerformed(ActionEvent e) {
-                      DelaySelected(e);
-                  }
-              });
-              menu1.add(menuItem1);
+       //---- menuItem1 ----
+       menuItem1 = new JMenuItem();
+       menuItem1.setText("Set Chat Delay");
+       menuItem1.addActionListener(new ActionListener() {
+           @Override
+           public void actionPerformed(ActionEvent e) {
+               DelaySelected(e);
+           }
+       });
+       menu1.add(menuItem1);
 
-              final JMenuItem menuItem2 = new JMenuItem();
-              menuItem2.addActionListener(new ActionListener() {
-                  @Override
-                  public void actionPerformed(ActionEvent e) {
-                      menuItem2.setEnabled(false);
-                      menuItem2.setText("Injecting...");
+       final JMenuItem menuItem2 = new JMenuItem();
+       menuItem2.addActionListener(new ActionListener() {
+           @Override
+           public void actionPerformed(ActionEvent e) {
+               menuItem2.setEnabled(false);
+               menuItem2.setText("Injecting...");
 
-                      DLLInjector.inject(new InjectionResult() {
-                          @Override
-                          public void run(boolean result, String fail_reason) {
-                             if(result)
-                               menuItem2.setText(Text.MENU_DLL_LOADED.text);
-                             else {
-                               menuItem2.setEnabled(true);
-                               menuItem2.setText("Injection failed: "+fail_reason);
-                             }
-                          }
-                      });
-                  }
-              });
-              menu1.add(menuItem2);
-              menu_dll_additions = menuItem2;
-              //Update dll aditions status
-              displayDllStatus(false);
-
-              manu_threadcontrol_pretend_accepted = new JMenuItem();
-              manu_threadcontrol_pretend_accepted.setText("Detect game lobby");
-              manu_threadcontrol_pretend_accepted.setToolTipText("If the lobby has been already invoked, skip accept phase.");
-              manu_threadcontrol_pretend_accepted.setEnabled(false);
-              manu_threadcontrol_pretend_accepted.addActionListener(new ActionListener() {
-                  @Override
-                  public void actionPerformed(ActionEvent e) {
-                    Gui.this.ac.ac.simulateAccepted();
-                  }
-              });
-              menu1.add(manu_threadcontrol_pretend_accepted);
-          }
-          menuBar1.add(menu1);
-          //======== menu2 ========
-          {
-              JMenu menu = new JMenu();
-              menu.setText("Display");
-              
-              menu_tray_enabled = new JCheckBoxMenuItem("Show in system tray");
-              menu_tray_enabled.addActionListener(new ActionListener() {
-                  @Override
-                  public void actionPerformed(ActionEvent e) {
-                    boolean enabled = menu_tray_enabled.getState();
-                    boolean minimize = menu_tray_minimize.getState();
-                    if(!enabled)
-                      menu_tray_minimize.setState(false);
-                    displayTrayEnabled(enabled, minimize, true);
-                    if(!enabled && minimize) {
-                      //Send event to inform other checkbox that it's been disabled
-                      e.setSource(menu_tray_minimize);
-                      for(ActionListener a: menu_tray_minimize.getActionListeners()) {
-                        a.actionPerformed(e);
+               DLLInjector.inject(new InjectionResult() {
+                   @Override
+                   public void run(boolean result, String fail_reason) {
+                      if(result)
+                        menuItem2.setText(Text.MENU_DLL_LOADED.text);
+                      else {
+                        menuItem2.setEnabled(true);
+                        menuItem2.setText("Injection failed: "+fail_reason);
                       }
-                    }
-                  }
-              });
-              menu.add(menu_tray_enabled);
-              settings.bindToInput(Setnames.TRAY_ICON_ENABLED.name,menu_tray_enabled, true);
-              
-              
-              menu_tray_minimize = new JCheckBoxMenuItem("Minimize to tray");
-              menu_tray_minimize.setToolTipText("When minimized, the application will disappear from task bar.");
-              menu_tray_minimize.addActionListener(new ActionListener() {
-                  @Override
-                  public void actionPerformed(ActionEvent e) {
-                    displayTrayEnabled(menu_tray_enabled.getState(), menu_tray_minimize.getState(), true);
-                  }
-              });
-              menu.add(menu_tray_minimize);
-              settings.bindToInput(Setnames.TRAY_ICON_MINIMIZE.name, menu_tray_minimize, true);
-              //Add this menu to the bar
-              menuBar1.add(menu);
-          }
-          //======== Notifications menu ========
-          initTrayIcon() ;
-          {
-              JMenu menu = new JMenu();
-              menu.setText("Notifications");
-              Notification.Def.createAll(notifications, NotificationTrayBaloon.class, settings, tray_icon);
-              //======== Tray Notifications menu ========
-              {
-                JMenu tray_notifs = new JMenu();
-                tray_notifs.setText("Tray bubble");
-                notifications.addToJMenu(tray_notifs, NotificationTrayBaloon.class);
-                tray_notifs.setEnabled(canTray());
-                menu.add(tray_notifs);
-              }
-              menuBar1.add(menu);
-          }
+                   }
+               });
+           }
+       });
+       menu1.add(menuItem2);
+       menu_dll_additions = menuItem2;
+       //Update dll aditions status
+       displayDllStatus(false);
+
+       manu_threadcontrol_pretend_accepted = new JMenuItem();
+       manu_threadcontrol_pretend_accepted.setText("Detect game lobby");
+       manu_threadcontrol_pretend_accepted.setToolTipText("If the lobby has been already invoked, skip accept phase.");
+       manu_threadcontrol_pretend_accepted.setEnabled(false);
+       manu_threadcontrol_pretend_accepted.addActionListener(new ActionListener() {
+           @Override
+           public void actionPerformed(ActionEvent e) {
+             Gui.this.ac.ac.simulateAccepted();
+           }
+       });
+       menu1.add(manu_threadcontrol_pretend_accepted);
+     }
+     menuBar1.add(menu1);
+     //======== menu2 ========
+     {
+       JMenu menu = new JMenu();
+       menu.setText("Display");
+
+       menu_tray_enabled = new JCheckBoxMenuItem("Show in system tray");
+       menu_tray_enabled.addActionListener(new ActionListener() {
+           @Override
+           public void actionPerformed(ActionEvent e) {
+             boolean enabled = menu_tray_enabled.getState();
+             boolean minimize = menu_tray_minimize.getState();
+             if(!enabled)
+               menu_tray_minimize.setState(false);
+             displayTrayEnabled(enabled, minimize, true);
+             if(!enabled && minimize) {
+               //Send event to inform other checkbox that it's been disabled
+               e.setSource(menu_tray_minimize);
+               for(ActionListener a: menu_tray_minimize.getActionListeners()) {
+                 a.actionPerformed(e);
+               }
+             }
+           }
+       });
+       menu.add(menu_tray_enabled);
+       settings.bindToInput(Setnames.TRAY_ICON_ENABLED.name,menu_tray_enabled, true);
+
+
+       menu_tray_minimize = new JCheckBoxMenuItem("Minimize to tray");
+       menu_tray_minimize.setToolTipText("When minimized, the application will disappear from task bar.");
+       menu_tray_minimize.addActionListener(new ActionListener() {
+           @Override
+           public void actionPerformed(ActionEvent e) {
+             displayTrayEnabled(menu_tray_enabled.getState(), menu_tray_minimize.getState(), true);
+           }
+       });
+       menu.add(menu_tray_minimize);
+       settings.bindToInput(Setnames.TRAY_ICON_MINIMIZE.name, menu_tray_minimize, true);
+       //Add this menu to the bar
+       menuBar1.add(menu);
+     }
+     //======== Notifications menu ========
+     initTrayIcon() ;
+     {
+       JMenu menu = new JMenu();
+       menu.setText("Notifications");
+       Notification.Def.createAll(notifications, NotificationTrayBaloon.class, settings, tray_icon);
+       //======== Tray Notifications menu ========
+       {
+         JMenu tray_notifs = new JMenu();
+         tray_notifs.setText("Tray bubble");
+         notifications.addToJMenu(tray_notifs, NotificationTrayBaloon.class);
+         tray_notifs.setEnabled(canTray());
+         menu.add(tray_notifs);
+       }
+       menuBar1.add(menu);
+     }
+     //======== Passive automation menu ========
+     if(false)
+     {
+        JMenu menu = new JMenu();
+        menu.setText("Passive Automation");
+        JMenuItem disableAll = new JMenuItem("Disable all");
+        
+        //======== Auto Launch ========
+        {
+          JMenu auto_launch = new JMenu();
+          auto_launch.setText("Auto launch");
+          
+          
+          menu.add(auto_launch);
+        }
+        menuBar1.add(menu);
       }
       setJMenuBar(menuBar1);
 
@@ -471,7 +484,7 @@ import javax.swing.SwingUtilities;
           }
       });
       menuBar1.add(toggleButton1);
-   }
+    }
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         // Generated using JFormDesigner Evaluation license - Jakub Mareda

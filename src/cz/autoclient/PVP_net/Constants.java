@@ -17,8 +17,14 @@ import java.io.File;
  */
 public class Constants {
   public static final String window_title = "PVP.net Client";
+  public static final String window_title_part = "PVP.net";
   public static final String process_name = "LolClient.exe";
   public static final String test_process_name = "Annoyance.exe";
+  
+  
+  public static final String patcher_window_title = "LoL Patcher";
+  
+  public static final String game_window_title = "League of Legends";
   public static final Rect normalSize = new Rect(0, 1152, 720, 0);
   public static final Rect smallestSize = new Rect(0, 1024, 640, 0);
   public static final Version lolData = new Version(DataLoader.Realm.NA, new File("LOLResources"), true);

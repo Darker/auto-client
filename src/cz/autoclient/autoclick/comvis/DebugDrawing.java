@@ -8,9 +8,11 @@ package cz.autoclient.autoclick.comvis;
 
 import cz.autoclient.autoclick.Rect;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
@@ -20,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -73,6 +76,14 @@ public class DebugDrawing {
      graph.drawLine(x, y-size, x, y+size);
      graph.dispose();
    }
+   public static void drawPointOrRect(BufferedImage target, Rect rect, Color color) {
+     if(rect.width>0 || rect.height>0) {
+       drawResult(target, rect, color);
+     }
+     else {
+       drawPoint(target, rect.left, rect.top, 5, color); 
+     }
+   }
    
    public static BufferedImage loadFromPath(String path) {
      File img = new File(path);
@@ -98,12 +109,16 @@ public class DebugDrawing {
    public static void displayImage(Image image, String message) {
      JLabel label = new JLabel(new ImageIcon(image));
 
-     JPanel panel = new JPanel();
+     /*JPanel panel = new JPanel();
      panel.add(label);
 
-     JScrollPane scrollPane = new JScrollPane(panel);
-     
-     JOptionPane.showMessageDialog(null, scrollPane, message, javax.swing.JOptionPane.INFORMATION_MESSAGE);
+     JScrollPane scrollPane = new JScrollPane(panel);*/
+     JFrame frame = new JFrame();
+     Container main = frame.getContentPane();
+     main.setLayout(new GridLayout(1,1));
+     main.add(label);
+     frame.setVisible(true);
+     //JOptionPane.showMessageDialog(null, scrollPane, message, javax.swing.JOptionPane.INFORMATION_MESSAGE);
    }
    public static void displayImage(Image image) {
      displayImage(image, "Debug");

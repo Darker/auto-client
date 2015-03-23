@@ -2,6 +2,7 @@
 /build/*
 /target/
 *.exe
+/data/*
 /LOLResources/*
 /images/unused/*
 /launcher_screens/*.png

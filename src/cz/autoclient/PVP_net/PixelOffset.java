@@ -2,6 +2,7 @@ package cz.autoclient.PVP_net;
 
 
 import cz.autoclient.autoclick.ColorPixel;
+import cz.autoclient.autoclick.Rect;
 import java.awt.Color;
 
 /*
@@ -15,6 +16,15 @@ import java.awt.Color;
  * @author Jakub
  */
 public enum PixelOffset {
+    /** AFTERMATCH **/
+    //Spell icon
+    AM_SUMMONER_SPELL_COLUMN (0.35283473610583094D, 0.4120435489306124D, new Color(254, 244, 51, 1)),
+    AM_MINION_ICON (0.6334241128680451D, 0.41037795782770337D, new Color(178, 57, 210, 1)),
+    AM_PLAY_AGAIN (0.8717328986112957D, 0.9039077309871311D, new Color(45, 101, 170, 1)),
+    AM_CHAT_FIELD (0.7429692805080877D, 0.8178090789717791D, new Color(255, 255, 255, 1)),
+    AM_SEND_CHAT (0.9687860734502807D, 0.814734127114088D, new Color(35, 74, 122, 1)),
+    
+    /** MAIN SCREEN **/
     PlayButton_red(0.5282632272641906D, 0.05335365853658536D, new Color(216, 38, 20, 1)),
     PlayButton_cancel(0.5587665322620996D, 0.06253177233521276D, new Color(205, 165, 102, 1)),
     PlayButton_SearchingForGame_Approx (0.42531457289624774D, 0.06710726787193565D, new Color(255, 255, 255, 1)),
@@ -82,6 +92,9 @@ public enum PixelOffset {
     InviteChat (0.4950512695332547D, 0.9208058039244397D, new Color(255, 255, 255, 1)),
     //Start button for a game with invited players
     InviteStart (0.7237508300449225D, 0.9146547965815433D, new Color(204, 110, 22, 1)),
+    //Patcher's orange launch button
+    Patcher_Launch (0.49697311457957116D, 0.06457398901151389D,new Color(138, 41, 8, 1)),
+    Patcher_SetServer (0.9572550031723815D, 0.08763612794419742D)
     ;
     
     
@@ -120,5 +133,8 @@ public enum PixelOffset {
                            +color.getBlue()+", "
                            +color.getAlpha()
                          +")":"")+")";
+    }
+    public Rect toRect(Rect win_dimensions) {
+      return new Rect((int)(x*(double)win_dimensions.width), (int)(y*(double)win_dimensions.height));
     }
 }

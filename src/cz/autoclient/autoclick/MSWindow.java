@@ -16,9 +16,12 @@ import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinGDI;
 import com.sun.jna.platform.win32.WinNT;
 import com.sun.jna.platform.win32.WinUser;
+import com.sun.jna.ptr.IntByReference;
 import sirius.classes.Common;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 import sirius.core.GDI32Ext;
 import sirius.core.User32Ext;
 import sirius.core.types.WinDefExt;
@@ -29,7 +32,7 @@ import sirius.core.types.WinDefExt;
  */
 public class MSWindow extends Common implements Window  {
   private final long hwnd_id;
-  private final WinDef.HWND hwnd;
+  public final WinDef.HWND hwnd;
   public MSWindow(long id) {
     hwnd_id = id;
     hwnd = longToHwnd(id);
@@ -318,8 +321,8 @@ public class MSWindow extends Common implements Window  {
    //And what is the last parameter?!
    GDIExt.BitBlt(hdcMemDC, 0, 0, (int)bounds.width, (int)bounds.height, hdcWindow, 0, 0, SRCCOPY);
    //Select and then delete? Why did we even bother?
-   GDI.SelectObject(hdcMemDC, hOld);
-   GDI.DeleteDC(hdcMemDC);
+   GDIExt.SelectObject(hdcMemDC, hOld);
+   GDIExt.DeleteDC(hdcMemDC);
    
    WinGDI.BITMAPINFO bmi = new WinGDI.BITMAPINFO();
    bmi.bmiHeader.biWidth = (int)bounds.width;
@@ -360,8 +363,8 @@ public class MSWindow extends Common implements Window  {
    WinNT.HANDLE hOld = GDI32.INSTANCE.SelectObject(hdcMemDC, hBitmap);
    //getGDI32();
    GDIExt.BitBlt(hdcMemDC, x, y, w, h, hdcWindow, 0, 0, SRCCOPY);
-   GDI.SelectObject(hdcMemDC, hOld);
-   GDI.DeleteDC(hdcMemDC);
+   GDIExt.SelectObject(hdcMemDC, hOld);
+   GDIExt.DeleteDC(hdcMemDC);
    WinGDI.BITMAPINFO bmi = new WinGDI.BITMAPINFO();
    bmi.bmiHeader.biWidth = w;
    bmi.bmiHeader.biHeight = (-h);
@@ -408,10 +411,9 @@ public class MSWindow extends Common implements Window  {
   private void sendMsg(Messages msg, int wparam, int lparam) {
     sendMsg(msg.code, wparam, lparam);
   }
-  protected static User32Ext UserExt = User32Ext.INSTANCE;
-  protected static GDI32 GDI = GDI32.INSTANCE;
-  protected static GDI32Ext GDIExt = GDI32Ext.INSTANCE;
-  public static MSWindow windowFromName(final String name,final boolean strict) {
+  public static User32Ext UserExt = User32Ext.INSTANCE;
+  public static GDI32Ext GDIExt = GDI32Ext.INSTANCE;
+  public static MSWindow windowFromName(String name,final boolean strict) {
     if(strict) {
       WinDef.HWND hwnd = UserExt.FindWindow(null, name);
       if(hwnd==null)
@@ -420,10 +422,11 @@ public class MSWindow extends Common implements Window  {
         return new MSWindow(hwnd);
     }
     else {
+      final String name_small = name.toLowerCase();
      //I'm not entirely sure why we use array here, but
      //my guess is, that normal non-final variable would not be
      //accessible in the callback...
-     final long[] WindowID = { 0L };
+     final WinDef.HWND[] WindowID = { null };
      UserExt.EnumWindows(new WinUser.WNDENUMPROC()
      {
        int count = 0;
@@ -440,36 +443,134 @@ public class MSWindow extends Common implements Window  {
          
          UserExt.GetWindowText(handle, buf, length);
          String text = String.valueOf(buf).trim();
-         //System.out.println("Trying window '"+text+"'.");
+         
          //Now we try to match the given name in the title we obtained
          boolean result;
          //Do not trust empty strings
          if(text.isEmpty())
            result = false;
          else {
-           if(strict)
-             result=text.equals(name);
-           else
-             result=text.contains(name);
+           //System.out.println("Trying window '"+text+"'.");
+           result=text.toLowerCase().contains(name_small);
          }
          //If the window didn't match, return true to continue enumeration 
          if (!result) {
            return true;
          }
          //And if we gained one, put it in our array
-         WindowID[0] = handle.hashCode();
+         WindowID[0] = handle;
          //Returning false ends the enumeration
          return false;
        }
      }, null);
      
      
-     return WindowID[0]==0L?null:new MSWindow(WindowID[0]);
+     return WindowID[0]==null?null:new MSWindow(WindowID[0]);
     }
   }
+  
+  public static List<Window> windows(WindowValidator valid) {
+   
+     //I'm not entirely sure why we use array here, but
+     //my guess is, that normal non-final variable would not be
+     //accessible in the callback...
+     final List<Window> windows = new ArrayList<>();
+     UserExt.EnumWindows(new WinUser.WNDENUMPROC()
+     {
+       @Override
+       public boolean callback(WinDef.HWND handle, Pointer arg1)
+       {
+         //Skip non window objects, like browser tabs
+         if(!UserExt.IsWindow(handle))
+           return true;
+         Window w = new MSWindow(handle);
+         if(valid==null || valid.isValid(w)) {
+           windows.add(w);
+         }
+         //User32 provides us with window title
+         return true;
+       }
+     }, null);
+     return windows;   
+  }
+  @Deprecated
+  public static MSWindow windowFromPID(final int required_pid) {
+    if(true)
+      throw new UnsupportedOperationException("Can't get window from ID - the function doesn't work.");
+    //GetWindowThreadProcessId(WinDef.HWND hwnd, IntByReference ibr)
+     final WinDef.HWND[] WindowID = { null };
+     UserExt.EnumWindows(new WinUser.WNDENUMPROC()
+     {
+       int count = 0;
+       
+       @Override
+       public boolean callback(WinDef.HWND handle, Pointer arg1)
+       {
+         //Skip non window objects, like browser tabs
+         if(!UserExt.IsWindow(handle))
+           return true;
+         //User32 provides us with window title
+        
+         
+         int pid = UserExt.GetWindowThreadProcessId(handle, new IntByReference(0));
+         System.out.println(getWindowTitle(handle)+" : "+pid);
+         if(pid==required_pid) {
+           //And if we gained one, put it in our array
+           WindowID[0] = handle;
+           //Returning false ends the enumeration
+           return false;
+         }
+         return true;
+       }
+     }, null);
+     
+     
+     return WindowID[0]==null?null:new MSWindow(WindowID[0]);
+    }
+  
+  
+    public static String getWindowTitle(WinDef.HWND handle) {
+      //User32 provides us with window title
+      int length = UserExt.GetWindowTextLength(handle) + 1;
+      char[] buf = new char[length];
 
+      UserExt.GetWindowText(handle, buf, length);
+      return String.valueOf(buf).trim();
+    }
+    public static String getWindowClass(WinDef.HWND handle) {
+      //User32 provides us with window title
+      char[] buf = new char[255];
 
+      UserExt.GetClassName(handle, buf, 255);
+      return String.valueOf(buf).trim();
+    }
 
+  @Override
+  public String getTitle() {
+    return getWindowTitle(hwnd);
+  }
 
-    
+  @Override
+  public List<Window> getChildWindows() {
+    //GetWindowThreadProcessId(WinDef.HWND hwnd, IntByReference ibr)
+     final ArrayList<Window> list= new ArrayList<>();
+     UserExt.EnumChildWindows(hwnd, new WinUser.WNDENUMPROC()
+     {
+       @Override
+       public boolean callback(WinDef.HWND handle, Pointer arg1)
+       {
+         //Skip non window objects, like browser tabs
+         if(!UserExt.IsWindow(handle))
+           return true;
+         //User32 provides us with window title
+        
+         
+         list.add(new MSWindow(handle));
+         return true;
+       }
+     }, null);
+     
+     
+     return list;
+  }
 }

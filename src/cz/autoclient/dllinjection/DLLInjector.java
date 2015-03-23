@@ -23,6 +23,12 @@ public class DLLInjector {
   public static final String DLL_64 = "StopThat_64.dll";
   public static final String INJECTOR_64 = "RemoteDLLInjector64.exe";
   
+  /** How should the command be sent to the target injector program.
+   *  Known variables:
+   *    $PID - process id of the target process
+   *    $DLL_PATH - absolute path to the DLL file
+   *    $PNAME - name of the process
+   */
   private static String command_line_pattern = "$PID \"$DLL_PATH\"";
   private static String directory = "./stop_flashing";
   private static int version = 32;

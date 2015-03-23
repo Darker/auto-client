@@ -1,25 +1,30 @@
 package cz.autoclient;
 
-import cz.autoclient.PVP_net.Constants;
+import com.sun.jna.NativeLong;
+import com.sun.jna.Structure;
+import com.sun.jna.platform.win32.BaseTSD.ULONG_PTR;
+import com.sun.jna.platform.win32.WinDef.HWND;
+import com.sun.jna.platform.win32.WinDef.LRESULT;
+import com.sun.jna.platform.win32.WinDef.POINT;
+import com.sun.jna.platform.win32.WinDef.WPARAM;
+import com.sun.jna.platform.win32.WinUser;
+import com.sun.jna.platform.win32.WinUser.HOOKPROC;
 import cz.autoclient.autoclick.MSWindow;
 import cz.autoclient.autoclick.MouseButton;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.Window;
+import cz.autoclient.autoclick.comvis.DebugDrawing;
 import cz.autoclient.autoclick.comvis.ScreenWatcher;
 import cz.autoclient.autoclick.exceptions.APIError;
 import java.awt.Color;
-import java.awt.FlowLayout;
 import java.awt.Graphics2D;
-import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -32,7 +37,7 @@ import javax.swing.JFrame;
  * @author Jakub
  */
 public class WindowTester {
-   public static void main(String[] args) throws APIError
+   public static void main(String[] args) throws Exception
    {
     /*JComboBox<String> combo = new JComboBox<>(new String[] {"bar", "item"});
     combo.setEditable(true);
@@ -49,15 +54,89 @@ public class WindowTester {
     frame.pack();
     frame.setVisible(true);*/
      
-     
-     MSWindow test = MSWindow.windowFromName("PVP.net", false);
+     // "LoL Patcher" "firefox"  
+     MSWindow test = MSWindow.windowFromName("League of Legends", false);
      System.out.println(test==null?"Fail.":"Success");
      if(test!=null) {
        //test.typeString("PoJus.'\\#`&[]*-č");
-       Rect rect = test.getRect();
+       /*Rect rect = test.getRect();
        System.out.println(rect);
        System.out.println("Ratio = " + rect.right + "/" + Constants.smallestSize.right + " = " + Constants.sizeCoeficient(test.getRect()));
-    
+     */
+       //test.slowClick(288, 114, 100);
+       wintree(test);
+       while(true) {
+         System.out.println("Taking screenshot:");
+         DebugDrawing.displayImage(test.screenshot());
+         Thread.sleep(2000);
+       }
+       /*WinUser.HOOKPROC hkprc = new WinUser.HOOKPROC() {
+         
+       };
+       test.UserExt.SetWindowsHookEx(7, hkprc, null, test.UserExt.GetWindowThreadProcessId(test.hwnd, null));*/
+     
+     }
+     //TestGetByPID(6568);
+   }
+   private static void wintree(Window window, int indent) {
+     for(int i=0;i<indent; i++)
+       System.out.print(" ");
+     String title = window.getTitle();
+     String w_class = MSWindow.getWindowClass(((MSWindow)window).hwnd);
+     System.out.println(title+ " ["+w_class+"]");
+     
+     if(w_class.contains("Widget")) {
+       window.slowClick(502, 26, 80);
+     }
+     List<Window> windows = window.getChildWindows();
+     for(Window child:windows) {
+       wintree(child, indent+2);
+     }
+   }
+   private static void wintree(Window window) {
+     wintree(window, 0);
+   }
+   private interface LowLevelMouseProc extends HOOKPROC {
+     LRESULT callback(int nCode, WPARAM wParam, MOUSEHOOKSTRUCT lParam);
+   }
+   public class Point extends Structure {
+
+     @Override
+     protected List getFieldOrder() {
+       throw new UnsupportedOperationException("Not supported yet.");
+     }
+     public class ByReference extends Point implements
+       Structure.ByReference {
+     };
+
+     public NativeLong x;
+     public NativeLong y;
+   }
+
+   public static class MOUSEHOOKSTRUCT extends Structure {
+     @Override
+     protected List getFieldOrder() {
+       throw new UnsupportedOperationException("Not supported yet.");
+     }
+     public static class ByReference extends MOUSEHOOKSTRUCT implements
+       Structure.ByReference {
+     };
+
+     public POINT pt;
+     public HWND hwnd;
+     public int wHitTestCode;
+     public ULONG_PTR dwExtraInfo;
+   }     
+           
+   public static void TestGetByPID(int pid) throws Exception {
+     MSWindow test = MSWindow.windowFromPID(pid);
+     System.out.println(test==null?"Fail.":"Success");
+     if(test!=null) {
+       //test.typeString("PoJus.'\\#`&[]*-č");
+       if(test.isMinimized())
+         test.maximize();
+       else
+         test.minimize(true);
      }
    }
    public static void TestScreenshots(Window test) {

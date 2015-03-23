@@ -42,7 +42,7 @@ public class StateGuard extends Pauseable {
     while(!isInterrupted()||true) {
       //Check whether window is running
       if(win==null) {
-        win = MSWindow.windowFromName(Constants.window_title, false);
+        win = MSWindow.windowFromName(Constants.window_title_part, false);
         //if(win==null)
         //  System.out.println("Window from name failed...");
       }

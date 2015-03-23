@@ -48,7 +48,7 @@ import java.util.ArrayList;
    {
      System.out.println("Automation started!");
      //Get PVP.net window
-     window = MSWindow.windowFromName("PVP.net", false);
+     window = MSWindow.windowFromName(Constants.window_title_part, false);
      if(window==null) {
        System.err.println("No PVP.net window found!");
        end();
@@ -140,8 +140,8 @@ import java.util.ArrayList;
              )
              {
                System.out.println("Lobby detected. Picking champion and lane.");
-               normal_lobby();
-               break;
+               if(normal_lobby())
+                 break;
              }
              //Here detect teambuilder lobby
              else if(checkPoint(PixelOffset.TeamBuilder_CaptainIcon, 5)) {
@@ -224,7 +224,7 @@ import java.util.ArrayList;
                
              }
              //If play button wasn't there and sudenly appeared, the program shall quit
-             else if(checkPoint(PixelOffset.PlayButton_red,15) && !play_button) {
+             else if(checkPoint(PixelOffset.PlayButton_red, 15) && !play_button) {
                System.out.println("The play button is red. Something must've gone wrong. Aborting.");
                end();
                break;
@@ -270,7 +270,7 @@ import java.util.ArrayList;
    public synchronized void simulateAccepted() {
      pretendAccepted = true;     
    }
-   public void normal_lobby() throws InterruptedException, APIError {
+   public boolean normal_lobby() throws InterruptedException, APIError {
      if(settings.getBoolean(Setnames.NOTIF_MENU_BLIND_IN_LOBBY.name, false))
        gui.notification(Notification.Def.BLIND_TEAM_JOINED);
      boolean ARAM = false;
@@ -380,6 +380,17 @@ import java.util.ArrayList;
        sleep(800);
        click(PixelOffset.Blind_Runes_Dropdown_First.offset(0, PixelOffset.Blind_Runes_Dropdown_Spaces.y*(rune-1)));
      }
+     //Wait and return false if lobby ends unexpectedly
+     while(checkPoint(PixelOffset.LobbyChat, 1)
+                && checkPoint(PixelOffset.LobbyChat2, 1)
+                && checkPoint(PixelOffset.Blind_SearchChampion, 1)) {
+       System.out.println("NORMAL LOBBY: Waiting for a game to start."); 
+       if(MSWindow.windowFromName(Constants.game_window_title, false)!=null)
+         return true;
+       sleep(1000);
+     }
+     System.out.println("NORMAL LOBBY: Game did not start, waiting for another game."); 
+     return false;
    }
    
    public boolean teamBuilder_lobby() throws InterruptedException {
