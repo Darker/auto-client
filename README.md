@@ -9,9 +9,9 @@
  - **Works when client is behind another window**
  - **Doesn't move your mouse**
 
-##[Download](https://github.com/Darker/auto-client/raw/master/release/AutoClient_v2.zip)
+##[Download](https://github.com/Darker/auto-client/raw/master/release/AutoClient.zip)
  
- - [Latest version](https://github.com/Darker/auto-client/raw/master/release/AutoClient_v2.zip)
+ - [Latest version](https://github.com/Darker/auto-client/raw/master/release/AutoClient.zip)
  - [All versions](https://github.com/Darker/auto-client/tree/master/release)
 
 For detailed information, [please refer to wiki](https://github.com/Darker/auto-client/wiki). On this page I'll
