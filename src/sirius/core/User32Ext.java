@@ -13,6 +13,8 @@
    
    public abstract boolean GetClientRect(WinDef.HWND paramHWND, WinDef.RECT paramRECT);
    
+   //public abstract boolean DeleteObject(WinDef.HGDIOBJ paramRECT);
+   
    public abstract WinDef.HMENU GetMenu(WinDef.HWND paramHWND);
    
    public abstract boolean GetMenuBarInfo(WinDef.HWND paramHWND, long paramLong1, long paramLong2, WinDefExt.MENUBARINFO paramMENUBARINFO);

@@ -30,6 +30,12 @@ public abstract class SettingsInputVerifier<T> extends javax.swing.InputVerifier
        return true; 
      }
   };
+  public void setValue(javax.swing.JComponent comp, Object value) {
+    throw new UnsupportedOperationException("I don't know how to set value to "+comp.getClass().getName()); 
+  }
+  public boolean canSetValue() {
+    return false; 
+  }
   
   public Class getType() {
     return (Class)

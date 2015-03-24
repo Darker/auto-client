@@ -67,8 +67,8 @@ public class WindowTester {
        wintree(test);
        while(true) {
          System.out.println("Taking screenshot:");
-         DebugDrawing.displayImage(test.screenshot());
-         Thread.sleep(2000);
+         DebugDrawing.displayImage(ScreenWatcher.resampleImage(MSWindow.screenshotAll(), 0.8, 0.8));
+         Thread.sleep(4000);
        }
        /*WinUser.HOOKPROC hkprc = new WinUser.HOOKPROC() {
          
@@ -85,9 +85,7 @@ public class WindowTester {
      String w_class = MSWindow.getWindowClass(((MSWindow)window).hwnd);
      System.out.println(title+ " ["+w_class+"]");
      
-     if(w_class.contains("Widget")) {
-       window.slowClick(502, 26, 80);
-     }
+
      List<Window> windows = window.getChildWindows();
      for(Window child:windows) {
        wintree(child, indent+2);

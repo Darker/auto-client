@@ -6,7 +6,6 @@
 
 package cz.autoclient.autoclick.comvis;
 
-import cz.autoclient.autoclick.comvis.ScreenWatcher;
 import java.awt.image.BufferedImage;
 
 /**

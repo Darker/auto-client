@@ -8,6 +8,7 @@ import cz.autoclient.GUI.tabs.FieldDef;
 import cz.autoclient.GUI.notifications.Notification;
 import cz.autoclient.GUI.notifications.NotificationTrayBaloon;
 import cz.autoclient.GUI.notifications.Notifications;
+import cz.autoclient.GUI.passive_automation.PAMenu;
 import cz.autoclient.GUI.summoner_spells.ButtonSummonerSpellMaster;
 import cz.autoclient.GUI.tabs.MultiFieldDef;
 import cz.autoclient.Main;
@@ -17,6 +18,9 @@ import cz.autoclient.PVP_net.SummonerSpell;
 import cz.autoclient.settings.Settings;
 import cz.autoclient.dllinjection.DLLInjector;
 import cz.autoclient.dllinjection.InjectionResult;
+import cz.autoclient.robots.AutoQueueBot;
+import cz.autoclient.robots.LaunchBot;
+import cz.autoclient.robots.RobotManager;
 import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Component;
@@ -80,6 +84,8 @@ import javax.swing.SwingUtilities;
    private boolean tray_added = false;
    private final SystemTray tray;
    
+   RobotManager robots;
+   
    /**
     * Is set to true if the AutoClient anti-annoyance functions are in place
     */
@@ -103,8 +109,11 @@ import javax.swing.SwingUtilities;
        tray = SystemTray.getSystemTray();
      else
        tray = null;
+     
+     robots = new RobotManager(900);
      initMenu();
      initComponents();
+     
      
 
      //There is many factors that determine whether the icon will be shown
@@ -123,6 +132,8 @@ import javax.swing.SwingUtilities;
        {
         //Display settings:
         settings.displaySettingsOnBoundFields();
+        //Start passive automation
+        robots.start();
        }
      });
      //notification(Notification.Def.TB_GAME_CAN_START);
@@ -452,7 +463,7 @@ import javax.swing.SwingUtilities;
        menuBar1.add(menu);
      }
      //======== Passive automation menu ========
-     if(false)
+     //if(false)
      {
         JMenu menu = new JMenu();
         menu.setText("Passive Automation");
@@ -460,11 +471,9 @@ import javax.swing.SwingUtilities;
         
         //======== Auto Launch ========
         {
-          JMenu auto_launch = new JMenu();
-          auto_launch.setText("Auto launch");
-          
-          
-          menu.add(auto_launch);
+          PAMenu auto_launch = new PAMenu(new LaunchBot(), settings, "Auto launch");
+          auto_launch.setRobots(robots);
+          menu.add(auto_launch.root);
         }
         menuBar1.add(menu);
       }

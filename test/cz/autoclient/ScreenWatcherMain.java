@@ -210,13 +210,17 @@ public class ScreenWatcherMain {
      Map<SummonerSpell, Rect> finds = new HashMap<>();
      /** HIDE SOM SPELLS FOR TESTING **/
      SummonerSpell[] hide = {SummonerSpell.Teleport, SummonerSpell.Smite, SummonerSpell.Clarity};
+     //Cache integral image
+     double[][][] iimg = ScreenWatcher.integralImage(screenshot);
+     displayImage(ScreenWatcher.drawIntegralImage(iimg));
+     
      for(SummonerSpell spell : hide) {
        BufferedImage im = spell.image.getCropped(5);
        if(im==null) {
          //System.err.println("["+spell.name+"] NO IMAGE!!!");
          continue;
        }
-       Rect pos = ScreenWatcher.findByAvgColor(im, screenshot, 0.005f, true);
+       Rect pos = ScreenWatcher.findByAvgColor(im, iimg, 0.005f, true);
        if(pos!=null) {
           //System.out.println("["+spell.name+"] Found object: "+pos);
           filledRect(screenshot, pos, Color.BLACK);
@@ -233,7 +237,7 @@ public class ScreenWatcherMain {
        }
        //displayImage(im);
        
-       Rect pos = ScreenWatcher.findByAvgColor(im, screenshot, 0.0001f, true);
+       Rect pos = ScreenWatcher.findByAvgColor(im, iimg, 0.0001f, true);
        if(pos!=null) {
           System.out.println("["+spell.name+"] Found object: "+pos);
           drawResult(screenshot, pos, Color.RED);

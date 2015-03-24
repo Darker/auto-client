@@ -11,9 +11,11 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
@@ -21,12 +23,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 
 /**
  *
@@ -106,8 +104,8 @@ public class DebugDrawing {
      }
      return true;
    }
-   public static void displayImage(Image image, String message) {
-     JLabel label = new JLabel(new ImageIcon(image));
+   public static void displayImage(final Image image, String message) throws InterruptedException {
+     
 
      /*JPanel panel = new JPanel();
      panel.add(label);
@@ -115,12 +113,55 @@ public class DebugDrawing {
      JScrollPane scrollPane = new JScrollPane(panel);*/
      JFrame frame = new JFrame();
      Container main = frame.getContentPane();
-     main.setLayout(new GridLayout(1,1));
-     main.add(label);
+     //main.setLayout(new GridLayout(1,1));
+     /*JLabel label = new JLabel(new ImageIcon(image));
+     JPanel panel = new JPanel();
+     panel.add(label);*/
+     JPanel panel = new JPanel() {
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            g.drawImage(image, 0, 0, null);
+        }
+     };
+     
+     main.add(panel);
+     //System.out.println(image.getWidth(null)+", "+image.getHeight(null));
+     //frame.pack();
+     frame.setTitle(message);
+     frame.setSize(image.getWidth(null), image.getHeight(null));
+     //frame.revalidate();
      frame.setVisible(true);
+     final Thread t = Thread.currentThread();
+     frame.addWindowListener(new WindowListener() {
+       @Override
+       public void windowOpened(WindowEvent e) {}
+       @Override
+       public void windowClosing(WindowEvent e) {
+         synchronized(t) {t.notify();}
+         System.out.println("Closing");}
+       @Override
+       public void windowClosed(WindowEvent e) {
+         System.out.println("Closed");
+         //synchronized(t) {
+           //t.notify();
+         //}
+       }
+       @Override
+       public void windowIconified(WindowEvent e) {}
+       @Override
+       public void windowDeiconified(WindowEvent e) {}
+       @Override
+       public void windowActivated(WindowEvent e) {}
+       @Override
+       public void windowDeactivated(WindowEvent e) {}
+     });
+     synchronized(t) {
+       t.wait();
+     }
      //JOptionPane.showMessageDialog(null, scrollPane, message, javax.swing.JOptionPane.INFORMATION_MESSAGE);
    }
-   public static void displayImage(Image image) {
+   public static void displayImage(Image image) throws InterruptedException {
      displayImage(image, "Debug");
    }
    static BufferedImage cloneImage(BufferedImage bi) {

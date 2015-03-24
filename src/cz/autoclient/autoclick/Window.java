@@ -40,12 +40,11 @@ public interface Window {
   
   /**Default methodss **/
   
-  public default void slowClick(int x, int y, int delay) {
+  public default void slowClick(int x, int y, int delay) throws InterruptedException {
     mouseDown(x,y);
-    try {
-      Thread.sleep(delay);
-    }
-    catch(InterruptedException e) {};
+  
+    Thread.sleep(delay);
+
     mouseUp(x,y);
   }
   /**
@@ -53,7 +52,7 @@ public interface Window {
    * @param window
    * @param pos rectangle to click on.
    */
-  public default void slowClick(Rect pos, int delay) {
+  public default void slowClick(Rect pos, int delay) throws InterruptedException {
     slowClick(pos.left, pos.top, delay);
   }
   

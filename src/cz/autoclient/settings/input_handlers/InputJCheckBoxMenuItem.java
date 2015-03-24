@@ -75,10 +75,15 @@ public class InputJCheckBoxMenuItem implements Input {
   }
   @Override
   public void setValue(Object value) {
-    if(value instanceof Boolean) 
-      field.setState((Boolean) value);
-    else
-      field.setState(value!=null);
+    if(verifier==null || !verifier.canSetValue()) {
+      if(value instanceof Boolean) 
+        field.setState((Boolean) value);
+      else
+        field.setState(value!=null);
+    }
+    else {
+      verifier.setValue(field, value);
+    }
   }
 
   @Override

@@ -12,6 +12,7 @@ import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.Window;
 import cz.autoclient.autoclick.exceptions.APIError;
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 
 /**
  *
@@ -87,6 +88,25 @@ public class WindowTools {
             (Math.abs(a.getGreen() - b.getGreen()) < tolerance) &&
             (Math.abs(a.getBlue() -  b.getBlue())  < tolerance);
    }
+   public static boolean checkPoint(BufferedImage img, ColorPixel point, int tolerance) throws APIError {
+     if(point.color==null)
+       return false;
+
+     Color a = getColor(img, (int)point.x, (int)point.y);
+     Color b = point.color;
+
+     return (Math.abs(a.getRed() -   b.getRed())   < tolerance) &&
+            (Math.abs(a.getGreen() - b.getGreen()) < tolerance) &&
+            (Math.abs(a.getBlue() -  b.getBlue())  < tolerance);
+   }
+
+   public static boolean checkPoint(BufferedImage img, PixelOffset point, int tolerance) throws APIError {
+     return checkPoint(img, point.offset(0, 0), tolerance);
+   }
+   public static Color getColor(BufferedImage img, int x, int y) {
+     int pixel = img.getRGB(x, y);
+     return new Color(((pixel&0x00FF0000)>>16),((pixel&0x0000FF00)>>8), (pixel&0x000000FF)); 
+   }
    public static int[] diffPoint(Window window, ColorPixel point) throws APIError {
      if(point.color==null)
        return new int[] {255,255,255};
@@ -98,5 +118,19 @@ public class WindowTools {
      return new int[] {(int)Math.abs(a.getRed() -   b.getRed()),
                        (int)Math.abs(a.getGreen() - b.getGreen()),
                        (int)Math.abs(a.getBlue() -  b.getBlue())};
+   }
+   
+   public static void say(Window w, String text, Rect field) throws APIError, InterruptedException {
+     if(text==null || text.isEmpty())
+       return;
+     w.slowClick(field, 30);
+     w.typeString(text);
+     w.keyDown(13);
+     w.keyUp(13);
+   }
+   public static void say(Window w, String text, PixelOffset field) throws APIError, InterruptedException {
+     if(text==null || text.isEmpty())
+       return;
+     say(w, text, field.toRect(w.getRect()));
    }
 }

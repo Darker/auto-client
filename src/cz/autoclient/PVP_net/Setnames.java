@@ -36,7 +36,8 @@ public enum Setnames {
   
   NOTIF_MENU_BLIND_IN_LOBBY(false),
 
-  
+  AM_SAY(),
+  AUTO_QUEUE_ENABLED(false),
   
   
   ;

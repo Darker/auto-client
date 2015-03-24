@@ -12,6 +12,8 @@ import java.awt.Image;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.awt.image.DataBufferInt;
 import java.util.ArrayList;
 
 /**
@@ -168,6 +170,9 @@ public class ScreenWatcher {
   public static Rect findByAvgColor(BufferedImage image, BufferedImage bigImage, float tolerance, boolean return_nearest) {
     return findByAvgColor(image, bigImage, tolerance, return_nearest, null); 
   } 
+  public static Rect findByAvgColor(BufferedImage image, double[][][] bigIntegralImage, float tolerance, boolean return_nearest) {
+    return findByAvgColor(image, bigIntegralImage, tolerance, return_nearest, null); 
+  } 
   public static Rect findByAvgColor(BufferedImage image, BufferedImage bigImage, float tolerance, boolean return_nearest, ArrayList<RectMatch> matches) {
     double integral_image[][][] = integralImage(bigImage);
     double sum_small[] = colorSum(image);
@@ -279,9 +284,9 @@ public class ScreenWatcher {
    * @return 
    */
   public static BufferedImage resampleImage(BufferedImage original, double xscale, double yscale) {
-    int w = original.getWidth();
-    int h = original.getHeight();
-    BufferedImage after = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+    double w = original.getWidth();
+    double h = original.getHeight();
+    BufferedImage after = new BufferedImage((int)Math.round(w*xscale), (int)Math.round(yscale*h), BufferedImage.TYPE_INT_ARGB);
     AffineTransform at = new AffineTransform();
     at.scale(xscale, yscale);
     System.out.println("["+xscale+", "+yscale+"]");
@@ -318,6 +323,7 @@ public class ScreenWatcher {
      pixels before and itself.
   */
   public static double[][][] integralImage(BufferedImage image) {
+    /* */
     //Cache width and height in variables
     int w = image.getWidth();
     int h = image.getHeight();
@@ -347,6 +353,60 @@ public class ScreenWatcher {
     }
     //Return the array
     return integral_image;
+    /* * /
+    //Cache width and height in variables
+    int w = image.getWidth();
+    int h = image.getHeight();
+    //Create the 2D array as large as the image is
+    //Notice that I use [Y, X] coordinates to comply with the formula
+    double integral_image[][][] = new double[h][w][3];
+    
+    //Variables for the image pixel array looping
+    final int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+    //final byte[] pixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+    //If the image has alpha, there will be 4 elements per pixel
+    final boolean hasAlpha = image.getAlphaRaster() != null;
+    final int pixel_size = hasAlpha?4:3;
+    //If there's alpha it's the first of 4 values, so we skip it
+    final int pixel_offset = hasAlpha?1:0;
+    //Coordinates, will be iterated too
+    //It's faster than calculating them using % and multiplication
+    int x=0;
+    int y=0;
+    
+    //Tmp storage for color
+    int[] color = new int[3];
+    
+    int same = 0;
+    
+    //Loop through pixel array
+    for(int i=0, l=pixels.length; i<l; i+=pixel_size) {
+      
+      //Prepare all the colors in advance
+      //color[2] = ((int) pixels[i + pixel_offset] & 0xff); // blue;
+      //color[1] = ((int) pixels[i + pixel_offset + 1] & 0xff); // green;
+      //color[0] = ((int) pixels[i + pixel_offset + 2] & 0xff); // red;
+      color[0] = (int)(pixels[i + pixel_offset + 2] & 0xFFFFFFFFL); // red;
+      color[1] = (int)(pixels[i + pixel_offset + 1] & 0xFFFFFFFFL); // green;
+      color[2] = (int)(pixels[i + pixel_offset    ] & 0xFFFFFFFFL); // blue;
+
+      //For every color, calculate the integrals
+      for(int j=0; j<3; j++) {
+        //Calculate the integral image field
+        double A = (x > 0 && y > 0) ? integral_image[y-1][x-1][j] : 0;
+        double B = (x > 0) ? integral_image[y][x-1][j] : 0;
+        double C = (y > 0) ? integral_image[y-1][x][j] : 0;
+        integral_image[y][x][j] = - A + B + C + color[j];
+      }
+      //Iterate coordinates
+      x++;
+      if(x>=w) {
+        x=0;
+        y++;        
+      }
+    }
+    //Return the array
+    return integral_image;/* */
   }
   
   public static double[] colorSum(BufferedImage image) {
@@ -438,7 +498,8 @@ public class ScreenWatcher {
     return result;
   }
   /**Draws colored integral image made from the normal image
-   * @param source normal image
+   * @param image
+   * @param max
    * @return rendered integral image **/ 
   public static BufferedImage drawIntegralImage(double[][][] image, double[] max) {
 
@@ -460,6 +521,13 @@ public class ScreenWatcher {
       }
     }
     return result;
+  }
+  public static BufferedImage drawIntegralImage(double[][][] image) {
+    if(image.length==0)
+      throw new IllegalArgumentException("Image height cannot be 0!");
+    if(image[0].length==0)
+      throw new IllegalArgumentException("Image width cannot be 0!");
+    return drawIntegralImage(image, image[image.length-1][image[0].length-1]);
   }
   public static String arrayToStr(int[] ar) {
     return "["+ar[0]+", "+ar[1]+", "+ar[2]+"]";

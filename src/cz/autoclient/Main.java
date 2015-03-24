@@ -5,6 +5,7 @@ import cz.autoclient.GUI.ImageResources;
 import cz.autoclient.GUI.summoner_spells.ButtonSummonerSpellMaster;
 import cz.autoclient.GUI.summoner_spells.InputSummonerSpell;
 import cz.autoclient.PVP_net.Setnames;
+import cz.autoclient.robots.AutoQueueBot;
 import cz.autoclient.robots.LaunchBot;
 import cz.autoclient.robots.Robot;
 import cz.autoclient.robots.RobotManager;
@@ -34,25 +35,15 @@ import sirius.constants.IWMConsts;
    public Gui gui;
    
    private Settings settings;
-   RobotManager robots;
+   
  
    
    public Main()
    {
      //Normal program
      startGUI();
-     //Start passive automation
-     startRobots();
    }
-   public void startRobots() {
-     if(robots!=null)
-       return;
-     /*Robot rur = new LaunchBot();
-     robots = new RobotManager(1000);
-     robots.addRobot(rur);
-     robots.start();*/
-     //rurs.join();
-   }
+
    
    public boolean ToolRunning() {
      return ac != null && ac.isAlive() && !ac.isInterrupted();

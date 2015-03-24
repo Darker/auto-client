@@ -40,7 +40,7 @@ public class LaunchBot extends Robot {
     try {
       while(true) {
         //System.out.println("  - entered the loop");
-        if(t.interrupted())
+        if(Thread.interrupted())
           throw new InterruptedException("Interrupted during main while(true).");
         
         //System.out.println("  - looking for the pixel");
@@ -57,11 +57,14 @@ public class LaunchBot extends Robot {
           window.everyChild(new WindowCallback() {
             @Override
             public void run(Window w) {
-              w.slowClick(pos.left, pos.top, 80);
+              try {
+                w.slowClick(pos.left, pos.top, 80);
+              }
+              catch(InterruptedException e) {
+                t.interrupt();
+              }
             }
           });//slowClick(pos.left, pos.top, 80);
-          
-          window.click(PixelOffset.Patcher_SetServer.toRect(win_rect));
           
           lastError = false;
           overSuccesful = true;
@@ -113,8 +116,8 @@ public class LaunchBot extends Robot {
    * @return true if there's a patcher window that ought to be clicked
    */
   @Override
-  public boolean canRun() {
-    return super.canRun() && (!overSuccesful || fromLastExit()>8000);
+  public boolean canRunEx() {
+    return super.canRunEx() && (!overSuccesful || fromLastExit()>8000);
   }
   
 }

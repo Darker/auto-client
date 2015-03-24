@@ -19,6 +19,8 @@ import com.sun.jna.platform.win32.WinUser;
 import com.sun.jna.ptr.IntByReference;
 import sirius.classes.Common;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -342,6 +344,47 @@ public class MSWindow extends Common implements Window  {
    UserExt.ReleaseDC(hwnd, hdcWindow);
    return image;
   }
+  public static BufferedImage screenshotAll() {
+    //Wtf is this, seriously? Random number?
+    WinDef.DWORD SRCCOPY = new WinDef.DWORD(13369376L);
+    //I guess here we retrieve the drawing context of the window...
+    WinDef.HDC hdcWindow = User32Ext.INSTANCE.GetDC(null);
+    //But what is this then? Why two HDC objects?
+    WinDef.HDC hdcMemDC = GDI32.INSTANCE.CreateCompatibleDC(hdcWindow);
+    //Get screen size
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    int width = (int)screenSize.getWidth();
+    int height = (int)screenSize.getHeight();
+    //And this is some kind of image representation?
+    WinDef.HBITMAP hBitmap = GDI32.INSTANCE.CreateCompatibleBitmap(hdcWindow, (int)width, (int)height);
+    //This is another total mystery
+    WinNT.HANDLE hOld = GDI32.INSTANCE.SelectObject(hdcMemDC, hBitmap);
+    //And what is the last parameter?!
+    GDIExt.BitBlt(hdcMemDC, 0, 0, width, height, hdcWindow, 0, 0, SRCCOPY);
+    //Select and then delete? Why did we even bother?
+    GDIExt.SelectObject(hdcMemDC, hOld);
+    GDIExt.DeleteDC(hdcMemDC);
+
+    WinGDI.BITMAPINFO bmi = new WinGDI.BITMAPINFO();
+    bmi.bmiHeader.biWidth = width;
+    bmi.bmiHeader.biHeight = -height;
+    bmi.bmiHeader.biPlanes = 1;
+    bmi.bmiHeader.biBitCount = 32;
+    bmi.bmiHeader.biCompression = 0;
+    //This makes sense - allocate 4 bytes for every RGBA pixel
+    Memory buffer = new Memory((long)(width * height * 4));
+    //Probably copying the data to memory
+    GDI32.INSTANCE.GetDIBits(hdcWindow, hBitmap, 0, height, buffer, bmi, 0);
+
+    BufferedImage image = new BufferedImage(width, height, 1);
+    image.setRGB(0, 0, width, height, buffer.getIntArray(0L, width * height), 0, width);
+    GDI32.INSTANCE.DeleteObject(hBitmap);
+    //Release? Does this mean we were blocking window rendering until now?
+    UserExt.ReleaseDC(null, hdcWindow);
+    
+    return image;
+  }
+  
   @Override
   public BufferedImage screenshotCrop(int x, int y, int w, int h) throws APIError {
    //Wtf is this, seriously

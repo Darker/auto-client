@@ -24,6 +24,11 @@ public enum ImageResources {
   SUMMONER_SPELLS_NOSPELL("nospell.png"),
   SAVE("save.png"),
   DELETE("delete.png"),
+  PA_BOT_DISABLED("disabled.png"),
+  PA_BOT_ENABLED("enabled.png"),
+  PA_BOT_RUNNING("running.png"),
+  PA_BOT_STOPPED("stopped.png"),
+  PA_BOT_PAUSED("paused.png"),
   ;
   
   //So according to [this guy](http://stackoverflow.com/a/17007533/607407) I

@@ -19,13 +19,22 @@ public abstract class Robot implements Runnable {
   protected Window window = null;
   
   protected Thread t;
+
+  protected BotActionListener listener = null;
+  public BotActionListener getListener() {
+    return listener;
+  }
+  public void setListener(BotActionListener listener) {
+    this.listener = listener;
+  }
   
   protected long lastRan = -1;
   protected long lastExit = -1;
   
+  protected boolean lastCanRun = false;
 
   public void start() {
-    if(isAlive())
+    if(isRunning())
       return;
     getWindow();
     if(!canRun()) {
@@ -37,14 +46,26 @@ public abstract class Robot implements Runnable {
     t.start();
   }
   
+  public void stop() {
+    if(t.isAlive()) {
+      t.interrupt(); 
+    }
+  }
+  
   @Override
   public final void run() {
     System.out.println("Robot thread "+t.getName()+" started.");
+    if(listener!=null) 
+      listener.started();
     try {
       go();
+      if(listener!=null) 
+        listener.terminated();
     }
     catch(Exception e) {
       System.out.println(e);
+      if(listener!=null) 
+        listener.terminated(e);
     }
     System.out.println("Robot thread "+t.getName()+" terminated.");
     lastExit = System.currentTimeMillis();
@@ -57,13 +78,26 @@ public abstract class Robot implements Runnable {
     return window;
   }
   
-  public boolean isAlive() {
+  public boolean isRunning() {
     return t!=null && t.isAlive(); 
-    
   }
   
-  public boolean canRun() {
-    return getWindow()!=null; 
+  /**
+   * Indicate whether this thread can run. Override canRunEx instead of this method.
+   * @return
+   */
+  public final boolean canRun() {
+    if(listener==null)
+      return lastCanRun = canRunEx();
+    else {
+      boolean can = canRunEx();
+      if(can!=lastCanRun)
+        listener.enabledStateChanged(can);
+      return lastCanRun = can;
+    }
+  }
+  protected boolean canRunEx() {
+    return getWindow()!=null;
   }
   
   public int fromLastRun() {
