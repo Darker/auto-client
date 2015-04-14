@@ -16,6 +16,7 @@ import java.util.List;
 public class RobotManager extends Thread {
   protected final List<Robot> robots = new ArrayList<>();
   private final int checkInterval;
+  private Throwable lastError = null;
   public RobotManager(int checkInterval) {
     this.checkInterval = checkInterval;
     setDaemon(true);
@@ -78,7 +79,7 @@ public class RobotManager extends Thread {
         if(rur!=null) {
           if(!rur.isRunning()) {
             if(rur.canRun()) {
-              //System.out.println("    "+rur.getClass().getName()+" started.");
+              //System.out.println("    Robot "+rur.getClass().getName()+" started.");
               rur.start();
             }
           }
@@ -93,10 +94,13 @@ public class RobotManager extends Thread {
       }
     }
     catch(InterruptedException e) {
-     
+      
     }
-    catch(Exception e) {
-      run(); 
+    catch(Throwable e) {
+      if(!e.equals(lastError)) {
+        lastError = e;
+        run(); 
+      }
     }
   }
 }

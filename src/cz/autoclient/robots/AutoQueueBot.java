@@ -6,15 +6,17 @@
 
 package cz.autoclient.robots;
 
+import cz.autoclient.robots.helpers.ValueChangeToWatcher;
 import cz.autoclient.PVP_net.Constants;
 import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.PVP_net.Setnames;
-import cz.autoclient.autoclick.MSWindow;
+import cz.autoclient.autoclick.ms_windows.MSWindow;
 import cz.autoclient.autoclick.Rect;
-import cz.autoclient.autoclick.Window;
-import cz.autoclient.autoclick.comvis.DebugDrawing;
+import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.exceptions.APIError;
+import cz.autoclient.robots.helpers.IterationLimiter;
 import cz.autoclient.settings.Settings;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 
 /**
@@ -23,6 +25,9 @@ import java.awt.image.BufferedImage;
  */
 public class AutoQueueBot extends Robot {
   private final Settings settings;
+  //public 
+  public ActionListener requeued = null;
+  
   public AutoQueueBot(Settings s) {
     settings = s;
   }
@@ -34,6 +39,8 @@ public class AutoQueueBot extends Robot {
    * Remembers whether the last go() went with errors or not
    */
   private boolean lastError = false;
+  
+  private ValueChangeToWatcher<Boolean> watchLoLExit = new ValueChangeToWatcher<>(false, false);
 
   /**
    *
@@ -41,33 +48,56 @@ public class AutoQueueBot extends Robot {
    */
   @Override
   protected void go() throws InterruptedException {
+    IterationLimiter limit = new IterationLimiter();
+    watchLoLExit.resetChanged();
     //System.out.println("Start waiting for launch button.");
     try {
       while(true) {
         //System.out.println("  - entered the loop");
         if(t.interrupted())
           throw new InterruptedException("Interrupted during main while(true).");
-        window.restoreNoActivate();
-        window.repaint();
+        if(limit.limitIteration(10)) {
+          throw new InterruptedException("Interrupting self because iteration limit was reached!");
+        }
+        //window.restoreNoActivate();
+        //window.repaint();
         BufferedImage img = window.screenshot();
-        if(WindowTools.checkPoint(img, PixelOffset.AM_CHAT_FIELD, 3) && 
-           WindowTools.checkPoint(img, PixelOffset.AM_MINION_ICON, 30) && 
-           WindowTools.checkPoint(img, PixelOffset.AM_PLAY_AGAIN, 20) && 
-           WindowTools.checkPoint(img, PixelOffset.AM_SUMMONER_SPELL_COLUMN, 50)) {
+        
+        if(WindowTools.checkPoint(img, PixelOffset.AM_CHAT_FIELD) && 
+           WindowTools.checkPoint(img, PixelOffset.AM_MINION_ICON) && 
+           WindowTools.checkPoint(img, PixelOffset.AM_SUMMONER_SPELL_COLUMN)) {
           Rect size = window.getRect();
           
           WindowTools.say(window, settings.getString(Setnames.AM_SAY.name), PixelOffset.AM_CHAT_FIELD.toRect(size));
           //Play again!
-          window.click(PixelOffset.AM_PLAY_AGAIN.toRect(size));
-          Thread.sleep(800);
+          if(WindowTools.checkPoint(img, PixelOffset.AM_PLAY_AGAIN)) {
+            window.click(PixelOffset.AM_PLAY_AGAIN.toRect(size));
+          }
+          else {
+            window.click(PixelOffset.AM_HOME.toRect(size));
+            Thread.sleep(800);
+            window.click(PixelOffset.PlayButton_red.toRect(size));
+            Thread.sleep(800);
+            window.click(PixelOffset.Play_Solo.toRect(size));
+          }
+          //window.click(PixelOffset.AM_PLAY_AGAIN.toRect(size));
+          /*Thread.sleep(800);
           window.click(PixelOffset.PlayButton_red.toRect(size));
           Thread.sleep(800);
-          window.click(PixelOffset.Play_Solo.toRect(size));
+          window.click(PixelOffset.Play_Solo.toRect(size));*/
+          
+          if(requeued!=null)
+            requeued.actionPerformed(null);
+          //Exit the bot now
+          break;
         }
-        DebugDrawing.displayImage(window.screenshot());
+        /*WindowTools.drawCheckPoint(img, PixelOffset.AM_CHAT_FIELD);
+        WindowTools.drawCheckPoint(img, PixelOffset.AM_MINION_ICON);
+        WindowTools.drawCheckPoint(img, PixelOffset.AM_PLAY_AGAIN); 
+        WindowTools.drawCheckPoint(img, PixelOffset.AM_SUMMONER_SPELL_COLUMN);
+        DebugDrawing.displayImage(img);*/
         //System.out.println("  - Going to sleep.");
         Thread.sleep(3000);
-        Thread.yield();
       }
     } catch(APIError e) {
       lastError = true;
@@ -84,18 +114,21 @@ public class AutoQueueBot extends Robot {
     lastError = false;
   }
 
-  /*@Override
-  public boolean canRun() {
-    return 
-      *  super.canRun();
-  }*/
-  
   @Override
+  public boolean canRunEx() {
+    //Check if League of legends is running
+    if(watchLoLExit.checkValueChangedDebug(MSWindow.windowFromName(Constants.game_window_title, false)!=null)) {
+      System.out.println("AUTOQUEUE: Game just was closed!"); 
+    }
+    return watchLoLExit.hasChanged() && super.canRunEx() && window.isVisible();
+  }
+  
+  /*@Override
   public Window getWindow() {
     if(window==null || !window.isValid()) {
       window = MSWindow.windowFromName(getWindowName(), false);
     }
     return window;
-  }
+  }*/
   
 }

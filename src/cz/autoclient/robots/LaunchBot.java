@@ -8,11 +8,14 @@ package cz.autoclient.robots;
 
 import cz.autoclient.PVP_net.Constants;
 import cz.autoclient.PVP_net.PixelOffset;
-import cz.autoclient.autoclick.MSWindow;
+import cz.autoclient.autoclick.ms_windows.MSWindow;
 import cz.autoclient.autoclick.Rect;
-import cz.autoclient.autoclick.Window;
-import cz.autoclient.autoclick.WindowCallback;
+import cz.autoclient.autoclick.windows.Window;
+import cz.autoclient.autoclick.windows.WindowCallback;
 import cz.autoclient.autoclick.exceptions.APIError;
+import cz.autoclient.autoclick.windows.cache.title.CacheByTitle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -59,6 +62,16 @@ public class LaunchBot extends Robot {
             public void run(Window w) {
               try {
                 w.slowClick(pos.left, pos.top, 80);
+                Thread.sleep(80);
+                try {
+                  while(WindowTools.checkPoint(window, PixelOffset.Patcher_Eula_Heading, 10)) {
+                    System.out.println("Accepting eula.");
+                    w.slowClick(PixelOffset.Patcher_Eula_Button.toRect(win_rect), 80);
+                    Thread.sleep(180);
+                  }
+                } catch (APIError ex) {
+                  Logger.getLogger(LaunchBot.class.getName()).log(Level.SEVERE, null, ex);
+                }
               }
               catch(InterruptedException e) {
                 t.interrupt();
@@ -117,6 +130,9 @@ public class LaunchBot extends Robot {
    */
   @Override
   public boolean canRunEx() {
+    //If the PVP.net client is running, the patcher cannot be running so this can be skipped
+    if(CacheByTitle.initalInst.getCache(Constants.window_title_part).hasValidWindow())
+      return false;
     return super.canRunEx() && (!overSuccesful || fromLastExit()>8000);
   }
   

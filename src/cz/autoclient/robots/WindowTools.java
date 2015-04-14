@@ -8,8 +8,10 @@ package cz.autoclient.robots;
 
 import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.autoclick.ColorPixel;
+import cz.autoclient.autoclick.ComparablePixel;
 import cz.autoclient.autoclick.Rect;
-import cz.autoclient.autoclick.Window;
+import cz.autoclient.autoclick.windows.Window;
+import cz.autoclient.autoclick.comvis.DebugDrawing;
 import cz.autoclient.autoclick.exceptions.APIError;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -47,22 +49,52 @@ public class WindowTools {
  
    }
 
-   public static boolean checkPoint(Window window, PixelOffset point) throws APIError {
-     if(point.color==null)
+   public static boolean checkPoint(Window window, ComparablePixel point) throws APIError {
+     if(point.getColor()==null)
        return false;
-     Rect rect = window.getRect();
-     return point.color.equals(window.getColor((int)(rect.width * point.x), (int)(rect.height * point.y)));
+     if(point.getTolerance()<1) {
+       Rect rect = window.getRect();
+       return point.getColor().equals(
+                  window.getColor(
+                      (int)(rect.width * point.getX()),
+                      (int)(rect.height * point.getY())
+                  )
+       );
+     }
+     else {
+       return checkPoint(window, point, point.getTolerance());
+     }
    }
-   public static boolean checkPoint(Window window, PixelOffset point, int tolerance) throws APIError {
+   public static int checkPoint(Window window, ComparablePixel... points) throws APIError {
+     int matches = 0;
+     if(points.length<3) {
+       for(ComparablePixel point:points) {
+         if(checkPoint(window, point))
+           matches++;
+       }
+     }
+     else {
+       BufferedImage img = window.screenshot();
+       for(ComparablePixel point:points) {
+         if(checkPoint(img, point, point.getTolerance()))
+           matches++;
+       }      
+     }
+     return matches;
+   }
+   
+   public static boolean checkPoint(Window window, ComparablePixel point, int tolerance) throws APIError {
      return checkPoint(window, point, tolerance, null);
    }
-   public static boolean checkPoint(Window window, PixelOffset point, int tolerance, String debug) throws APIError {
-     if(point.color==null)
+   public static boolean checkPoint(Window window, ComparablePixel point, int tolerance, String debug) throws APIError {
+     Color b = point.getColor();
+     if(b==null)
        return false;
      
      Rect rect = window.getRect();
-     Color a = window.getColor((int)(rect.width * point.x), (int)(rect.height * point.y));
-     Color b = point.color;
+     
+     Color a = window.getColor((int)(rect.width * point.getX()), (int)(rect.height * point.getY()));
+     
      if(debug!=null) {
        System.out.println("DEBUG#"+debug+" checkPoint("+point.toSource()+"), "+tolerance+")");
        System.out.println("   Comparing to: "+a);
@@ -76,24 +108,15 @@ public class WindowTools {
      
 
    }
-   public static boolean checkPoint(Window window, ColorPixel point, int tolerance) throws APIError {
-     if(point.color==null)
-       return false;
-   
-     Rect rect = window.getRect();
-     Color a = window.getColor((int)(rect.width * point.x), (int)(rect.height * point.y));
-     Color b = point.color;
-
-     return (Math.abs(a.getRed() -   b.getRed())   < tolerance) &&
-            (Math.abs(a.getGreen() - b.getGreen()) < tolerance) &&
-            (Math.abs(a.getBlue() -  b.getBlue())  < tolerance);
+   public static boolean checkPoint(BufferedImage img, ComparablePixel point) throws APIError {
+     return checkPoint(img, point, point.getTolerance());
    }
-   public static boolean checkPoint(BufferedImage img, ColorPixel point, int tolerance) throws APIError {
-     if(point.color==null)
+   public static boolean checkPoint(BufferedImage img, ComparablePixel point, int tolerance) throws APIError {
+     Color b = point.getColor();
+     if(b==null)
        return false;
-
-     Color a = getColor(img, (int)point.x, (int)point.y);
-     Color b = point.color;
+ 
+     Color a = getColor(img, (int)point.realX(img.getWidth()), (int)point.realY(img.getHeight()));
 
      return (Math.abs(a.getRed() -   b.getRed())   < tolerance) &&
             (Math.abs(a.getGreen() - b.getGreen()) < tolerance) &&
@@ -119,6 +142,19 @@ public class WindowTools {
                        (int)Math.abs(a.getGreen() - b.getGreen()),
                        (int)Math.abs(a.getBlue() -  b.getBlue())};
    }
+   public static void drawCheckPoint(BufferedImage img, ComparablePixel p, int tolerance) throws APIError {
+     Rect preal = p.toRect(img.getWidth(), img.getHeight());
+     DebugDrawing.drawPoint(
+        img, 
+        preal.left, 
+        preal.top, 
+        5,
+        checkPoint(img, p, tolerance)?java.awt.Color.GREEN:java.awt.Color.RED
+     );
+   }
+   public static void drawCheckPoint(BufferedImage img, ComparablePixel pixelOffset) throws APIError {
+     drawCheckPoint(img, pixelOffset, pixelOffset.getTolerance());
+   }
    
    public static void say(Window w, String text, Rect field) throws APIError, InterruptedException {
      if(text==null || text.isEmpty())
@@ -133,4 +169,6 @@ public class WindowTools {
        return;
      say(w, text, field.toRect(w.getRect()));
    }
+
+
 }

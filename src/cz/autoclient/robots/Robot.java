@@ -6,8 +6,9 @@
 
 package cz.autoclient.robots;
 
-import cz.autoclient.autoclick.MSWindow;
-import cz.autoclient.autoclick.Window;
+import cz.autoclient.autoclick.ms_windows.MSWindow;
+import cz.autoclient.autoclick.windows.Window;
+import cz.autoclient.autoclick.windows.cache.title.CacheByTitle;
 
 
 
@@ -34,8 +35,11 @@ public abstract class Robot implements Runnable {
   protected boolean lastCanRun = false;
 
   public void start() {
-    if(isRunning())
+    if(isRunning()) {
+      //System.out.println("Robot can't start, already running!");
       return;
+    }
+    
     getWindow();
     if(!canRun()) {
       throw new IllegalStateException("Can't run! Call canRun() before start().");
@@ -61,19 +65,21 @@ public abstract class Robot implements Runnable {
       go();
       if(listener!=null) 
         listener.terminated();
+      System.out.println("Robot thread "+t.getName()+" terminated.");
     }
     catch(Exception e) {
-      System.out.println(e);
+      //System.out.println(e);
       if(listener!=null) 
         listener.terminated(e);
+      System.out.println("Robot thread "+t.getName()+" terminated with error:\n     "+e);
     }
-    System.out.println("Robot thread "+t.getName()+" terminated.");
+    
     lastExit = System.currentTimeMillis();
   }
   
   public Window getWindow() {
     if(window==null || !window.isValid()) {
-      window = MSWindow.windowFromName(getWindowName(), true);
+      window = CacheByTitle.initalInst.getWindow(getWindowName());//MSWindow.windowFromName(getWindowName(), true);
     }
     return window;
   }

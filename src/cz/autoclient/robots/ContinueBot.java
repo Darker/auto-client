@@ -8,10 +8,10 @@ package cz.autoclient.robots;
 
 import cz.autoclient.PVP_net.Constants;
 import cz.autoclient.PVP_net.PixelOffset;
-import cz.autoclient.autoclick.MSWindow;
+import cz.autoclient.autoclick.ms_windows.MSWindow;
 import cz.autoclient.autoclick.Rect;
-import cz.autoclient.autoclick.Window;
-import cz.autoclient.autoclick.WindowCallback;
+import cz.autoclient.autoclick.windows.Window;
+import cz.autoclient.autoclick.windows.WindowCallback;
 import cz.autoclient.autoclick.comvis.DebugDrawing;
 import cz.autoclient.autoclick.exceptions.APIError;
 
@@ -71,12 +71,12 @@ public class ContinueBot extends Robot {
     return super.canRun();
   }*/
   
-  @Override
+  /*@Override
   public Window getWindow() {
     if(window==null || !window.isValid()) {
       window = MSWindow.windowFromName(getWindowName(), false);
     }
     return window;
-  }
+  }*/
   
 }
