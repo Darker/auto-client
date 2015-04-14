@@ -40,7 +40,11 @@ public class Version extends DataLoader {
         System.out.println(e);
         return "error"; 
       }
+      if(version!=null) {
+        tryClearData(); 
+      }
     }
+
     return version;
   }
   public String getLanguage() {
@@ -54,7 +58,15 @@ public class Version extends DataLoader {
         return "en_US"; 
       }
     }
+    if(language!=null) {
+      tryClearData(); 
+    }
     return language;
+  }
+  
+  private void tryClearData() {
+    if(language!=null && version !=null)
+      unloadData();
   }
   
   public Champions getChampions() {

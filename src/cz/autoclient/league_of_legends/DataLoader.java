@@ -29,7 +29,7 @@ public abstract class DataLoader {
   protected Realm realm;
   protected final File base_path; 
   protected final File file_path; 
-  protected JSONObject data;
+  private JSONObject data;
   protected final boolean auto_download;
   /**
    * When checking for updates, this will be filled with the downloaded file. 
@@ -58,8 +58,10 @@ public abstract class DataLoader {
   
   
   public void forceUpdate() {
-    if(data_tmp!=null)
+    if(data_tmp!=null) {
       data=data_tmp;
+      data_tmp = null;
+    }
     else
       data = fromURL(getURL());
     toFile(file_path);
@@ -91,6 +93,13 @@ public abstract class DataLoader {
       }
     }
     return data;
+  }
+  /** If everything has been extrated from the JSON data, unset the object as it's 
+   *  consuming real bunch of memory.
+   * 
+   */
+  public void unloadData() {
+    data = null;   
   }
   
   public String getRealm() {

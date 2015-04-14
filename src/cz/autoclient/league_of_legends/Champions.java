@@ -32,14 +32,21 @@ public class Champions extends DataLoader {
   public Champions(Version v, boolean b) {
     super(v.realm, v.base_path, b); 
     ver = v;
-    try {
-      champ_data = getData().getJSONObject("data");
-    } catch (JSONException ex) {
-      champ_data = null;
-    }
+
   }
+  public JSONObject getChampData() {
+    if(champ_data==null) {
+      try {
+        champ_data = getData().getJSONObject("data");
+      } catch (JSONException ex) {
+        champ_data = null;
+      }
+    }
+    return champ_data;
+  }
+  
   public Champion getChampion(String name) {
-    if(champ_data!=null) {
+    if(getChampData()!=null) {
       if(champs.containsKey(name)) {
         return (Champion)champs.get(name);
       }
@@ -72,24 +79,31 @@ public class Champions extends DataLoader {
   }
   
   public String[] allNames() {
-    if(champ_data!=null) {
-      if(champion_names!=null) {
-        return champion_names; 
-      }
-      if(champion_names_list==null) 
-        allNamesList();
-      return champion_names = champion_names_list.toArray(new String[champion_names_list.size()]);
-    }
-    return new String[0];
+    /*if(champion_names!=null) {
+      return champion_names; 
+    }*/
+    
+    if(champion_names_list==null)
+      allNamesList();
+    return champion_names = champion_names_list.toArray(new String[champion_names_list.size()]);
+   
+    //return new String[0];
   }
+  
+  @Override
+  public void unloadData() {
+    champ_data = null;
+    super.unloadData();
+  }
+  
   public ArrayList<String> allNamesList() {
-    if(champ_data!=null) {
-      if(champion_names_list!=null) {
-        return champion_names_list; 
-      }
+    if(champion_names_list!=null) {
+      return champion_names_list; 
+    }
+    if(getChampData()!=null) {
       ArrayList<String> names = new ArrayList<>();
       String[] ids = JSONObject.getNames(champ_data);
-      System.out.println("Feteching "+ids.length+" champion names.");
+      System.out.println("Fetching "+ids.length+" champion names.");
       for(String id: ids) {
         try {
           names.add(champ_data.getJSONObject(id).getString("name"));
