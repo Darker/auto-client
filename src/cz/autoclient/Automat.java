@@ -3,9 +3,9 @@ package cz.autoclient;
 import cz.autoclient.GUI.Gui;
 import cz.autoclient.GUI.notifications.Notification;
 import cz.autoclient.PVP_net.Constants;
-import cz.autoclient.autoclick.Window;
+import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.Rect;
-import cz.autoclient.autoclick.MSWindow;
+import cz.autoclient.autoclick.ms_windows.MSWindow;
 import cz.autoclient.settings.Settings;
 import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.PVP_net.Images;
@@ -18,6 +18,8 @@ import cz.autoclient.autoclick.ColorPixel;
 
 import cz.autoclient.autoclick.comvis.RectMatch;
 import cz.autoclient.autoclick.comvis.ScreenWatcher;
+import cz.autoclient.autoclick.windows.cache.title.CacheByTitle;
+import cz.autoclient.robots.WindowTools;
 import java.awt.image.BufferedImage;
 
 import java.io.IOException;
@@ -273,6 +275,7 @@ import java.util.ArrayList;
    public boolean normal_lobby() throws InterruptedException, APIError {
      if(settings.getBoolean(Setnames.NOTIF_MENU_BLIND_IN_LOBBY.name, false))
        gui.notification(Notification.Def.BLIND_TEAM_JOINED);
+     System.out.println("In normal lobby.");
      boolean ARAM = false;
      //this.gui.getProgressBar1().setValue(70);
      if(settings.getStringEquivalent(Setnames.BLIND_CALL_TEXT.name).length()>0) {
@@ -367,6 +370,7 @@ import java.util.ArrayList;
      //Set masteries:
      int mastery = settings.getInt(Setnames.BLIND_MASTERY.name, 0);
      if(mastery>0) {
+       System.out.println("  Setting mastery to mastery #"+mastery); 
        click(PixelOffset.Masteries_Edit);
        sleep(100);
        click(PixelOffset.Masteries_Big_First.offset(PixelOffset.Masteries_Big_Spaces.x*(mastery-1), 0));
@@ -380,17 +384,39 @@ import java.util.ArrayList;
        sleep(800);
        click(PixelOffset.Blind_Runes_Dropdown_First.offset(0, PixelOffset.Blind_Runes_Dropdown_Spaces.y*(rune-1)));
      }
+     System.out.println("NORMAL LOBBY: Waiting for a game to start.");
+     gui.setTitle("In normal lobby, waiting for a game to start.");
      //Wait and return false if lobby ends unexpectedly
-     while(checkPoint(PixelOffset.LobbyChat, 1)
-                && checkPoint(PixelOffset.LobbyChat2, 1)
-                && checkPoint(PixelOffset.Blind_SearchChampion, 1)) {
-       System.out.println("NORMAL LOBBY: Waiting for a game to start."); 
-       if(MSWindow.windowFromName(Constants.game_window_title, false)!=null)
-         return true;
-       sleep(1000);
+     PixelOffset[] points = new PixelOffset[] {
+       PixelOffset.LobbyChat,
+       PixelOffset.LobbyChat2,
+       PixelOffset.Blind_SearchChampion,
+       PixelOffset.LobbyTopBar,
+       PixelOffset.LobbyHoverchampTop,
+       PixelOffset.LobbySummonerSpellsHeader,
+       PixelOffset.LobbyRunesCheckmark,
+       PixelOffset.Masteries_Edit
+     };
+     while(true) {
+       if(WindowTools.checkPoint(window, points)<4) {
+         System.out.println("NORMAL LOBBY: lobby gone, waiting for the game.");
+         //Wait 5 seconds, should be long enough for the game window to be created
+         sleep(10000);
+         if(CacheByTitle.initalInst.getWindow(Constants.game_window_title)!=null) {
+           System.out.println("NORMAL LOBBY: Game started.");
+           return true;
+         }
+         else if(WindowTools.checkPoint(window, points)<4) {
+           System.out.println("NORMAL LOBBY: Game did not start, waiting for another game."); 
+           return false;
+         }
+         else {
+           System.out.println("NORMAL LOBBY: lobby back here, waiting for game again."); 
+         }
+       }
+       sleep(300);
      }
-     System.out.println("NORMAL LOBBY: Game did not start, waiting for another game."); 
-     return false;
+
    }
    
    public boolean teamBuilder_lobby() throws InterruptedException {
