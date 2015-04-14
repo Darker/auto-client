@@ -12,31 +12,27 @@ import java.awt.Color;
  *
  * @author Jakub
  */
-public class ColorPixel {
+public class ColorPixel implements ComparablePixel {
     public final double x;   // in kilograms
     public final double y; // in meters
     public final Color color;
+    public final int tolerance;
     public ColorPixel(double x, double y) {
-        this.x = x;
-        this.y = y;
-        color = null;
+      this(x,y,null,1);
     }
     public ColorPixel(double x, double y, Color color) {
-        this.x = x;
-        this.y = y;
-        this.color = color;
+      this(x,y,color,1);
     }
-    public double[] offset(double ox, double oy) {
+    public ColorPixel(double x, double y, Color color, int tolerance) {
+      this.x = x;
+      this.y = y;
+      this.color = color;
+      this.tolerance = tolerance;
+    }
+    /*public double[] offset(double ox, double oy) {
       return new double[] {x+ox, y+oy};
-    }
+    }*/
     
-    
-    public double realX(double width) {
-        return width*x;   
-    }
-    public double realY(double height) {
-        return height*y;   
-    }
     public String toSource() {
       return "new ColorPixel("
                          +x+"D, "
@@ -68,4 +64,29 @@ public class ColorPixel {
                            +color.getAlpha()
                          +")";
     }
+
+  @Override
+  public Color getColor() {
+    return color;
+  }
+
+  @Override
+  public int getTolerance() {
+    return tolerance;
+  }
+
+  @Override
+  public double getX() {
+    return x;
+  }
+
+  @Override
+  public double getY() {
+    return y;
+  }
+
+  @Override
+  public ComparablePixel offset(double x, double y) {
+    return new ColorPixel(this.x+x, this.y+y, color, tolerance);
+  }
 }

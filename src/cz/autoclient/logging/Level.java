@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package logging;
+package cz.autoclient.logging;
 
 /**
  *
@@ -21,6 +21,4 @@ public enum Level {
   ERROR,
   //Program crashed
   FATAL_ERROR;
-  
-  
 }

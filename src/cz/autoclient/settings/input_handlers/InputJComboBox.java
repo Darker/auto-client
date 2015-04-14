@@ -79,14 +79,14 @@ public class InputJComboBox implements Input {
   @Override
   public void setValue(Object value) {
     field.getEditor().setItem(value);
-    if(value!=null)
+    /*if(value!=null)
       System.out.println("Setting "+field.getClass().getName()+
                          " value to "+
                          value.getClass().getName()+" ("+value+")");
     else
       System.out.println("Setting "+field.getClass().getName()+
                          " value to null");
-    System.out.println(" -> Value: "+getValue());
+    System.out.println(" -> Value: "+getValue());*/
   }
 
   @Override

@@ -6,6 +6,8 @@
 
 package cz.autoclient.autoclick;
 
+import cz.autoclient.autoclick.windows.Window;
+
 /**
  *
  * @author Jakub

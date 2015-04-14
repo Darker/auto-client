@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package cz.autoclient.autoclick;
+package cz.autoclient.autoclick.windows;
 
 /**
  *

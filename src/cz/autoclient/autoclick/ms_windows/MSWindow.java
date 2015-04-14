@@ -4,11 +4,11 @@
  * and open the template in the editor.
  */
 
-package cz.autoclient.autoclick;
+package cz.autoclient.autoclick.ms_windows;
 
 import cz.autoclient.autoclick.exceptions.APIError;
-import cz.autoclient.autoclick.windows.Messages;
-import cz.autoclient.autoclick.windows.ShowWindow;
+import cz.autoclient.autoclick.ms_windows.Messages;
+import cz.autoclient.autoclick.ms_windows.ShowWindow;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.GDI32;
@@ -17,6 +17,11 @@ import com.sun.jna.platform.win32.WinGDI;
 import com.sun.jna.platform.win32.WinNT;
 import com.sun.jna.platform.win32.WinUser;
 import com.sun.jna.ptr.IntByReference;
+import cz.autoclient.autoclick.ColorRef;
+import cz.autoclient.autoclick.MouseButton;
+import cz.autoclient.autoclick.Rect;
+import cz.autoclient.autoclick.windows.Window;
+import cz.autoclient.autoclick.windows.WindowValidator;
 import sirius.classes.Common;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -325,6 +330,7 @@ public class MSWindow extends Common implements Window  {
    //Select and then delete? Why did we even bother?
    GDIExt.SelectObject(hdcMemDC, hOld);
    GDIExt.DeleteDC(hdcMemDC);
+   hOld = hdcMemDC = null;
    
    WinGDI.BITMAPINFO bmi = new WinGDI.BITMAPINFO();
    bmi.bmiHeader.biWidth = (int)bounds.width;
@@ -465,11 +471,14 @@ public class MSWindow extends Common implements Window  {
         return new MSWindow(hwnd);
     }
     else {
-      final String name_small = name.toLowerCase();
+     final String name_small = name.toLowerCase();
      //I'm not entirely sure why we use array here, but
      //my guess is, that normal non-final variable would not be
      //accessible in the callback...
      final WinDef.HWND[] WindowID = { null };
+     //Create ArrayList to store all windows from EnumWindows
+     final ArrayList<WinDef.HWND> allWindows = new ArrayList<>();
+     
      UserExt.EnumWindows(new WinUser.WNDENUMPROC()
      {
        int count = 0;
@@ -477,6 +486,7 @@ public class MSWindow extends Common implements Window  {
        @Override
        public boolean callback(WinDef.HWND handle, Pointer arg1)
        {
+         /*
          //Skip non window objects, like browser tabs
          if(!UserExt.IsWindow(handle))
            return true;
@@ -486,6 +496,8 @@ public class MSWindow extends Common implements Window  {
          
          UserExt.GetWindowText(handle, buf, length);
          String text = String.valueOf(buf).trim();
+         
+         buf = null;
          
          //Now we try to match the given name in the title we obtained
          boolean result;
@@ -503,10 +515,43 @@ public class MSWindow extends Common implements Window  {
          //And if we gained one, put it in our array
          WindowID[0] = handle;
          //Returning false ends the enumeration
-         return false;
+         return false;*/
+         allWindows.add(handle);
+         return true;
        }
      }, null);
-     
+     //Find the window in list:
+     for(WinDef.HWND handle:allWindows) {
+       //Skip non window objects, like browser tabs
+       if(!UserExt.IsWindow(handle))
+         continue;
+       //User32 provides us with window title
+       int length = UserExt.GetWindowTextLength(handle) + 1;
+       char[] buf = new char[length];
+
+       UserExt.GetWindowText(handle, buf, length);
+       String text = String.valueOf(buf).trim();
+
+       buf = null;
+
+       //Now we try to match the given name in the title we obtained
+       boolean result;
+       //Do not trust empty strings
+       if(text.isEmpty())
+         result = false;
+       else {
+         //System.out.println("Trying window '"+text+"'.");
+         result=text.toLowerCase().contains(name_small);
+       }
+       //If the window didn't match, return true to continue enumeration 
+       if (!result) {
+         continue;
+       }
+       //And if we gained one, put it in our array
+       WindowID[0] = handle;
+       //Returning false ends the enumeration
+       break;
+     }
      
      return WindowID[0]==null?null:new MSWindow(WindowID[0]);
     }

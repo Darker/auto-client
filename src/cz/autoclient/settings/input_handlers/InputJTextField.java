@@ -7,6 +7,7 @@
 package cz.autoclient.settings.input_handlers;
 
 import cz.autoclient.settings.Input;
+import cz.autoclient.settings.InputSecure;
 import cz.autoclient.settings.SettingsInputVerifier;
 import cz.autoclient.settings.ValueChanged;
 import javax.swing.InputVerifier;
@@ -17,11 +18,12 @@ import javax.swing.JTextField;
  *
  * @author Jakub
  */
-public class InputJTextField implements Input {
+public class InputJTextField implements Input, InputSecure {
   private final JTextField field;
   private final ValueChanged onchange;
   private SettingsInputVerifier<Object> verifier;
   
+  protected boolean secure = false;
 
   //Indicate whether events have been bound to input
   private boolean bound = false;
@@ -47,7 +49,7 @@ public class InputJTextField implements Input {
           return true;
         }
         //If verification fails, return false and ignore the value
-        if(!verif.verify(in))
+        if(!verif.verify(in, false))
           return false;
         //Sucessful verification means we get the value and update it
         onchange.changed(verif.value(in));
@@ -69,13 +71,21 @@ public class InputJTextField implements Input {
     else
       return null;
   }
+  /** Converts given object to string. Sets value to empty string if null is given.
+   * 
+   * @param value anything
+   */
   @Override
   public void setValue(Object value) {
-    field.setText(value.toString());
+    if(value!=null)
+      field.setText(value.toString());
+    else
+      field.setText("");
   }
 
   @Override
   public boolean validate() {
+    //throw new UnsupportedOperationException("BLE");
     return verifier!=null?verifier.verify(field):true;
   }
 
@@ -102,6 +112,13 @@ public class InputJTextField implements Input {
     field.setInputVerifier(null);
   }
 
+  @Override
+  public boolean isSecure() {
+    return secure;
+  }
 
-  
+  @Override
+  public void setSecure(boolean secure) {
+    this.secure = secure;
+  }  
 }

@@ -74,6 +74,7 @@ public class DebugDrawing {
      graph.drawLine(x, y-size, x, y+size);
      graph.dispose();
    }
+   
    public static void drawPointOrRect(BufferedImage target, Rect rect, Color color) {
      if(rect.width>0 || rect.height>0) {
        drawResult(target, rect, color);

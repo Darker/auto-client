@@ -14,6 +14,11 @@ import java.lang.reflect.ParameterizedType;
  * @param <T> object that the value should be converted to
  */
 public abstract class SettingsInputVerifier<T> extends javax.swing.InputVerifier {
+  /**
+   * Called to retrieve value from input. Allows you to convert input values to objects.
+   * @param comp
+   * @return 
+   */
   public abstract T value(javax.swing.JComponent comp);
   
   //Invalid verifier passed if no verifier defined
@@ -30,11 +35,16 @@ public abstract class SettingsInputVerifier<T> extends javax.swing.InputVerifier
        return true; 
      }
   };
-  public void setValue(javax.swing.JComponent comp, Object value) {
-    throw new UnsupportedOperationException("I don't know how to set value to "+comp.getClass().getName()); 
-  }
-  public boolean canSetValue() {
-    return false; 
+  
+  /** Verify the value and return whether it's valid or not.
+   * 
+   * @param comp
+   * @param silent if true, the value verification is not invoked by user and should produce
+   *               no messages to the user.
+   * @return true if the value can be parsed
+   */
+  public boolean verify(javax.swing.JComponent comp, boolean silent) {
+    return verify(comp);
   }
   
   public Class getType() {

@@ -4,12 +4,12 @@
  * and open the template in the editor.
  */
 
-package cz.autoclient;
+package cz.autoclient.settings.secure;
 
 /**
  *
  * @author Jakub
  */
-public class JSONTest {
-  
+public interface PasswordInitialiser {
+  public String getPassword();
 }

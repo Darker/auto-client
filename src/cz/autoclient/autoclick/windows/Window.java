@@ -6,9 +6,12 @@
 
 
  
-package cz.autoclient.autoclick;
+package cz.autoclient.autoclick.windows;
 
+import cz.autoclient.autoclick.MouseButton;
+import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.exceptions.APIError;
+import cz.autoclient.autoclick.ms_windows.MSWindow;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.List;
@@ -154,4 +157,21 @@ public interface Window {
   //Will not declare abstract static methods now for backwards compatibility
   //Once it is a standard, this will be redesigned
   //public static long FindWindowByName(String name);
+  
+  /**
+   * Fetch window from title.
+   * @param name title of the window
+   * @param strict strict search only returns exact match. May be system dependent
+   * @return Window instance or null if no window is found
+   * @throws UnsupportedOperationException 
+   */
+  public static Window FindWindowByName(String name, boolean strict) throws UnsupportedOperationException {
+    String sysname = System.getProperty("os.name");
+    if(sysname.contains("Windows")) {
+      return MSWindow.windowFromName(name, strict);
+    }
+    else {
+      throw new UnsupportedOperationException("Window API not supported on this OS.");
+    }
+  }
 }

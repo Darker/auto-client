@@ -4,17 +4,15 @@
  * and open the template in the editor.
  */
 
-package logging;
+package cz.autoclient.logging;
 
 
 import java.util.logging.Logger;
-import java.util.HashMap;
 /**
  *
  * @author Jakub
  */
 public interface Logging {
-  static HashMap loggers = new HashMap(4,1); 
   default void Log(Level lvl, String msg) {
     Logger log = Logger.getLogger(this.getClass().getName());
   }

@@ -20,8 +20,7 @@ public class Constants {
   public static final String window_title_part = "PVP.net";
   public static final String process_name = "LolClient.exe";
   public static final String test_process_name = "Annoyance.exe";
-  
-  
+ 
   public static final String patcher_window_title = "LoL Patcher";
   
   public static final String game_window_title = "League of Legends";

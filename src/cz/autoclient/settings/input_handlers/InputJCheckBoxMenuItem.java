@@ -8,6 +8,7 @@ package cz.autoclient.settings.input_handlers;
 
 import cz.autoclient.settings.Input;
 import cz.autoclient.settings.SettingsInputVerifier;
+import cz.autoclient.settings.SettingsValueChanger;
 import cz.autoclient.settings.ValueChanged;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -75,14 +76,14 @@ public class InputJCheckBoxMenuItem implements Input {
   }
   @Override
   public void setValue(Object value) {
-    if(verifier==null || !verifier.canSetValue()) {
+    if(verifier==null || !(verifier instanceof SettingsValueChanger)) {
       if(value instanceof Boolean) 
         field.setState((Boolean) value);
       else
         field.setState(value!=null);
     }
     else {
-      verifier.setValue(field, value);
+      ((SettingsValueChanger)verifier).setValue(field, value);
     }
   }
 

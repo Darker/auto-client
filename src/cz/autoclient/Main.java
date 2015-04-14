@@ -1,18 +1,13 @@
 package cz.autoclient;
 
 import cz.autoclient.GUI.Gui;
-import cz.autoclient.GUI.ImageResources;
 import cz.autoclient.GUI.summoner_spells.ButtonSummonerSpellMaster;
 import cz.autoclient.GUI.summoner_spells.InputSummonerSpell;
 import cz.autoclient.PVP_net.Setnames;
-import cz.autoclient.robots.AutoQueueBot;
-import cz.autoclient.robots.LaunchBot;
-import cz.autoclient.robots.Robot;
-import cz.autoclient.robots.RobotManager;
 import cz.autoclient.settings.InputHandlers;
 import cz.autoclient.settings.Settings;
 import cz.autoclient.settings.input_handlers.*;
-import java.awt.Image;
+import cz.autoclient.settings.secure.SecureSettings;
 
 import java.io.IOException;
 import javax.swing.JCheckBox;
@@ -30,6 +25,7 @@ import sirius.constants.IWMConsts;
  {
    //Some application constants
    public static final String SETTINGS_FILE = "data/settings.bin";
+   public static boolean debug = true;
    
    public Automat ac;
    public Gui gui;
@@ -79,9 +75,16 @@ import sirius.constants.IWMConsts;
      }
      catch(IOException e) {
        //Do nothing, this is expected for first run, before the settings file is created 
+       System.out.println("No settings loaded, they will be re-created. Error:"+e);
      }
+     //System.out.println("PW: "+settings.getSetting(Setnames.REMEMBER_PASSWORD.name));
      //Fill empty fields with default values
      Setnames.setDefaults(settings);
+     //Initialise encryption
+     SecureSettings encryptor = settings.getEncryptor();
+     encryptor.setUse_hwid(settings.getBoolean(Setnames.ENCRYPTION_USE_HWID.name, true));
+     encryptor.setPassword("Constant password.");
+     
      gui = new Gui(this, settings);
  
      SwingUtilities.invokeLater(new Runnable()
@@ -108,6 +111,7 @@ import sirius.constants.IWMConsts;
    public static void main(String[] args)
    {
      //Register GUI settings handlers
+     InputHandlers.register(InputJTextField.class,  javax.swing.JPasswordField.class);
      InputHandlers.register(InputJTextField.class,  JTextField.class);
      InputHandlers.register(InputJCheckBox.class,  JCheckBox.class);
      InputHandlers.register(InputJCheckBoxMenuItem.class,  JCheckBoxMenuItem.class);

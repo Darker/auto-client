@@ -6,7 +6,7 @@
 
 package cz.autoclient.autoclick;
 
-import cz.autoclient.autoclick.windows.Messages;
+import cz.autoclient.autoclick.ms_windows.Messages;
 
 /**
  *

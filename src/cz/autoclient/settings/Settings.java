@@ -7,6 +7,9 @@
 package cz.autoclient.settings;
 
 
+import cz.autoclient.settings.secure.EncryptedSetting;
+import cz.autoclient.settings.secure.InvalidPasswordException;
+import cz.autoclient.settings.secure.SecureSettings;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -30,7 +33,7 @@ import javax.swing.JTextField;
  *
  * @author Jakub
  */
-public class Settings implements java.io.Serializable {
+public class Settings {
   //Settings can be of any type
   protected Map<String, Object> settings = new HashMap<>();
   /**
@@ -41,6 +44,12 @@ public class Settings implements java.io.Serializable {
    * Should never change from true to false! Indicates that settings have changed and should be saved in file.
    */
   private boolean changed = false;
+  /**
+   * If using encrypted settings, you must set the encryptor/decryptor first! Otherwise, 
+   * {@link java.lang.IllegalStateException} will be thrown.
+   */
+  protected SecureSettings encryptor;
+
 
   /**
    * Retrieve setting that IS Integer. If the setting does not exist or isn't Integer, returns default value.
@@ -88,17 +97,52 @@ public class Settings implements java.io.Serializable {
   public String getStringEquivalent(String name) {
     if(settings.containsKey(name)) {
       Object value = settings.get(name);
-      if(value instanceof String) {
+      if(value instanceof String) 
         return (String)value; 
-      }
-      else
+      else if(value!=null)
         return value.toString();
+      else
+        return "";
     }
     return "";
   }
   public Object getSetting(String name) {
     return settings.get(name);
   }
+  
+  public Object getEncrypted(String name) throws InvalidPasswordException {
+    Object s = settings.get(name);
+    if(s instanceof EncryptedSetting) {
+      //Prevent null pointer exception
+      if(encryptor==null) {
+        throw new IllegalStateException("The SecureSettings class must be initialised before using encrypted"
+            + "settings!"); 
+      }
+      return encryptor.decrypt((EncryptedSetting)s);
+    }
+    //If the setting is not saved as encrypted, return the unencrypted value
+    else 
+      return s;
+  }
+  public void setEncrypted(String name, java.io.Serializable value) {
+    if(encryptor==null) {
+      throw new IllegalStateException("The SecureSettings class must be initialised before using encrypted"
+          + "settings!"); 
+    }
+    System.out.println("ENCRYPTED: AutomatSettings[\""+name+"\"] = "+(value!=null?"[value hidden]":"null"));
+    changed = true;
+    Object s = settings.get(name);
+    if(s!=null && s instanceof EncryptedSetting) {
+      ((EncryptedSetting)s).encryptor = encryptor;
+      ((EncryptedSetting)s).setDecryptedValue(value);
+    }
+    else {
+      EncryptedSetting e = new EncryptedSetting(encryptor);
+      e.setDecryptedValue(value);
+      settings.put(name, e);
+    }
+  }
+  
   public boolean empty(String name) {
     Object val = settings.get(name);
     if(val!=null) {
@@ -191,23 +235,42 @@ public class Settings implements java.io.Serializable {
     //boundInputs.put(setting_name, input);
     Input in;
     try {
-    in = InputHandlers.fromJComponent(input, 
-      new ValueChanged() {
-        @Override
-        public void changed(Object o) {
-          //System.out.println("Change event!");
-          setSetting(setting_name, o);
-        }
-      },
-      verif
-    );}
+      in = InputHandlers.fromJComponent(input, 
+        new ValueChangedListener(setting_name),
+        verif
+      );
+    }
     //Silent fail
     catch(NoSuchMethodException e) {
       System.err.println("No handler for "+input.getClass().getName());
       return;
-    };
+    }
     
     boundInputs.put(setting_name, in);
+    useVerifier(in, verif);
+  }
+  public void bindToInputSecure(final String setting_name, final JComponent input, final SettingsInputVerifier<Object> verif) {    
+    //boundInputs.put(setting_name, input);
+    Input in;
+    try {
+      in = InputHandlers.fromJComponent(input, 
+        new SecureValueChangedListener(setting_name),
+        verif
+      );
+    }
+
+    //Silent fail
+    catch(NoSuchMethodException e) {
+      System.err.println("No handler for "+input.getClass().getName()+" \n   Error:"+e);
+      return;
+    }
+    if(in instanceof InputSecure) {
+      ((InputSecure)in).setSecure(true);
+    }
+    boundInputs.put(setting_name, in);
+    useVerifier(in, verif);
+  }
+  private void useVerifier(final Input in, final SettingsInputVerifier<Object> verif) {
     if(verif!=null) {
       if(verif!=SettingsInputVerifier.INVALID_VERIFIER) {
         in.bind();
@@ -219,6 +282,33 @@ public class Settings implements java.io.Serializable {
       }
     }
   }
+  
+  public class ValueChangedListener extends ValueChanged {
+    public final String setting_name;
+    public ValueChangedListener(String n) {
+      setting_name = n; 
+    }
+    @Override
+    public void changed(Object o) {
+      //System.out.println("Change event!");
+      setSetting(setting_name, o);
+    }
+  }
+  public class SecureValueChangedListener extends ValueChanged {
+    public final String setting_name;
+    public SecureValueChangedListener(String n) {
+      setting_name = n; 
+    }
+    @Override
+    public void changed(Object o) {
+      //Can't encrypt unserializable objects
+      if(!(o instanceof java.io.Serializable))
+        return;
+      //System.out.println("Change event!");
+      setEncrypted(setting_name, (java.io.Serializable)o);
+    }
+  }
+  
   public void copyTo(Settings target) {
     if(target==this)
       throw new IllegalArgumentException("Can't copy to self. Also, it makes no sense!");
@@ -274,7 +364,10 @@ public class Settings implements java.io.Serializable {
       
       //System.out.println("Trying to load setting '"+name+"' from input.");
       //System.out.println("   value='"+input.getValue()+"'");
-      setSetting(name, input.getValue());
+      if(input instanceof InputSecure && ((InputSecure)input).isSecure())
+        this.setEncrypted(name, (java.io.Serializable)input.getValue());
+      else
+        setSetting(name, input.getValue());
     }
   }
   
@@ -285,7 +378,7 @@ public class Settings implements java.io.Serializable {
     OutputStream file = new FileOutputStream(path);
     OutputStream buffer = new BufferedOutputStream(file);
     ObjectOutput output = new ObjectOutputStream(buffer);
-    System.out.println("Saving settings HashMap - "+settings.size()+" fields.");
+    //System.out.println("Saving settings HashMap - "+settings.size()+" fields.");
     output.writeObject(settings);
     
     buffer.close();
@@ -302,17 +395,28 @@ public class Settings implements java.io.Serializable {
     //Get the properties out of the object
     try {
       Map set = (Map)input.readObject();
-      System.out.println(set.size()+" settings loaded from file.");
+      //System.out.println(set.size()+" settings loaded from file.");
       this.settings.putAll(set);
     }
     catch(ClassNotFoundException e) {};  
   }
   
   /**Custom serialization - only write the hash map, everything else is irrelevant **/
-  private void writeObject(ObjectOutputStream oos) throws IOException {
+  /*private void writeObject(ObjectOutputStream oos) throws IOException {
     oos.writeObject(settings);
   }
   private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
     settings = (HashMap<String, Object>)ois.readObject(); 
+  }*/
+
+  public SecureSettings getEncryptor() {
+    if(encryptor==null) {
+      encryptor = new SecureSettings(); 
+    }
+    return encryptor;
+  }
+
+  public void setEncryptor(SecureSettings encryptor) {
+    this.encryptor = encryptor;
   }
 }
