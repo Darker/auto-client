@@ -26,7 +26,7 @@ auto calls your lane and automaticaly accepts players in team-builder
 **Issues about anything bellow will be closed without longer reply**
 
  - For setting to take effect, you must leave the text field (focus another text field)
- - The program doesn't work when the window is minimized (**won't fix**)
+ - The program doesn't work when the PVP.net window is minimized (**won't fix**)
  - Sometimes, the text isn't called properly
  - Teambuilder captain mode is not 100% reliable at this moment
  - Images on the main page of the client can confuse the automation
