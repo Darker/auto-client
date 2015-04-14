@@ -187,7 +187,7 @@ public class ConfigurationManager {
       settings.put(currentChampion, set=new Settings());
     else
       set = settings.get(currentChampion);
-    main_settings.copyTo(set);
+    main_settings.copyTo(set, names);
     //Now, the current setup has a name
     currentSetup = currentChampion;
     //Enable delete for non-null setups

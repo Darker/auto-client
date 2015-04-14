@@ -6,9 +6,9 @@
 
 package cz.autoclient.GUI;
 import cz.autoclient.Main;
-import cz.autoclient.autoclick.MSWindow;
-import cz.autoclient.autoclick.Window;
+import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.PVP_net.Constants;
+import cz.autoclient.autoclick.windows.cache.title.CacheByTitle;
 import cz.autoclient.threads.Pauseable;
 /**
  * This class is designed to ensure GUI reflects current situation. It checks whether 
@@ -42,7 +42,7 @@ public class StateGuard extends Pauseable {
     while(!isInterrupted()||true) {
       //Check whether window is running
       if(win==null) {
-        win = MSWindow.windowFromName(Constants.window_title_part, false);
+        win = CacheByTitle.initalInst.getWindow(Constants.window_title_part);
         //if(win==null)
         //  System.out.println("Window from name failed...");
       }

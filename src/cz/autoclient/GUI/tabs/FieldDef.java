@@ -19,7 +19,7 @@ import javax.swing.JPanel;
  * @author Jakub
  */
 public class FieldDef {
-  public final String setting_name;
+  private String setting_name;
   public final String title;
   public final String label_text;
   public final JPanel container;
@@ -37,6 +37,16 @@ public class FieldDef {
     label.setHorizontalAlignment(JLabel.CENTER);
     container.add(label);
   }
+
+  public String getSetting_name() {
+    return setting_name;
+  }
+
+  public void setSetting_name(String setting_name) {
+    this.setting_name = setting_name;
+  }
+  
+  
   public void addField(JComponent field) {
     if(this.field!=null) {
       container.remove(this.field); 

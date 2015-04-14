@@ -12,7 +12,12 @@ import cz.autoclient.robots.Robot;
 import cz.autoclient.robots.RobotManager;
 import cz.autoclient.settings.Settings;
 import cz.autoclient.settings.SettingsInputVerifier;
+import cz.autoclient.settings.SettingsValueChanger;
 import java.awt.Desktop;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.net.MalformedURLException;
 import java.net.URL;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
@@ -30,16 +35,16 @@ public class PAMenu {
   public static final ImageResources running_icon = ImageResources.PA_BOT_RUNNING;
   
   private static Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-  
-  
-  
-  protected final Robot robot;
+
+  public final Robot robot;
   protected RobotManager robots;
   public final Settings settings;
   public final JMenu root;
   public final JCheckBoxMenuItem enable;
   //Other GUI
   protected JMenuItem aboutLink;
+  //Null until populated
+  private PAConfigWindow config_window;
   
   protected String name;
   protected String settingName;
@@ -59,20 +64,56 @@ public class PAMenu {
     this(robot, settings, name, "PA_" + name.replaceAll("\\s+", "_").replaceAll("[^a-zA-Z0-9_]", "").toUpperCase());
   }
   protected void initGui() {
+    //Set main node text
     root.setText(name);
+    
+    //Configure the enable/disable item
     boolean enabled = settings.getBoolean(settingName, false);
     enable.setState(enabled);
     enable.setText("Enable/disable");
+    //Remember the last state for further updates
     lastState = enabled;
     setIcon(enabled);
-    
     root.add(enable);
+    
+    
+    //Prepare about item
+    aboutLink = new JMenuItem();
+    aboutLink.setVisible(false);
+    root.add(aboutLink);
     /** Assign callbacks **/
     settings.bindToInput(settingName, enable, new EnabledStateUpdater());
   }
-  public void setAboutLink(URL link) {
-    
-  }  
+  public void setAboutLink(final URL link) {
+    if(desktop == null || !desktop.isSupported(Desktop.Action.BROWSE))
+      return;
+    //Make the about item visible
+    aboutLink.setVisible(true);
+    aboutLink.setText("About");
+    //aboutLink.setIcon(ImageResources.INTERNET.getIcon());
+    //Add the click-redirect listener
+    aboutLink.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        displayAboutPage(link);
+      }
+    });
+  }
+  public void setAboutLink(String link) {
+    try {
+      setAboutLink(new URL(link));
+    }
+    catch(MalformedURLException e) {};
+  }
+  public static void displayAboutPage(URL page) {
+    if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+      try {
+        desktop.browse(page.toURI());
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+  }
   
   protected void setIcon(boolean enabled, boolean running) {
    if(running)
@@ -116,6 +157,22 @@ public class PAMenu {
       lastState = enabled;
     }
   }
+  /** CONFIG WINDOW **/
+  public PAConfigWindow createConfigWindow() {
+    if(config_window==null) {
+      config_window = new PAConfigWindow(this, settings);
+      root.add(config_window.actuator, 1);
+    }   
+    return config_window;
+  }
+  public PAConfigWindow createConfigWindow(Window parent) {
+    if(config_window==null) {
+      config_window = new PAConfigWindow(this, settings, parent);
+      root.add(config_window.actuator, 1);
+    }   
+    return config_window;
+  }
+  
   
   protected class BOTStateUpdater implements BotActionListener {
     @Override
@@ -129,7 +186,7 @@ public class PAMenu {
       System.out.println("Bot "+name+" terminated.");
     };
   }
-  protected class EnabledStateUpdater extends SettingsInputVerifier {
+  protected class EnabledStateUpdater extends SettingsInputVerifier implements SettingsValueChanger {
     @Override
     public Boolean value(JComponent comp) {
       boolean enabled = ((JCheckBoxMenuItem)comp).getState();
@@ -138,8 +195,6 @@ public class PAMenu {
     }
     @Override
     public boolean verify(JComponent input) {return true;}
-    @Override
-    public boolean canSetValue() {return true;}
     @Override
     public void setValue(JComponent comp, Object value) {
       boolean enabled = value instanceof Boolean? (Boolean)value:false;

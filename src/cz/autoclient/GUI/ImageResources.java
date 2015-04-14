@@ -29,6 +29,7 @@ public enum ImageResources {
   PA_BOT_RUNNING("running.png"),
   PA_BOT_STOPPED("stopped.png"),
   PA_BOT_PAUSED("paused.png"),
+  INTERNET("link.png"),
   ;
   
   //So according to [this guy](http://stackoverflow.com/a/17007533/607407) I
