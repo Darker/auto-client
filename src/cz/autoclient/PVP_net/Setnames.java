@@ -39,6 +39,13 @@ public enum Setnames {
   AM_SAY(),
   AUTO_QUEUE_ENABLED(false),
   
+  REMEMBER_PASSWORD(null),
+  
+  ENCRYPTION_USE_PW(false),
+  ENCRYPTION_PW(null),
+  ENCRYPTION_USE_HWID(true),
+  
+  //PA names
   
   ;
   
