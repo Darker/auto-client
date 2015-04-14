@@ -2,6 +2,7 @@ package cz.autoclient.PVP_net;
 
 
 import cz.autoclient.autoclick.ColorPixel;
+import cz.autoclient.autoclick.ComparablePixel;
 import cz.autoclient.autoclick.Rect;
 import java.awt.Color;
 
@@ -15,14 +16,15 @@ import java.awt.Color;
  *
  * @author Jakub
  */
-public enum PixelOffset {
+public enum PixelOffset implements ComparablePixel {
     /** AFTERMATCH **/
     //Spell icon
-    AM_SUMMONER_SPELL_COLUMN (0.35283473610583094D, 0.4120435489306124D, new Color(254, 244, 51, 1)),
-    AM_MINION_ICON (0.6334241128680451D, 0.41037795782770337D, new Color(178, 57, 210, 1)),
-    AM_PLAY_AGAIN (0.8717328986112957D, 0.9039077309871311D, new Color(45, 101, 170, 1)),
-    AM_CHAT_FIELD (0.7429692805080877D, 0.8178090789717791D, new Color(255, 255, 255, 1)),
+    AM_SUMMONER_SPELL_COLUMN (0.35283473610583094D, 0.4120435489306124D, new Color(254, 244, 51, 1), 80),
+    AM_MINION_ICON (0.6334241128680451D, 0.41037795782770337D, new Color(178, 57, 210, 1), 30),
+    AM_PLAY_AGAIN (0.8717328986112957D, 0.9039077309871311D, new Color(45, 101, 170, 1), 25),
+    AM_CHAT_FIELD (0.7429692805080877D, 0.8178090789717791D, new Color(255, 255, 255, 1), 3),
     AM_SEND_CHAT (0.9687860734502807D, 0.814734127114088D, new Color(35, 74, 122, 1)),
+    AM_HOME (0.7151025273364979D, 0.8746956883390652D, new Color(35, 78, 128, 1)),
     
     /** MAIN SCREEN **/
     PlayButton_red(0.5282632272641906D, 0.05335365853658536D, new Color(216, 38, 20, 1)),
@@ -30,11 +32,20 @@ public enum PixelOffset {
     PlayButton_SearchingForGame_Approx (0.42531457289624774D, 0.06710726787193565D, new Color(255, 255, 255, 1)),
     //The button you can press after game mode has been selected
     Play_Solo(0.5306054028901105D, 0.8869954957698297D, new Color(200, 81, 0, 1)),
-    LobbyChat(0.495117D, 0.91875D, new Color(255, 255, 255, 1)),
+    LobbyChat(0.495117D, 0.91875D, new Color(255, 255, 255, 1), 1),
     LobbyChat2(0.5387487383572218D, 0.9184036396562681D, new Color(255, 255, 255, 1)),
     //Quit button for lobby (not allways available)s
     LobbyQuit(0.11646860979241919D, 0.9207317073170731D),
     LobbyChampionSlot1(0.25182702572064036D, 0.26219512195121947D),
+    
+    LobbyTopBar (0.70837606967439D, 0.08148622422881514D, new Color(33, 33, 33, 1)),
+    //White separator line in the lobby champion skill details
+    LobbyHoverchampSeparator (0.49889495962588765D, 0.8362587901179259D, new Color(204, 204, 204, 1)),
+    LobbyHoverchampTop (0.4844811217785136D, 0.739397806600655D,new Color(49, 49, 49, 1)),
+    //Orange text "Spells"
+    LobbySummonerSpellsHeader(0.4441223758058664D, 0.590262641502635D, new Color(251, 150, 1, 1),50),
+    //Green checkmark seen above the rune selectbox
+    LobbyRunesCheckmark (0.36532672890688844D, 0.625624587866083D,new Color(0, 135, 55, 1),10),
     //Summoner spell icons
     Blind_SumSpell1 (0.4979340371027294D, 0.6088404678228453D),
     
@@ -42,7 +53,7 @@ public enum PixelOffset {
     //Fortunatelly, this one works for both spell 1 and spell 2 dialogs
     Blind_SumSpell_CloseDialog (0.650720718284894D, 0.20448429853646063D),
     //Button for editing masteries in lobby
-    Masteries_Edit(0.40952916497216874D, 0.659577173474749D),
+    Masteries_Edit(0.40952916497216874D, 0.659577173474749D, new Color(188, 201, 215, 1),10),
     //The first mastery tab offset
     Masteries_Big_First (0.29229661714686006D, 0.22546405904893319D),
     //Spaces between mastery tabs
@@ -58,7 +69,7 @@ public enum PixelOffset {
     MatchFound(0.495117D, 0.515625D, new Color(255, 255, 255)),
     AcceptButton(0.39004512649241546D, 0.5599898226129755D, new Color(25, 60, 101, 1)),
     //Search champion field in blind queue
-    Blind_SearchChampion(0.7103209D, 0.16875D, new Color(255, 255, 255, 1)),
+    Blind_SearchChampion(0.779484336388102D, 0.16596235113330773D, new Color(255, 255, 255, 1)),
     TeamBuilder_AcceptGroup  (0.36240150633806045D, 0.5802060676136939D, new Color(43, 85, 137, 1)),
     TeamBuilder_CaptainIcon (0.5120583464840514D, 0.17717336270716075D, new Color(56, 97, 99, 1)),
     //The green arrow after the Invited heading on the right
@@ -94,7 +105,13 @@ public enum PixelOffset {
     InviteStart (0.7237508300449225D, 0.9146547965815433D, new Color(204, 110, 22, 1)),
     //Patcher's orange launch button
     Patcher_Launch (0.49697311457957116D, 0.06457398901151389D,new Color(138, 41, 8, 1)),
-    Patcher_SetServer (0.9572550031723815D, 0.08763612794419742D)
+    Patcher_SetServer (0.9572550031723815D, 0.08763612794419742D),
+    Patcher_Eula_Button (0.3230461378879247D, 0.8685457846236829D),
+    Patcher_Eula_Heading (0.5046604947648373D, 0.08148622422881516D, new Color(24, 117, 143, 1)),
+    
+    Login_UsernameField (0.10299488008468129D, 0.3996156263257844D, new Color(242, 243, 243, 1)),
+    Login_PasswordField (0.10107303503836476D, 0.47648942276806283D, new Color(242, 243, 243, 1)),
+    Login_ButtonDisabled (0.28557015948475223D, 0.5254193957017744D, new Color(140, 140, 140, 1))
     ;
     
     
@@ -102,20 +119,23 @@ public enum PixelOffset {
     public final double x;
     public final double y;
     public final Color color;
+    public final int tolerance;
     PixelOffset(double x, double y) {
-        this.x = x;
-        this.y = y;
-        color = null;
+      this(x,y,null);
     }
     PixelOffset(double x, double y, Color color) {
-        this.x = x;
-        this.y = y;
-        this.color = color;
+      this(x,y,color, 1);
     }
+    PixelOffset(double x, double y, Color color, int tolerance) {
+      this.x = x;
+      this.y = y;
+      this.color = color;
+      this.tolerance = tolerance;
+    }
+    @Override
     public ColorPixel offset(double ox, double oy) {
-      return new ColorPixel(x+ox, y+oy, color);
+      return new ColorPixel(x+ox, y+oy, color, tolerance);
     }
-    
     
     public double realX(double width) {
         return width*x;   
@@ -123,6 +143,7 @@ public enum PixelOffset {
     public double realY(double height) {
         return height*y;   
     }
+    @Override
     public String toSource() {
       return this.name()+"("
                          +x+"D, "
@@ -137,4 +158,27 @@ public enum PixelOffset {
     public Rect toRect(Rect win_dimensions) {
       return new Rect((int)(x*(double)win_dimensions.width), (int)(y*(double)win_dimensions.height));
     }
+    public Rect toRect(int width, int height) {
+      return new Rect((int)(x*(double)width), (int)(y*(double)height));
+    }
+
+  @Override
+  public Color getColor() {
+    return color;
+  }
+
+  @Override
+  public int getTolerance() {
+    return tolerance;
+  }
+
+  @Override
+  public double getX() {
+    return x;
+  }
+
+  @Override
+  public double getY() {
+    return y;
+  }
 }
