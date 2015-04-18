@@ -36,6 +36,42 @@ public class NativeProcess {
     catch(IOException e) {}
     return b.toString();
   }
+  public static String readWholeOutput(final Process p, long timeout) {
+    ProcessReader rdr = new ProcessReader(p);
+    rdr.start();
+    try {
+      rdr.join(timeout);
+      rdr.interrupt();
+    }
+    catch(InterruptedException e) {
+      return null; 
+    }
+    if(rdr.hasTerminatedOk())
+      return rdr.result;
+    else 
+      return null;
+  }
+  public static String readWholeOutput(final String p, long timeout) throws IOException {
+    return readWholeOutput(Runtime.getRuntime().exec(p), timeout);
+  }
+  
+  public static class ProcessReader extends Thread {
+    public final Process process;
+    public String result;
+    private boolean terminatedOk = false;
+    public ProcessReader(Process p) {
+      process = p;
+    }
+    @Override
+    public void run() {
+      result = readWholeOutput(process);
+      terminatedOk = true;
+    }
+    public boolean hasTerminatedOk() {
+      return terminatedOk;
+    }
+  }
+  
   public static int getProcessId(String name) {
     int[] all = getProcessIDs(name, true, true);
     if(all==null||all.length==0)
