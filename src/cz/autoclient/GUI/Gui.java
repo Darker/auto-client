@@ -26,8 +26,6 @@ import cz.autoclient.robots.RobotManager;
 import cz.autoclient.settings.SettingsInputVerifier;
 import cz.autoclient.settings.SettingsValueChanger;
 import cz.autoclient.settings.secure.EncryptedSetting;
-import cz.autoclient.settings.secure.InvalidPasswordException;
-import cz.autoclient.settings.secure.SecureSettings;
 import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Component;
@@ -67,11 +65,8 @@ import javax.swing.JPasswordField;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
-import javax.swing.LayoutStyle;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
-import java.util.Timer;
-import java.util.TimerTask;
  
  public class Gui
    extends JFrame
@@ -108,11 +103,16 @@ import java.util.TimerTask;
    {
      return new String[0];//(String[]) (selected != null ? selected : "");
    }
-   
+   public static Gui inst;
    public Gui(Main acmain, final Settings settings)
    {
+     if(inst!=null)
+       throw new IllegalStateException("Only one Gui instance allowed.");
+     
      this.ac = acmain;
      this.settings = settings;
+     
+     inst = this;
      
      setIconImage(ImageResources.ICON.getImage());
      //The tray is final so it must be initialised in constructor
@@ -121,7 +121,7 @@ import java.util.TimerTask;
      else
        tray = null;
      
-     robots = new RobotManager(900);
+     robots = new RobotManager(1200);
      initMenu();
      initComponents();
      
@@ -171,7 +171,10 @@ import java.util.TimerTask;
             settings.loadSettingsFromBoundFields();
             settings.saveToFile(Main.SETTINGS_FILE, false);
           }
-          catch(IOException e) {}
+          catch(IOException e) {
+            System.err.println("Problem saving settings:");
+            e.printStackTrace(System.err);
+          }
           //Hide tray icon
           if(canTray())
             tray.remove(tray_icon);
@@ -370,7 +373,7 @@ import java.util.TimerTask;
        menu1.setText("Settings");
 
        //---- menuItem1 ----
-       menuItem1 = new JMenuItem();
+       /*menuItem1 = new JMenuItem();
        menuItem1.setText("Set Chat Delay");
        menuItem1.addActionListener(new ActionListener() {
            @Override
@@ -378,7 +381,7 @@ import java.util.TimerTask;
                DelaySelected(e);
            }
        });
-       menu1.add(menuItem1);
+       menu1.add(menuItem1);*/
 
        final JMenuItem menuItem2 = new JMenuItem();
        menuItem2.addActionListener(new ActionListener() {
@@ -533,7 +536,11 @@ import java.util.TimerTask;
               null);
           final JPasswordField pw = new JPasswordField();
           if(settings.exists(Setnames.REMEMBER_PASSWORD.name, EncryptedSetting.class)) {
-             try {
+            if(settings.getSetting(Setnames.REMEMBER_PASSWORD.name, EncryptedSetting.class).doesHaveValue())
+              pw.setText("****");
+            else
+              pw.setText("");
+             /*try {
                settings.getEncrypted(Setnames.REMEMBER_PASSWORD.name);
                pw.setText("****");
                //System.out.println("PW: "+settings.getEncrypted(Setnames.REMEMBER_PASSWORD.name));
@@ -548,7 +555,7 @@ import java.util.TimerTask;
                }.start();
                settings.setSetting(Setnames.REMEMBER_PASSWORD.name, null);
                pw.setText("");
-             }
+             }*/
              //settings.getEncrypted(Setnames.REMEMBER_PASSWORD.name) instanceof String)
           }
           
@@ -642,7 +649,7 @@ import java.util.TimerTask;
           //setwin.addLine(field);
           
           
-          field = new FieldDef(
+          /*field = new FieldDef(
               "Encrypt with hardware ID:",
               "Will use unique key of this computer to encrypt the password.",
               Setnames.ENCRYPTION_USE_HWID.name);
@@ -650,13 +657,13 @@ import java.util.TimerTask;
           ActionListener updateUseHWID = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-              settings.getEncryptor().setUse_hwid(use_hwid.isSelected());
+              //settings.getEncryptor().setUse_hwid(use_hwid.isSelected());
             }
           };
           use_hwid.addActionListener(updateUseHWID);
-          settings.getEncryptor().setUse_hwid(settings.getBoolean(Setnames.ENCRYPTION_USE_HWID.name, true));
+          //settings.getEncryptor().setUse_hwid(settings.getBoolean(Setnames.ENCRYPTION_USE_HWID.name, true));
           field.addField(use_hwid);
-          setwin.addLine(field);
+          setwin.addLine(field);*/
           
           setwin.setSize(333, 130);
           
@@ -784,7 +791,7 @@ import java.util.TimerTask;
                 }
             });
 
-            GroupLayout chatDialogLayout = new GroupLayout(chatDialog);
+            /*GroupLayout chatDialogLayout = new GroupLayout(chatDialog);
             chatDialog.setLayout(chatDialogLayout);
             chatDialogLayout.setHorizontalGroup(
                 chatDialogLayout.createParallelGroup()
@@ -811,7 +818,7 @@ import java.util.TimerTask;
                         .addContainerGap())
             );
             chatDialog.pack();
-            chatDialog.setLocationRelativeTo(chatDialog.getOwner());
+            chatDialog.setLocationRelativeTo(chatDialog.getOwner());*/
         }
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
         
@@ -993,5 +1000,23 @@ import java.util.TimerTask;
     private JSpinner spinner1;
     private JButton button1;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
+    
+    //Dialogs
+    public void dialogErrorAsync(String message, String title) {
+        new Thread() {
+          @Override
+          public void run() {
+            JOptionPane.showMessageDialog(
+                Gui.this,
+                message,
+                title,
+                JOptionPane.ERROR_MESSAGE
+            );
+          }
+        }.start();
+    }
+    public void dialogErrorAsync(String message) {
+      dialogErrorAsync(message, "Error");
+    }
  }
 
