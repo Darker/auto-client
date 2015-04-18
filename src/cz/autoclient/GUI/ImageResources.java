@@ -29,6 +29,7 @@ public enum ImageResources {
   PA_BOT_RUNNING("running.png"),
   PA_BOT_STOPPED("stopped.png"),
   PA_BOT_PAUSED("paused.png"),
+  PA_BOT_DISABLED_ERROR("stopped_error.png"),
   INTERNET("link.png"),
   ;
   
