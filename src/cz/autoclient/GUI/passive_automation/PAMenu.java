@@ -6,7 +6,6 @@
 
 package cz.autoclient.GUI.passive_automation;
 
-import cz.autoclient.GUI.ImageResources;
 import cz.autoclient.robots.BotActionListener;
 import cz.autoclient.robots.Robot;
 import cz.autoclient.robots.RobotManager;
@@ -23,16 +22,20 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import static cz.autoclient.GUI.ImageResources.PA_BOT_DISABLED_ERROR;
+import static cz.autoclient.GUI.ImageResources.PA_BOT_STOPPED;
+import static cz.autoclient.GUI.ImageResources.PA_BOT_PAUSED;
+import static cz.autoclient.GUI.ImageResources.PA_BOT_RUNNING;
+import cz.autoclient.settings.input_handlers.InputJCheckBoxMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 /**
  * Passive automation menu - the basic menu that handles enabling, starting and disabling of
  * a passive automation robot.
  * @author Jakub
  */
-public class PAMenu {
-  public static final ImageResources disabled_icon = ImageResources.PA_BOT_STOPPED;
-  public static final ImageResources enabled_icon = ImageResources.PA_BOT_PAUSED;
-  public static final ImageResources running_icon = ImageResources.PA_BOT_RUNNING;
+public class PAMenu {  
   
   private static Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
 
@@ -116,10 +119,17 @@ public class PAMenu {
   }
   
   protected void setIcon(boolean enabled, boolean running) {
-   if(running)
-     root.setIcon(running_icon.getIcon());
-   else
-     root.setIcon(enabled?enabled_icon.getIcon():disabled_icon.getIcon());
+    /*root.setIcon(PA_BOT_DISABLED_ERROR.getIcon());
+    if(true)
+      return;*/
+    if(running)
+      root.setIcon(PA_BOT_RUNNING.getIcon());
+    else {
+      if(enabled) 
+        root.setIcon(PA_BOT_PAUSED.getIcon());
+      else
+        root.setIcon(robot.isErrorDisabled()?PA_BOT_DISABLED_ERROR.getIcon():PA_BOT_STOPPED.getIcon());
+    } 
   }
   protected void setIcon(boolean enabled) {
     setIcon(enabled, robot.isRunning());
@@ -146,6 +156,8 @@ public class PAMenu {
         if(robots!=null)
           robots.addRobot(robot);
         System.out.println("Bot "+name+" enabled.");
+        //Reset the robots data, it has not been running and data may be outdated
+        robot.reset();
       }
       else {
         if(robots!=null)
@@ -177,19 +189,110 @@ public class PAMenu {
   protected class BOTStateUpdater implements BotActionListener {
     @Override
     public void started() {
-      setIcon();
-      System.out.println("Bot "+name+" started.");
+      SwingUtilities.invokeLater(
+        new Runnable() {
+          @Override
+          public void run() {
+            setIcon();
+            System.out.println("Bot "+name+" started.");
+          }
+        }
+      );
     };
     @Override
-    public void terminated(Exception e) {
-      setIcon(enable.getState(), false);
-      System.out.println("Bot "+name+" terminated.");
+    public void terminated(Throwable e) {
+      SwingUtilities.invokeLater(
+        new Runnable() {
+          @Override
+          public void run() {
+            setIcon(enable.getState(), false);
+            if(e==null)
+              System.out.println("Bot "+name+" terminated.");
+            else
+              System.out.println("Bot "+name+" terminated with error: \n     "+e);
+          }
+        }
+      );
     };
+    @Override
+    public void disabledByError(Throwable e) {
+      SwingUtilities.invokeLater(
+        new Runnable() {
+          @Override
+          public void run() {
+              //updateEnabledState(false);
+              if(enable.getState()==true) {
+                //Simulate Click on the menu item to trigger any callbacks
+                ActionEvent event = new ActionEvent(enable, 666, "die");
+                enable.setState(false);
+                for(ActionListener l :enable.getActionListeners()) {
+                  l.actionPerformed(event);
+                  //Remove the settings action listener
+                  if(l instanceof InputJCheckBoxMenuItem.ChangeListener) {
+                    //Remember the listener to be able to put it back
+                    enableBlocker.oldListener = l;
+                    enable.removeActionListener(l);
+                  }
+                }
+                enableBlocker.error = e;
+                //Add the listener with warning popup
+                enable.addActionListener(enableBlocker);
+              }
+              //Just update icon if already disabled (though this should not occur)
+              else {
+                setIcon(); 
+              }
+          }
+        }
+      );
+    }
+  }
+  public final EnableBlocker enableBlocker = new EnableBlocker(null);
+  protected class EnableBlocker implements ActionListener {
+    public Throwable error;
+    public ActionListener oldListener;
+    public EnableBlocker(Throwable error) {
+      this.error = error; 
+    }
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      if(error==null)
+        return;
+      JCheckBoxMenuItem comp;
+      try {
+        comp = (JCheckBoxMenuItem)e.getSource();
+      }
+      catch(ClassCastException ex) {
+        System.err.println("Invalid action source.");
+        return;
+      }
+      boolean enabled = comp.getState();
+      if(enabled && robot.isErrorDisabled()) {
+        int state = JOptionPane.showConfirmDialog(PAMenu.this.enable, "This automat was "
+            + "disabled due to following exception:\n"
+            + "   "+robot.getLastError()+"\n"
+            + "Are you sure you want to run it again?", "Robot disabled by error",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.ERROR_MESSAGE);
+        if(state==1) {
+          ((JCheckBoxMenuItem)comp).setState(false);
+          
+          //updateEnabledState(false);
+        }
+        else {
+          robot.forgetErrors();
+          oldListener.actionPerformed(e);
+          //Put the action listener back
+          comp.addActionListener(oldListener);
+        }
+      }
+    }
   }
   protected class EnabledStateUpdater extends SettingsInputVerifier implements SettingsValueChanger {
     @Override
     public Boolean value(JComponent comp) {
       boolean enabled = ((JCheckBoxMenuItem)comp).getState();
+
       updateEnabledState(enabled);
       return enabled;
     }
