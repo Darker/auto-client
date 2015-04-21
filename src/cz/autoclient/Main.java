@@ -7,12 +7,17 @@ import cz.autoclient.PVP_net.Setnames;
 import cz.autoclient.settings.InputHandlers;
 import cz.autoclient.settings.Settings;
 import cz.autoclient.settings.input_handlers.*;
+import cz.autoclient.settings.secure.EncryptedSetting;
 import cz.autoclient.settings.secure.SecureSettings;
+import cz.autoclient.settings.secure.UniqueID;
+import java.io.File;
+import java.io.FileNotFoundException;
 
 import java.io.IOException;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
@@ -73,17 +78,40 @@ import sirius.constants.IWMConsts;
      try {
        settings.loadFromFile(SETTINGS_FILE);
      }
-     catch(IOException e) {
+     catch(FileNotFoundException e) {
        //Do nothing, this is expected for first run, before the settings file is created 
        System.out.println("No settings loaded, they will be re-created. Error:"+e);
+     }
+     catch(IOException e) {
+       //This means the settings probably exist but are corrupted
+       System.err.println("Settings corrupted. Error:"+e);
+       if((new File(SETTINGS_FILE)).exists()) {
+         new Thread() {
+           @Override
+           public void run() {
+             JOptionPane.showMessageDialog(null, "Your settings file was corrupted. Defaults will be loaded."
+                 //+ "It will be moved into data/backup/ directory and default settings will be used."
+                 , "Error",JOptionPane.ERROR_MESSAGE);
+           }
+         }.start();
+         e.printStackTrace();
+         
+       }
      }
      //System.out.println("PW: "+settings.getSetting(Setnames.REMEMBER_PASSWORD.name));
      //Fill empty fields with default values
      Setnames.setDefaults(settings);
      //Initialise encryption
      SecureSettings encryptor = settings.getEncryptor();
-     encryptor.setUse_hwid(settings.getBoolean(Setnames.ENCRYPTION_USE_HWID.name, true));
-     encryptor.setPassword("Constant password.");
+     
+     /*EncryptedSetting test = new EncryptedSetting(encryptor);
+     settings.setSetting(Setnames.REMEMBER_PASSWORD.name, test);
+     test.setEncryptedValue(new byte[] {0,56,64,32,44,55,66,99,88,77,88,55,66,33});*/
+     
+     encryptor.addPassword("Constant password.");
+     encryptor.addPassword(UniqueID.WINDOWS_USER_SID);
+     
+     System.out.println("Encryption password: "+encryptor.getMergedPassword());
      
      gui = new Gui(this, settings);
  
@@ -92,16 +120,6 @@ import sirius.constants.IWMConsts;
        @Override
        public void run()
        {
-         /*AlloyLookAndFeel.setProperty("alloy.licenseCode", "a#Phyrum_Tea#1cl1e0j#9u3t2k");
-         try
-         {
-           AlloyTheme al = new GlassTheme();
-           new AlloyLookAndFeel().setTheme(al, true);
-           LookAndFeel alloyLnF = new AlloyLookAndFeel(new GlassTheme());
-           UIManager.setLookAndFeel(alloyLnF);
-         }
-         catch (UnsupportedLookAndFeelException ex) {}*/
-         
          gui.setDefaultCloseOperation(3);
          gui.setVisible(true);
        }
