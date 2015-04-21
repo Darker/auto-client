@@ -64,7 +64,7 @@ public class ConfigurationManager {
     else {
       settings = new HashMap<String, Settings>();
       //Add settings to main settings object
-      main.setSetting(setting_name, settings);
+      main.setSetting(setting_name, settings, true);
     }
     
     this.input = input;

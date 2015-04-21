@@ -149,11 +149,21 @@ public class WindowTools {
         preal.left, 
         preal.top, 
         5,
-        checkPoint(img, p, tolerance)?java.awt.Color.GREEN:java.awt.Color.RED
+        checkPoint(img, p, tolerance)?java.awt.Color.GREEN:java.awt.Color.RED,
+        (p instanceof Enum)?((Enum)p).name() : null
      );
    }
    public static void drawCheckPoint(BufferedImage img, ComparablePixel pixelOffset) throws APIError {
      drawCheckPoint(img, pixelOffset, pixelOffset.getTolerance());
+   }
+   public static void drawCheckPoint(BufferedImage img, ComparablePixel[] pixels) throws APIError {
+     for(ComparablePixel p : pixels) {
+       drawCheckPoint(img, p);
+     }
+   }
+   public static void showDrawCheckPoint(BufferedImage img, ComparablePixel[] pixels) throws APIError, InterruptedException {
+     drawCheckPoint(img, pixels);
+     DebugDrawing.displayImage(img);
    }
    
    public static void say(Window w, String text, Rect field) throws APIError, InterruptedException {

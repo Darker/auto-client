@@ -6,12 +6,16 @@
 
 package cz.autoclient.robots;
 
+import cz.autoclient.GUI.Gui;
 import cz.autoclient.PVP_net.Constants;
 import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.PVP_net.Setnames;
 import cz.autoclient.autoclick.Rect;
+import cz.autoclient.autoclick.exceptions.APIError;
+import cz.autoclient.robots.exceptions.RobotNotConfiguredException;
 import cz.autoclient.robots.helpers.ValueChangeToWatcher;
 import cz.autoclient.settings.Settings;
+import cz.autoclient.settings.secure.EncryptedSetting;
 import cz.autoclient.settings.secure.InvalidPasswordException;
 import java.awt.image.BufferedImage;
 
@@ -21,24 +25,18 @@ import java.awt.image.BufferedImage;
  */
 public class AutoLoginBot extends Robot {
   private final Settings settings;
- public AutoLoginBot(Settings s) {
+  public AutoLoginBot(Settings s) {
     settings = s;
   }
   @Override
   public String getWindowName() {
     return Constants.window_title_part;
   }
-  /**
-   * Remembers whether the last go() went with errors or not
-   */
-  private boolean lastError = false;
-  private boolean overSuccesful = false;
-  
   private boolean initializing = false;
   
-  private boolean invalidPassword = false;
-  /** This bot only starts when PVP.net window suddenly appears. As such, it remembers last state of the window.
-   * 
+  private boolean initialized = false;
+  /** 
+   * This bot only starts when PVP.net window suddenly appears. As such, it remembers last state of the window.
    */
   private ValueChangeToWatcher<Boolean> PVPAppeared = new ValueChangeToWatcher<>(false, true);
   /**
@@ -46,13 +44,28 @@ public class AutoLoginBot extends Robot {
    * @throws InterruptedException when the htread is iterrupted externally
    */
   @Override
-  protected void go() throws InterruptedException {
-    //System.out.println("Start waiting for login screen.");
+  protected void go() throws InterruptedException, APIError {
+    
+    System.out.println("Start waiting for login screen.");
     if(initializing) {
-      //System.out.println("Initializing phase of auto login.");
+      System.out.println("Initializing phase of auto login.");
       initializing = false;
       settings.getEncryptor().init();
-      return;
+      if(!settings.exists(Setnames.REMEMBER_PASSWORD.name, EncryptedSetting.class)) {
+        Gui.inst.dialogErrorAsync("Setup a password before enabling this function.");
+        disableDueToException(new RobotNotConfiguredException("Login password is not set."));
+        return;
+      }
+      try {
+        settings.getEncrypted(Setnames.REMEMBER_PASSWORD.name);
+        initialized = true;
+      }
+      catch(InvalidPasswordException e) {
+        brokenPassword(e);
+      }
+      if(!canRun()) {
+        return;
+      }
     }
     PVPAppeared.resetChanged();
     try {
@@ -69,6 +82,7 @@ public class AutoLoginBot extends Robot {
           WindowTools.say(window,
                          (String)settings.getEncrypted(Setnames.REMEMBER_PASSWORD.name),
                          PixelOffset.Login_PasswordField.toRect(size));
+     
           //Click ok
           Thread.sleep(400);
           window.click(PixelOffset.Login_ButtonDisabled.toRect(size));
@@ -84,21 +98,34 @@ public class AutoLoginBot extends Robot {
       }
     }
     catch(InvalidPasswordException e) {
-      invalidPassword = true;
+      brokenPassword(e);
       return;      
     }
-    catch(Throwable e) {
-      lastError = true;
-      //Recover if the window is still valid
-      if(canRun()) {
-        go();
-      }
-    }
+  }
+  /**
+   * Called internally when password cannot be decrypted.
+   */
+  private void brokenPassword(InvalidPasswordException e) throws InvalidPasswordException {
+    settings.setSetting(Setnames.REMEMBER_PASSWORD.name, "");
+    //This will disable the bot
+    disableDueToException(e);
+    //This will appear assynchronously and wait for the user to close it
+    System.out.println("Your saved password could not be decrypted. It will be deleted now.");
+    new Exception().printStackTrace();
+    Gui.inst.dialogErrorAsync("Your saved password could not be decrypted. It will be deleted now.");
+    //The execution stops here
+    throw e;
+  }
+  
+  @Override
+  public void reset() {
+    super.reset();
+    initialized = initializing = false;
   }
   
   @Override
   protected void init() {
-    lastError = overSuccesful = false;
+   
   }
   /**
    * The bot will also claim it can run if the encryption framework needs to be initialized.
@@ -106,18 +133,17 @@ public class AutoLoginBot extends Robot {
    */
   @Override
   public boolean canRunEx() {
-    if(!settings.getEncryptor().isInitialized() && settings.getEncryptor().doesUse_password()) {
+    //If the bot is initializing it cannot do anything else
+    //if(initializing)
+    //  return false;
+    
+    if(!initialized || initializing) {
       //System.out.println("Initializing - run once.");
       initializing = true;
       return true;
     }
-    else {
-      
-    }
-    if(invalidPassword) {
-      //System.out.println("Cannot run - no valid password.");
-      return false;
-    }
+    
+
 
     
     //boolean windowState = super.canRunEx();

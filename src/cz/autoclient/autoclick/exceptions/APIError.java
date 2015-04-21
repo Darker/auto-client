@@ -10,7 +10,7 @@ package cz.autoclient.autoclick.exceptions;
  *
  * @author Jakub
  */
-public class APIError extends Exception {
+public class APIError extends RuntimeException {
 
   /**
    * Creates a new instance of <code>APIError</code> without detail message.

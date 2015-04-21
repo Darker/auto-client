@@ -18,7 +18,7 @@ public interface BotActionListener {
   /** Called whenever the thread ends. 
    * @param e Exception that stopped the thread. Null if the thread stopped without error.
    */
-  public default void terminated(Exception e) {};
+  public default void terminated(Throwable e) {};
   /**
    * Called whenever the robot detects that it's canRun state changed. This 
    * means whenever canRun method is called and gave different result than last time,
@@ -29,5 +29,9 @@ public interface BotActionListener {
   /** Called whenever the thread ends normally.
    */
   public default void terminated() {terminated(null);};
+  /** Called when the bot is automatically disabled due to it being errorneous.
+   * @param error error that disabled to bot
+   */
+  public default void disabledByError(Throwable error) {};
   
 }

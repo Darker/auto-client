@@ -66,15 +66,24 @@ public class DebugDrawing {
         g2d.drawString(string, x, y);
         g2d.dispose();
    }
-   public static void drawPoint(BufferedImage target, int x, int y, int size, Color color) {
+   public static void drawPoint(BufferedImage target, int x, int y, int size, Color color, String name) {
      //Draw rectangle on discovered position
      Graphics2D graph = target.createGraphics();
      graph.setColor(color);
      graph.drawLine(x-size, y, x+size, y);
      graph.drawLine(x, y-size, x, y+size);
+     if(name!=null && name.length()>0) {
+        graph.setFont(new Font("Courier New", Font.PLAIN, 12));
+        FontMetrics fm = graph.getFontMetrics();
+        y = y+fm.getHeight();
+        x+=size+2;
+        graph.drawString(name, x, y);
+     }
      graph.dispose();
    }
-   
+   public static void drawPoint(BufferedImage target, int x, int y, int size, Color color) {
+     drawPoint(target, x, y, size, color, null);
+   }
    public static void drawPointOrRect(BufferedImage target, Rect rect, Color color) {
      if(rect.width>0 || rect.height>0) {
        drawResult(target, rect, color);

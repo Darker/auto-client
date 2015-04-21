@@ -44,22 +44,25 @@ public class InputJCheckBoxMenuItem implements Input {
     //Event to be called if new value is valid
     final ValueChanged onchange = this.onchange;
 
-   
-    field.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        if(verif==null) {
+    field.addActionListener(listener);
+  }
+  public final ChangeListener listener = new ChangeListener();
+  public class ChangeListener implements ActionListener {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        JCheckBoxMenuItem field = (JCheckBoxMenuItem)e.getSource();
+        if(verifier==null) {
           onchange.changed((Boolean)field.getState());
           return;
         }
         //If verification fails, return false and ignore the value
-        if(!verif.verify(field))
+        if(!verifier.verify(field))
           return;
         //Sucessful verification means we get the value and update it
-        onchange.changed(verif.value(field));
+        onchange.changed(verifier.value(field));
       }
-    });
   }
+  
   @Override
   public JComponent getField() {
     return field;
@@ -112,7 +115,8 @@ public class InputJCheckBoxMenuItem implements Input {
   @Override
   public void unbind() {
     bound = false;
-    field.setInputVerifier(null);
+    //field.setInputVerifier(null);
+    field.removeActionListener(listener);
   }
 
 

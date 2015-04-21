@@ -130,6 +130,8 @@ public class LaunchBot extends Robot {
    */
   @Override
   public boolean canRunEx() {
+    //if(System.currentTimeMillis()%5==0)
+    //  throw new Error("TEST ERROR");
     //If the PVP.net client is running, the patcher cannot be running so this can be skipped
     if(CacheByTitle.initalInst.getCache(Constants.window_title_part).hasValidWindow())
       return false;

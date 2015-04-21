@@ -14,6 +14,7 @@ import cz.autoclient.PVP_net.SummonerSpell;
 import cz.autoclient.PVP_net.TeamBuilderPlayerSlot;
 import cz.autoclient.autoclick.exceptions.APIError;
 import cz.autoclient.autoclick.ColorPixel;
+import cz.autoclient.autoclick.comvis.DebugDrawing;
  import java.awt.Color;
 
 import cz.autoclient.autoclick.comvis.RectMatch;
@@ -397,24 +398,42 @@ import java.util.ArrayList;
        PixelOffset.LobbyRunesCheckmark,
        PixelOffset.Masteries_Edit
      };
+     PixelOffset[] failPoints = new PixelOffset[] {
+       PixelOffset.StoreButton,
+       PixelOffset.PlayButton_red,
+       PixelOffset.PlayButton_SearchingForGame_Approx,
+       PixelOffset.PlayButton_cancel
+     };
      while(true) {
        if(WindowTools.checkPoint(window, points)<4) {
          System.out.println("NORMAL LOBBY: lobby gone, waiting for the game.");
-         //Wait 5 seconds, should be long enough for the game window to be created
-         sleep(10000);
-         if(CacheByTitle.initalInst.getWindow(Constants.game_window_title)!=null) {
-           System.out.println("NORMAL LOBBY: Game started.");
-           return true;
-         }
-         else if(WindowTools.checkPoint(window, points)<4) {
-           System.out.println("NORMAL LOBBY: Game did not start, waiting for another game."); 
-           return false;
-         }
-         else {
-           System.out.println("NORMAL LOBBY: lobby back here, waiting for game again."); 
-         }
+         //Internal loop will wait until lobby reappears or game starts
+         //or main screen reappears
+         do {
+           //Wait 2 seconds, then check if back in main screen
+           sleep(2000);
+           if(WindowTools.checkPoint(window, failPoints)>1) {
+             System.out.println("NORMAL LOBBY: Game did not start, waiting for another game."); 
+             return false;
+           }
+           //Check if the game is running, return true if it does
+           else if(CacheByTitle.initalInst.getWindow(Constants.game_window_title)!=null) {
+             System.out.println("NORMAL LOBBY: Game started.");
+             return true;
+           }
+           /*BufferedImage img = window.screenshot();
+           WindowTools.drawCheckPoint(img, points);
+           WindowTools.drawCheckPoint(img, failPoints);
+           DebugDrawing.displayImage(img);*/
+           //else if(WindowTools.checkPoint(window, points)>=4) {
+           //  System.out.println("NORMAL LOBBY: lobby back here, waiting for game again."); 
+             //System.out.println("NORMAL LOBBY: Game did not start, waiting for another game."); 
+             //return false;
+           //}
+         } while(WindowTools.checkPoint(window, points)<4);
+         System.out.println("NORMAL LOBBY: lobby back here, waiting for game again."); 
        }
-       sleep(300);
+       sleep(800);
      }
 
    }

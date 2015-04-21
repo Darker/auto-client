@@ -9,6 +9,7 @@ package cz.autoclient.robots;
 import cz.autoclient.autoclick.ms_windows.MSWindow;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.windows.cache.title.CacheByTitle;
+import cz.autoclient.robots.exceptions.RobotDisabledException;
 
 
 
@@ -17,10 +18,113 @@ import cz.autoclient.autoclick.windows.cache.title.CacheByTitle;
  * @author Jakub
  */
 public abstract class Robot implements Runnable {
+  
+  
   protected Window window = null;
   
   protected Thread t;
+  
+  /** Enum for recognition of bot execution phases when identifying error location **/
+  public enum ExecutionPhase {CAN_RUN, RUN, GET_WINDOW}
+  
+  
+  /**
+   *  Phase where the last error occured.
+   */
+  private ExecutionPhase errorPhase;
+  /**
+   * The last error that occured.
+   */
+  private Throwable lastError;
+  /**
+   * Determines whether this bot should be disabled due to errors.
+   */
+  protected boolean errorDisabled = false;
+  /**
+   * Sets whether the bot is disabled due to error or not. If error has occured during 
+   * getWindow, the bot will be disabled immediatelly. If the error occured during canRun() or run()
+   * the bot will only be disabled if the error is repetitive.
+   * @param error error that occured
+   * @param phase phase of execution in which the error occured
+   * @return true if this error is not significant enough to cancel this bot
+   */
+  protected boolean continueOnError(Throwable error, ExecutionPhase phase) {
+    //System.err.println("Error "+error+" caught in robot "+this.getClass().getName());
+    //System.err.println("Last: "+lastError+((/*error.equals(lastError)*/errorsSame(error, lastError)?" which is the same as last":" which is defferent than last")));
+    if(phase == ExecutionPhase.GET_WINDOW || (errorsSame(error, lastError) && phase==errorPhase)) {
+      //System.err.println("Disabling robot "+this.getClass().getName()+" too many errors.");
+      //Remember last
+      setLastError(error, phase);
+      //Set errorDisabled before calling the callback, so that calls to isErrorDisabled will return true already
+      errorDisabled = true;
+      //If robot state listener is listening, inform it about this event
+      if(listener!=null)
+        listener.disabledByError(error);
+      //Disable the robot - on attempt to run, it will throw RobotDisabledException
+      return !(errorDisabled);
+    }
+    //Remmeber last
+    setLastError(error, phase);
+    //The robot can remain running, but next same error will turn it down
+    return true;
+  }
+  protected void disableDueToException(Exception error) {
+    setLastError(error, ExecutionPhase.RUN);
+    //Set errorDisabled before calling the callback, so that calls to isErrorDisabled will return true already
+    errorDisabled = true;
+    //If robot state listener is listening, inform it about this event
+    if(listener!=null)
+      listener.disabledByError(error);
+  }
+  
+  public static boolean errorsSame(Throwable A, Throwable B) {
+    //Same instance (or two nulls) is always equal
+    if(A==B)
+      return true;
+    //if one of them is null and other is not, they are equal
+    if(B!=A && (A==null || B==null))
+      return false;
+    //Check messages
+    if(!A.getMessage().equals(B.getMessage())) 
+      return false;
+    
+    if(!A.getClass().equals(B.getClass()))
+      return false;
+    if(!A.getStackTrace()[0].equals(B.getStackTrace()[0]))
+      return false;
+    return true;
+  }
+  
+  protected void setLastError(Throwable error, ExecutionPhase phase) {
+    lastError = error;
+    errorPhase = phase;
+  }
 
+  public ExecutionPhase getErrorPhase() {
+    synchronized (errorPhase) {
+      return errorPhase;
+    }
+  }
+
+  public Throwable getLastError() {
+    synchronized (lastError) {
+      return lastError;
+    }
+  }
+  
+  
+  public void forgetErrors() {
+    lastError = null;
+    errorPhase = null;
+    errorDisabled = false;
+    //System.out.println("forgetErrors called!");
+    //new Exception().printStackTrace();
+  }
+  
+  public boolean isErrorDisabled() {
+    return errorDisabled; 
+  }
+  
   protected BotActionListener listener = null;
   public BotActionListener getListener() {
     return listener;
@@ -28,23 +132,36 @@ public abstract class Robot implements Runnable {
   public void setListener(BotActionListener listener) {
     this.listener = listener;
   }
+  /**
+   * Resets internal data of the robot, forgeting
+   * any statistics or configuration. Good when it's supposed to start anew.
+   */
+  public void reset() {
+    forgetErrors();
+    window = null;
+  }
   
   protected long lastRan = -1;
   protected long lastExit = -1;
   
   protected boolean lastCanRun = false;
 
-  public void start() {
+  public final void start() {
     if(isRunning()) {
-      //System.out.println("Robot can't start, already running!");
-      return;
+      throw new IllegalStateException("Robot can't start, already running!");
     }
-    
-    getWindow();
+    try {
+      getWindow();
+    }
+    catch(Throwable e) {
+      if(!continueOnError(e, ExecutionPhase.GET_WINDOW))
+        throw new RobotDisabledException("Robot disabled by error in getWindow.", e);
+    }
     if(!canRun()) {
       throw new IllegalStateException("Can't run! Call canRun() before start().");
     }
     lastRan = System.currentTimeMillis();
+    
     init();
     t = new Thread(this);
     t.start();
@@ -58,20 +175,20 @@ public abstract class Robot implements Runnable {
   
   @Override
   public final void run() {
-    System.out.println("Robot thread "+t.getName()+" started.");
+    //System.out.println("Robot thread "+t.getName()+" started.");
     if(listener!=null) 
       listener.started();
     try {
       go();
       if(listener!=null) 
         listener.terminated();
-      System.out.println("Robot thread "+t.getName()+" terminated.");
+      //System.out.println("Robot thread "+t.getName()+" terminated.");
     }
-    catch(Exception e) {
+    catch(Throwable e) {
       //System.out.println(e);
-      if(listener!=null) 
+      if(listener!=null)
         listener.terminated(e);
-      System.out.println("Robot thread "+t.getName()+" terminated with error:\n     "+e);
+      //System.out.println("Robot thread "+t.getName()+" terminated with error:\n     "+e);
     }
     
     lastExit = System.currentTimeMillis();
@@ -93,13 +210,21 @@ public abstract class Robot implements Runnable {
    * @return
    */
   public final boolean canRun() {
-    if(listener==null)
-      return lastCanRun = canRunEx();
-    else {
-      boolean can = canRunEx();
-      if(can!=lastCanRun)
-        listener.enabledStateChanged(can);
-      return lastCanRun = can;
+    try {
+      if(listener==null)
+        return lastCanRun = canRunEx();
+      else {
+        boolean can = canRunEx();
+        if(can!=lastCanRun)
+          listener.enabledStateChanged(can);
+        return lastCanRun = can;
+      }
+    }
+    catch(Throwable t) {
+      //Return value is not used here. Prompting for canRun doesn't account for attempt to run bot
+      //so no exception is thrown down the line
+      continueOnError(t, ExecutionPhase.CAN_RUN);
+      return false;
     }
   }
   protected boolean canRunEx() {
@@ -117,7 +242,9 @@ public abstract class Robot implements Runnable {
     return (int) (System.currentTimeMillis()-lastExit);
   }
   /**
-   * Inner initialisation method. Can be overriden, but dummy by default.
+   * Called each time before robot run() thread is started.
+   * Inner initialisation method. Can be overriden, but dummy by default. 
+   * 
    */
   protected void init() {}
   

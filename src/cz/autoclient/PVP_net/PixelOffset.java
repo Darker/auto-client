@@ -27,18 +27,24 @@ public enum PixelOffset implements ComparablePixel {
     AM_HOME (0.7151025273364979D, 0.8746956883390652D, new Color(35, 78, 128, 1)),
     
     /** MAIN SCREEN **/
-    PlayButton_red(0.5282632272641906D, 0.05335365853658536D, new Color(216, 38, 20, 1)),
-    PlayButton_cancel(0.5587665322620996D, 0.06253177233521276D, new Color(205, 165, 102, 1)),
-    PlayButton_SearchingForGame_Approx (0.42531457289624774D, 0.06710726787193565D, new Color(255, 255, 255, 1)),
+    //PlayButton_red_old(0.5282632272641906D, 0.05335365853658536D, new Color(216, 38, 20, 1)),
+    PlayButton_red (0.48352019925535544D, 0.06457398901151389D, new Color(139, 18, 13, 1), 10),
+    //The small cross button to stop searching for game
+    PlayButton_cancel(0.5587665322620996D, 0.06253177233521276D, new Color(205, 165, 102, 1), 10),
+    PlayButton_SearchingForGame_Approx (0.42531457289624774D, 0.06710726787193565D, new Color(255, 255, 255, 1), 8),
+    StoreButton (0.7179852949059728D, 0.05839416058394161D, new Color(200, 178, 136, 1), 10),
+    /** GAME SELECTION **/
     //The button you can press after game mode has been selected
     Play_Solo(0.5306054028901105D, 0.8869954957698297D, new Color(200, 81, 0, 1)),
+    
+    /** BLIND PICK LOBBY**/
     LobbyChat(0.495117D, 0.91875D, new Color(255, 255, 255, 1), 1),
     LobbyChat2(0.5387487383572218D, 0.9184036396562681D, new Color(255, 255, 255, 1)),
     //Quit button for lobby (not allways available)s
     LobbyQuit(0.11646860979241919D, 0.9207317073170731D),
     LobbyChampionSlot1(0.25182702572064036D, 0.26219512195121947D),
     
-    LobbyTopBar (0.70837606967439D, 0.08148622422881514D, new Color(33, 33, 33, 1)),
+    LobbyTopBar (0.70837606967439D, 0.08148622422881514D, new Color(33, 33, 33, 1), 3),
     //White separator line in the lobby champion skill details
     LobbyHoverchampSeparator (0.49889495962588765D, 0.8362587901179259D, new Color(204, 204, 204, 1)),
     LobbyHoverchampTop (0.4844811217785136D, 0.739397806600655D,new Color(49, 49, 49, 1)),

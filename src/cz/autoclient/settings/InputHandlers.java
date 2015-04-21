@@ -7,7 +7,6 @@
 package cz.autoclient.settings;
 
 import java.beans.Expression;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JComponent;
