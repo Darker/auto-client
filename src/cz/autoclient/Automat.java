@@ -3,9 +3,10 @@ package cz.autoclient;
 import cz.autoclient.GUI.Gui;
 import cz.autoclient.GUI.notifications.Notification;
 import cz.autoclient.PVP_net.Constants;
+import cz.autoclient.PVP_net.ImageFrame;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.Rect;
-import cz.autoclient.autoclick.ms_windows.MSWindow;
+import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
 import cz.autoclient.settings.Settings;
 import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.PVP_net.Images;
@@ -14,13 +15,13 @@ import cz.autoclient.PVP_net.SummonerSpell;
 import cz.autoclient.PVP_net.TeamBuilderPlayerSlot;
 import cz.autoclient.autoclick.exceptions.APIError;
 import cz.autoclient.autoclick.ColorPixel;
-import cz.autoclient.autoclick.comvis.DebugDrawing;
- import java.awt.Color;
+import java.awt.Color;
 
 import cz.autoclient.autoclick.comvis.RectMatch;
 import cz.autoclient.autoclick.comvis.ScreenWatcher;
 import cz.autoclient.autoclick.windows.cache.title.CacheByTitle;
-import cz.autoclient.robots.WindowTools;
+import cz.autoclient.PVP_net.WindowTools;
+import cz.autoclient.autoclick.comvis.DebugDrawing;
 import java.awt.image.BufferedImage;
 
 import java.io.IOException;
@@ -139,7 +140,7 @@ import java.util.ArrayList;
              boolean lobby = false;
              if(checkPoint(PixelOffset.LobbyChat, 1)
                 && checkPoint(PixelOffset.LobbyChat2, 1)
-                && checkPoint(PixelOffset.Blind_SearchChampion, 1)
+                //&& checkPoint(PixelOffset.Blind_SearchChampion, 1)
              )
              {
                System.out.println("Lobby detected. Picking champion and lane.");
@@ -318,6 +319,9 @@ import java.util.ArrayList;
      
 
      //Loop that just does the same thing for both spells
+     Rect winRect = window.getRect();
+     double winSizeCoef = Constants.sizeCoeficientInverted(winRect);
+     Rect cropRect = null;
      for(int i=0; i<2; i++) {
        SummonerSpell s = spells[i];
        if(s!=null) {
@@ -327,31 +331,74 @@ import java.util.ArrayList;
            click(i==0?PixelOffset.Blind_SumSpell1:PixelOffset.Blind_SumSpell2);
            //Wait till the launcher screen redraws
            sleep(500L);
+           
+           //Calculate crop rectangle 
+           if(cropRect==null)
+             cropRect = ImageFrame.NormalLobby_SummonerSpellPopup.rect(window);
            //Use base resolution window - the icons are saved in base resolution too
-           BufferedImage screenshot = ScreenWatcher.resampleImageTo(
+           /*BufferedImage screenshot = ScreenWatcher.resampleImageTo(
                   window.screenshot(),
-                  Constants.smallestSize.width, Constants.smallestSize.height);
+                  Constants.smallestSize.width, Constants.smallestSize.height);*/
+           
+           BufferedImage screenshot = ScreenWatcher.resampleImage(
+                  window.screenshotCrop(cropRect),
+                  winSizeCoef,winSizeCoef);
            //double[][][] integral_image = ScreenWatcher.integralImage(screenshot);
            //Some CV
            Rect pos = ScreenWatcher.findByAvgColor(icon, screenshot, 0.001f, true, null);
-
+        
            if(pos!=null) {
-             //Get real screenshot
-             //screenshot = window.screenshot();
+             /*System.out.println("Original result: "+pos);
+             screenshot = window.screenshot();
+             DebugDrawing.drawResult(screenshot, cropRect, Color.RED);
+             DebugDrawing.displayImage(screenshot, "Non-normalized");
+             
+             screenshot = ScreenWatcher.resampleImageTo(
+                  window.screenshot(),
+                  Constants.smallestSize.width, Constants.smallestSize.height);*/
+             //Add the normalized top/left coordinates of the search rectangle we used
+             Rect cropNormalized = Constants.normalize(cropRect, winRect);
+             pos = pos.move(cropNormalized.left, cropNormalized.top);
+             /*System.out.println("Search region: "+cropNormalized);
+             System.out.println("Moved result: "+pos);
+             DebugDrawing.drawResult(screenshot, cropNormalized, Color.RED);
+             DebugDrawing.drawResult(screenshot, pos, Color.GREEN);
+             DebugDrawing.displayImage(screenshot, "Normalized");*/
+             
+             
+
+             
+             
+//             System.out.println("Crop rect: "+cropRect+" and normalized: "+cropNormalized);
+//             screenshot = window.screenshot();
+//             DebugDrawing.drawResult(screenshot, pos, Color.RED, Color.YELLOW);
+//             System.out.println("Moved result: "+pos);
+//             DebugDrawing.displayImage(screenshot, "Moved result");
+             
              //De normalize the rectangle (don't forget we rescaled the screenshot prior to 
              // searching the summoner spell)
-             pos = Constants.deNormalize(pos, window.getRect());
+             
+             pos = Constants.deNormalize(pos, winRect);
+             
+             /*screenshot = window.screenshot();
+             DebugDrawing.drawResult(screenshot, pos, Color.RED, Color.YELLOW);
+             System.out.println("Rescaled result: "+pos);
+             DebugDrawing.displayImage(screenshot, "Rescaled result");
+
              //Show some debug
-             //DebugDrawing.drawResult(screenshot, pos, Color.RED);
+             screenshot = window.screenshot();
+             DebugDrawing.drawResult(screenshot, pos, Color.RED);*/
+             // Click in middle of button rather than the corner
              pos = pos.middle();
+             
              /*DebugDrawing.drawPoint(screenshot, pos.left, pos.top, 5, Color.YELLOW);
              DebugDrawing.displayImage(screenshot);*/
              //Click in the middle of the found rectangle
-             System.out.println("  Spell #"+(i+1)+" CLICKING!");
+             System.out.println("  Spell #"+(i+1)+" CLICKING: "+pos);
              window.mouseDown(pos.left, pos.top);
-             sleep(90L);
+             sleep(30L);
              window.mouseUp(pos.left, pos.top);
-             sleep(500L);
+             sleep(400L);
            }
            else {
              System.out.println("  Spell #"+(i+1)+" not seen on screen.");
@@ -375,14 +422,14 @@ import java.util.ArrayList;
        click(PixelOffset.Masteries_Edit);
        sleep(100);
        click(PixelOffset.Masteries_Big_First.offset(PixelOffset.Masteries_Big_Spaces.x*(mastery-1), 0));
-       sleep(100);
+       sleep(50);
        click(PixelOffset.Masteries_Big_Close);
      }
      //Set runes:
      int rune = settings.getInt(Setnames.BLIND_RUNE.name, 0);
      if(rune>0) {
        click(PixelOffset.Blind_Runes_Dropdown);
-       sleep(800);
+       sleep(700);
        click(PixelOffset.Blind_Runes_Dropdown_First.offset(0, PixelOffset.Blind_Runes_Dropdown_Spaces.y*(rune-1)));
      }
      System.out.println("NORMAL LOBBY: Waiting for a game to start.");
@@ -391,7 +438,7 @@ import java.util.ArrayList;
      PixelOffset[] points = new PixelOffset[] {
        PixelOffset.LobbyChat,
        PixelOffset.LobbyChat2,
-       PixelOffset.Blind_SearchChampion,
+       //PixelOffset.Blind_SearchChampion,
        PixelOffset.LobbyTopBar,
        PixelOffset.LobbyHoverchampTop,
        PixelOffset.LobbySummonerSpellsHeader,
@@ -405,7 +452,7 @@ import java.util.ArrayList;
        PixelOffset.PlayButton_cancel
      };
      while(true) {
-       if(WindowTools.checkPoint(window, points)<4) {
+       if(WindowTools.checkPoint(window, points)<3) {
          System.out.println("NORMAL LOBBY: lobby gone, waiting for the game.");
          //Internal loop will wait until lobby reappears or game starts
          //or main screen reappears
@@ -677,20 +724,26 @@ import java.util.ArrayList;
      double[][][] integral_image;
      double[] accepted, pending;
      try {
-       accepted = Images.INVITE_ACCEPTED.getColorSum();
+       accepted = Images.INVITE_ACCEPTED_SMALL.getColorSum();
        pending = Images.INVITE_PENDING.getColorSum();
      }
      catch(IOException e) {
        System.err.println("Can't find required image! Invite lobby can't be automated!"); 
+       settings.setSetting(Setnames.INVITE_ENABLED.name, false);
        return;
      }
      //Declare the two arrays of matches
      ArrayList<RectMatch> accepted_all, pending_all;
+     
+     //Calculate the region where to search the player list
+     Rect player_list = ImageFrame.Invite_InvitedPlayerList.rect(window);
+     
      while(checkPoint(PixelOffset.InviteChat, 1) && checkPoint(PixelOffset.InviteStart, 8)) {
 
        
-       System.out.println("Taking screenshot from window.");
-       integral_image = ScreenWatcher.integralImage(window.screenshot());
+       //System.out.println("Taking screenshot from window.");
+       BufferedImage screenshot = window.screenshotCrop(player_list);
+       integral_image = ScreenWatcher.integralImage(screenshot);
        //System.out.println("Analysing the screenshot.");
        System.out.println("  Invited players: ");
        
@@ -700,27 +753,32 @@ import java.util.ArrayList;
                     integral_image,
                     Images.INVITE_PENDING.getWidth(),
                     Images.INVITE_PENDING.getHeight(),
-                    0.00009f);
+                    0.003f);
        System.out.println("    Pending: "+pending_all.size());
        
        accepted_all = ScreenWatcher.findByAvgColor_isolated_matches(
                     accepted.clone(),
                     integral_image,
-                    Images.INVITE_ACCEPTED.getWidth(),
-                    Images.INVITE_ACCEPTED.getHeight(),
-                    0.00009f);
+                    Images.INVITE_ACCEPTED_SMALL.getWidth(),
+                    Images.INVITE_ACCEPTED_SMALL.getHeight(),
+                    //This is maximum safe tolerance before "Owner" gets matched too
+                    0.0012f);
        System.out.println("    Accepted: "+accepted_all.size());
        
+       
+       /*DebugDrawing.drawPointOrRect(screenshot, Color.yellow, pending_all);
+       DebugDrawing.drawPointOrRect(screenshot, Color.green, accepted_all);
+       DebugDrawing.displayImage(screenshot);*/
        //Only start if all players accepted or declined and at least one accepted
        if(accepted_all.size()>0 && pending_all.isEmpty()) {
          System.out.println("All players have been invited and are in lobby. Time to start!");
-         gui.setTitle("Game started!");
+         gui.setTitle("Waiting for match.");
          click(PixelOffset.InviteStart);
          return;
        }
-       System.out.println("Next test in 1.2 seconds.");
-       sleep(1200L);
-       System.out.println("Timeout over, next test?");
+       //System.out.println("Next test in 2 seconds.");
+       sleep(2000L);
+       //System.out.println("Timeout over, next test?");
      }
      System.out.println("Lobby has exit spontaneously.");
    }
