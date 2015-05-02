@@ -13,6 +13,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Scanner;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,39 +23,58 @@ import org.json.JSONObject;
  *
  * @author Jakub
  */
-public abstract class DataLoader {
-  public enum Realm {NA, OCE, EUNE, EUW,  RU;};
+public abstract class DataLoader implements java.io.Serializable {
+
   
-  protected String realm_str;
-  protected Realm realm;
-  protected final File base_path; 
-  protected final File file_path; 
-  private JSONObject data;
+
+  protected File base_path = null; 
+  protected File file_path = null; 
+  protected File cache_path = null;
+  
+  private transient JSONObject data;
   protected final boolean auto_download;
+  
+  public LoLVersion baseVersion = null;
   /**
    * When checking for updates, this will be filled with the downloaded file. 
    * It can be later reused to perform update.
    */
   protected JSONObject data_tmp;
   
-  public DataLoader(Realm realm_, File path) {
-    this(realm_, path, false);
+  public DataLoader(LoLVersion v, File path) {
+    this(v, path, false);
   }
-  public DataLoader(Realm realm_, File path, boolean download_if_missing) {
-    realm_str = realm_.name().toLowerCase();
-    realm = realm_;
+  public DataLoader(LoLVersion v, File path, boolean download_if_missing) {
+    baseVersion = v;
+    
     auto_download = download_if_missing;
+    if(path==null)
+      throw new IllegalArgumentException("Cannot operate without cache path!");
 
-    String filename = getFilename();
     path.mkdirs();
-    if(path.exists()&&path.isDirectory()) {
-      file_path = new File(path.getAbsolutePath()+"/"+filename+".json");
+    if(path.exists() && path.isDirectory()) {
       base_path = path;
     }
     else {
       throw new IllegalArgumentException("Path is not an existing directory."); 
     }
   }
+  public void setCachePath(File path) {
+    cache_path = path; 
+  }
+
+  public File getCache_path() {
+    return cache_path;
+  }
+  /*public static <T extends DataLoader> T loadFromCache(File location, Class<T> className, Object... arguments) {
+    if(location.isFile()) {
+      
+      
+      
+      
+    }
+    
+  }*/
   
   
   public void forceUpdate() {
@@ -64,7 +84,7 @@ public abstract class DataLoader {
     }
     else
       data = fromURL(getURL());
-    toFile(file_path);
+    toFile(getFile());
   }
   public boolean update() {
     if(!this.upToDate()) {
@@ -74,7 +94,9 @@ public abstract class DataLoader {
     return false;
   }
   
-  public JSONObject getData() {
+  public JSONObject getJSONData() {
+    //Initialise the object path
+    getFile();
     if(data==null) {
       if(!file_path.exists() || !file_path.isFile()) {
         if(auto_download)
@@ -101,18 +123,14 @@ public abstract class DataLoader {
   public void unloadData() {
     data = null;   
   }
-  
-  public String getRealm() {
-    return realm_str;
-  }
-
-  public void setRealm(Realm realm) {
-    data = null;
-    this.realm = realm;
-    realm_str = realm.name().toLowerCase();
-  }
 
 
+
+
+  /**
+   * Returns the top working directory of the LoL data API.
+   * @return 
+   */
   public File getRoot() {
     return base_path; 
   }
@@ -164,9 +182,13 @@ public abstract class DataLoader {
     else
       throw new IllegalArgumentException("JSON file not found at "+url);
   }
-  
-
-  
+  public File getFile() {
+    if(file_path == null) {
+      String filename = getFilename();
+      file_path = new File(base_path.getAbsolutePath()+"/"+filename+".json");
+    }
+    return file_path;
+  }
   /**
    * Get name of the JSON file associated wth this class without the extension (allways .json)
    * @return String filename without extension.
@@ -182,9 +204,43 @@ public abstract class DataLoader {
    * @return X.X.X version format
    */
   public abstract String getVersion();
+  
   /**
-   * Checks whether this is up to date version of file.
-   * @return true if the online version matches the local one
+   *  Get the expected version of this file.
+   * @return 
    */
-  public abstract boolean upToDate();
+  public LoLVersion getBaseVersion() {
+    return baseVersion;
+  }
+
+  public void setBaseVersion(LoLVersion baseVersion) {
+    this.baseVersion = baseVersion;
+  }
+  
+
+
+  public boolean upToDate() {
+    return LoLVersion.isLatestVersion(getVersion());
+  }
+  
+  /**
+   * Loops through given object and returns name properties for every entry.
+   * By name properties I mean {x:{name:something}, y: ...}, not the json keys
+   * @param o 
+   * @return array of names using for this entries in game
+   */
+  public static ArrayList<String> listJSONNames(JSONObject o) {
+    ArrayList<String> names = new ArrayList<>();
+    String[] ids = JSONObject.getNames(o);
+    //System.out.println("Fetching "+ids.length+" champion names.");
+    for(String id: ids) {
+      try {
+        names.add(o.getJSONObject(id).getString("name"));
+      } catch (JSONException ex) {
+        //System.err.println("Error fetching champion "+id+" name: "+ex);
+        //Ignore and continue
+      }
+    }  
+    return names;
+  }
 }

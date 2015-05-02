@@ -19,25 +19,22 @@ import org.json.JSONObject;
  *
  * @author Jakub
  */
-public class Champions extends DataLoader {
+public class Champions_old extends DataLoader {
   private String version;
-  private Version ver;
   private JSONObject champ_data;
   private HashMap<String, Champion> champs = new HashMap<>();
   private String[] champion_names;
   private ArrayList<String> champion_names_list;
-  public Champions(Version v) {
+  public Champions_old(LoLVersion v) {
     this(v, false); 
   }
-  public Champions(Version v, boolean b) {
-    super(v.realm, v.base_path, b); 
-    ver = v;
-
+  public Champions_old(LoLVersion v, boolean b) {
+    super(v, v.base_path, b); 
   }
   public JSONObject getChampData() {
     if(champ_data==null) {
       try {
-        champ_data = getData().getJSONObject("data");
+        champ_data = getJSONData().getJSONObject("data");
       } catch (JSONException ex) {
         champ_data = null;
       }
@@ -46,10 +43,10 @@ public class Champions extends DataLoader {
   }
   
   public Champion getChampion(String name) {
+    if(champs.containsKey(name)) {
+      return (Champion)champs.get(name);
+    }
     if(getChampData()!=null) {
-      if(champs.containsKey(name)) {
-        return (Champion)champs.get(name);
-      }
       try {
         JSONObject node = champ_data.getJSONObject(name);
         Champion champ = new Champion(this, node);
@@ -66,7 +63,7 @@ public class Champions extends DataLoader {
   @Override
   public String getVersion() {
     if(version==null) {
-      JSONObject data = getData();
+      JSONObject data = getJSONData();
       try {
         version=data.getString("version");
       }
@@ -101,18 +98,7 @@ public class Champions extends DataLoader {
       return champion_names_list; 
     }
     if(getChampData()!=null) {
-      ArrayList<String> names = new ArrayList<>();
-      String[] ids = JSONObject.getNames(champ_data);
-      System.out.println("Fetching "+ids.length+" champion names.");
-      for(String id: ids) {
-        try {
-          names.add(champ_data.getJSONObject(id).getString("name"));
-        } catch (JSONException ex) {
-          System.err.println("Error fetching champion "+id+" name: "+ex);
-          //Ignore and continue
-        }
-      }  
-      return champion_names_list = names;
+      return champion_names_list = DataLoader.listJSONNames(champ_data);
     }
     return new ArrayList<String>();
   }
@@ -124,10 +110,10 @@ public class Champions extends DataLoader {
   @Override
   public URL getURL() {
     try {
-      System.out.print("Version: ");
-      System.out.println(ver.getVersion());
+      //System.out.print("LoLVersion: ");
+      //System.out.println(ver.getVersion());
       
-      return new URL("http://ddragon.leagueoflegends.com/cdn/"+ver.getVersion()+"/data/"+ver.getLanguage()+"/champion.json");
+      return new URL("http://ddragon.leagueoflegends.com/cdn/"+getBaseVersion().getVersion()+"/data/"+getBaseVersion().getLanguage()+"/champion.json");
     } catch (MalformedURLException ex) {
       return null;
     }
@@ -135,7 +121,7 @@ public class Champions extends DataLoader {
 
   @Override
   public boolean upToDate() {
-    return getVersion().equals(ver.getVersion());
+    return getVersion().equals(getBaseVersion().getVersion());
   }
 
 
