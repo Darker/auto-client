@@ -6,7 +6,6 @@
 
 package cz.autoclient.GUI;
 
-import cz.autoclient.autoclick.comvis.DebugDrawing;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.geom.AffineTransform;
@@ -16,8 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
@@ -42,12 +39,12 @@ public class LazyLoadedImage {
   public static final Class leclass = Type.FILE.getClass();
   //These will fill up on demand when needed
   protected ImageIcon icon = null;
-  protected Image image = null;
+  protected volatile Image image = null;
   protected BufferedImage b_image = null;
   //If image has failed, we'll not try to load it again and will return null straight away
   protected boolean image_failed = false;
   
-  private final String imageMutex = "ddd";
+  private final Object imageMutex = new Object();
   
   private HashMap<Dimensions, BufferedImage> scaledInstances;
   
@@ -110,11 +107,13 @@ public class LazyLoadedImage {
       return b_image;
     
     Image im = this.getImage();
+    if(im==null)
+      return null;
     
     if(im instanceof BufferedImage) {
       return b_image = (BufferedImage)im;
     }
-    else if(im!=null) {
+    else {
       // Create a buffered image with transparency
       b_image = new BufferedImage(im.getWidth(null), im.getHeight(null), BufferedImage.TYPE_INT_ARGB);
 
@@ -122,36 +121,45 @@ public class LazyLoadedImage {
       Graphics2D bGr = b_image.createGraphics();
       bGr.drawImage(im, 0, 0, null);
       bGr.dispose();
-
+      //Do not hold two instances of the same image
+      synchronized(imageMutex) {
+        image = b_image;
+      }
       // Return the buffered image
       return b_image;
     }
-    return null;
+    
     //return type==Type.FILE?new BufferedImage(getImageFile()):new BufferedImage(getImageResource()); 
   }
   public BufferedImage getCropped(int frame) {
     BufferedImage src = getBufferedImage();
     return src!=null? src.getSubimage(frame, frame, src.getWidth()-2*frame, src.getHeight()-2*frame):null;
   }
-  public BufferedImage getScaled(int width, int height, boolean saveToCache) {
+  public static BufferedImage crop(BufferedImage in, int top, int right, int bottom, int left) {
+    return in!=null?in.getSubimage(left, top, in.getWidth()-left-right, in.getHeight()-top-bottom):null;
+  }
+  public static BufferedImage crop(BufferedImage in, int margin) {
+    return in!=null?in.getSubimage(margin, margin, in.getWidth()-2*margin, in.getHeight()-2*margin):null;
+  }
+  public synchronized BufferedImage getScaled(int width, int height, boolean saveToCache) {
+    //Check cache first
+    Dimensions d = null;
+    if(scaledInstances!=null) {
+      d = new Dimensions(width, height);
+      if(scaledInstances.containsKey(d)) {
+        //System.out.println("Already cached. Returning cache.");
+        return scaledInstances.get(d);
+      }
+    }
+    
     BufferedImage src = getBufferedImage();
+
     if(src!=null) {
-      Dimensions d = new Dimensions(width, height);
-      System.out.println("Scaling icon.");
-      try {
-        DebugDrawing.displayImage(src);
-      } catch (InterruptedException ex) {
-        Logger.getLogger(LazyLoadedImage.class.getName()).log(Level.SEVERE, null, ex);
-      }
-      if(scaledInstances!=null) {
-        if(scaledInstances.containsKey(d)) {
-          System.out.println("Already cached. Returning cache.");
-          return scaledInstances.get(d);
-        }
-      }
+      //System.out.println("Scaling icon.");
+
       BufferedImage scaled = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
       AffineTransform at = new AffineTransform();
-      at.scale(src.getWidth()/width, src.getHeight()/height);
+      at.scale((double)width/(double)src.getWidth(), (double)height/(double)src.getHeight());
       //System.out.println("["+xscale+", "+yscale+"]");
       AffineTransformOp scaleOp = 
          new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
@@ -159,9 +167,11 @@ public class LazyLoadedImage {
       if(saveToCache) {
         if(scaledInstances==null)
           scaledInstances = new HashMap();
-        System.out.println("Saving to cache.");
+        if(d==null)
+          d = new Dimensions(width, height);
+        //System.out.println("Saving to cache.");
         scaledInstances.put(d, scaled);
-      }      
+      }
       return scaled;
     }
     return null;
@@ -169,7 +179,8 @@ public class LazyLoadedImage {
   public Image getImageFile() {
     if(image==null && !image_failed) {
       synchronized(imageMutex) {
-        if(image==null) {
+        //If was blocked, check for the null once again
+        if(image==null && !image_failed) {
           File file = new File(path);
           try {
             image = ImageIO.read(file);
@@ -211,27 +222,31 @@ public class LazyLoadedImage {
   /** Loads, or just retrieves from cache, the image.
    *  @return Image (not necesarily a BufferedImage) or null on failure
   */
-  private synchronized Image getImageResource() {
+  private Image getImageResource() {
     //Lazy load...
     if(image==null) {
-      //Since the .jar is constant (it's packed) we can
-      //Remember the image is unavailable
-      if(image_failed)
-        return null;
-      //System.out.println("  LoadImage(\""+leclass.getResource(".")+"\")");
-      //Use whatever is stored in Icon if we have it
-      if(icon!=null) {
-        image = icon.getImage();
-      }
-      //Load from .jar
-      else {
-        try {
-          image = ImageIO.read(leclass.getResourceAsStream(path));
-        }
-        //While only IOException is reported it also can throw InvalidArgumentException
-        // when read() argument is null
-        catch(Exception e) {
-          image_failed = true;
+      synchronized(imageMutex) {
+          if(image==null) {
+          //Since the .jar is constant (it's packed) we can
+          //Remember the image is unavailable
+          if(image_failed)
+            return null;
+          //System.out.println("  LoadImage(\""+leclass.getResource(".")+"\")");
+          //Use whatever is stored in Icon if we have it
+          if(icon!=null) {
+            image = icon.getImage();
+          }
+          //Load from .jar
+          else {
+            try {
+              image = ImageIO.read(leclass.getResourceAsStream(path));
+            }
+            //While only IOException is reported it also can throw InvalidArgumentException
+            // when read() argument is null
+            catch(Exception e) {
+              image_failed = true;
+            }
+          }
         }
       }
     }

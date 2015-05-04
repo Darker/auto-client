@@ -54,7 +54,7 @@ public class LazyLoadedRemoteImage extends LazyLoadedImage {
       return getImageUrl();
   } 
 
-  private Image getImageUrl() {
+  private synchronized Image getImageUrl() {
     if(image==null) {
       if(image_failed)
         return null;
@@ -75,7 +75,7 @@ public class LazyLoadedRemoteImage extends LazyLoadedImage {
     return image;
   }
 
-  private ImageIcon getIconUrl() {
+  private synchronized ImageIcon getIconUrl() {
     if(icon==null) {
       getImage();
       if(image!=null)
