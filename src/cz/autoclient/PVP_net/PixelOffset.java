@@ -52,12 +52,7 @@ public enum PixelOffset implements ComparablePixel {
     LobbySummonerSpellsHeader(0.4441223758058664D, 0.590262641502635D, new Color(251, 150, 1, 1),50),
     //Green checkmark seen above the rune selectbox
     LobbyRunesCheckmark (0.36532672890688844D, 0.625624587866083D,new Color(0, 135, 55, 1),10),
-    //Summoner spell icons
-    Blind_SumSpell1 (0.4979340371027294D, 0.6088404678228453D),
-    
-    Blind_SumSpell2 (0.5421364731680097D, 0.6117873045064729D),
-    //Fortunatelly, this one works for both spell 1 and spell 2 dialogs
-    Blind_SumSpell_CloseDialog (0.650720718284894D, 0.20448429853646063D),
+
     //Button for editing masteries in lobby
     Masteries_Edit(0.40952916497216874D, 0.659577173474749D, new Color(188, 201, 215, 1),10),
     //The first mastery tab offset
@@ -66,16 +61,22 @@ public enum PixelOffset implements ComparablePixel {
     Masteries_Big_Spaces(0.0258D, 0D),
     //Close button for the mastery editor
     Masteries_Big_Close (0.9092088770144683D, 0.2199774437191499D),
+    //Summoner spell icons
+    Blind_SumSpell1 (0.4979340371027294D, 0.6088404678228453D),
+    
+    Blind_SumSpell2 (0.5421364731680097D, 0.6117873045064729D),
+    //Fortunatelly, this one works for both spell 1 and spell 2 dialogs
+    Blind_SumSpell_CloseDialog (0.650720718284894D, 0.20448429853646063D),
     //Open dropdown menu with runes
     Blind_Runes_Dropdown (0.3163196802258168D, 0.6194746841507007D),
     //First item in the rune dropdown menu
     Blind_Runes_Dropdown_First (0.25385971622052933D, 0.6502242027276122D),
     Blind_Runes_Dropdown_Spaces (0D, 0.0275D),
-    
+    Blind_SearchChampion(0.779484336388102D, 0.16596235113330773D, new Color(255, 255, 255, 1)),
     MatchFound(0.495117D, 0.515625D, new Color(255, 255, 255)),
     AcceptButton(0.39004512649241546D, 0.5599898226129755D, new Color(25, 60, 101, 1)),
     //Search champion field in blind queue
-    Blind_SearchChampion(0.779484336388102D, 0.16596235113330773D, new Color(255, 255, 255, 1)),
+    
     TeamBuilder_AcceptGroup  (0.36240150633806045D, 0.5802060676136939D, new Color(43, 85, 137, 1)),
     TeamBuilder_CaptainIcon (0.5120583464840514D, 0.17717336270716075D, new Color(56, 97, 99, 1)),
     //The green arrow after the Invited heading on the right
@@ -115,7 +116,7 @@ public enum PixelOffset implements ComparablePixel {
     Patcher_Eula_Button (0.3230461378879247D, 0.8685457846236829D),
     Patcher_Eula_Heading (0.5046604947648373D, 0.08148622422881516D, new Color(24, 117, 143, 1)),
     
-    Login_UsernameField (0.10299488008468129D, 0.3996156263257844D, new Color(242, 243, 243, 1)),
+    Login_UsernameField (0.30478860994791757D, 0.3982062655710023D, new Color(242, 243, 243, 1)),
     Login_PasswordField (0.10107303503836476D, 0.47648942276806283D, new Color(242, 243, 243, 1)),
     Login_ButtonDisabled (0.28557015948475223D, 0.5254193957017744D, new Color(140, 140, 140, 1))
     ;
