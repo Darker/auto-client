@@ -7,7 +7,6 @@
 package cz.autoclient.GUI.summoner_spells;
 
 import cz.autoclient.GUI.ToolTipTimer;
-import cz.autoclient.PVP_net.SummonerSpell;
 import cz.autoclient.settings.Settings;
 import java.awt.Container;
 import java.awt.GridLayout;
@@ -22,6 +21,9 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import cz.autoclient.PVP_net.ConstData;
+import cz.autoclient.league_of_legends.SummonerSpell;
+import cz.autoclient.league_of_legends.maps.SummonerSpells;
 
 /**
  *
@@ -71,11 +73,15 @@ public class FrameSummonerSpells extends JDialog {
   }
   private void createButtons() {
     //Get all existing SummonerSpells
-    SummonerSpell[] values = SummonerSpell.values();
+    SummonerSpells spells = ConstData.lolData.getSummonerSpells();
+    int length = spells.size();
+    //cz.autoclient.PVP_net.SummonerSpell[] values = cz.autoclient.PVP_net.SummonerSpell.values();
+   
+    //int length = values.length;
     //Calculate number of rows and cells for the frame grid
     //We add 1 to length because there will be allways the NULL button
-    int width = (int)Math.ceil(Math.sqrt(values.length+1)),
-        height = (int)Math.round(Math.sqrt(values.length+1));
+    int width = (int)Math.ceil(Math.sqrt(length+1)),
+        height = (int)Math.round(Math.sqrt(length+1));
     //Layout will automatically distribute spells evenly in the grid
     GridLayout layout = new GridLayout(height, width, 5, 5);
     //Get content panel to add buttons in
@@ -86,23 +92,26 @@ public class FrameSummonerSpells extends JDialog {
     //Listener for clicks
     ActionListener list = new buttonOnclick();
     //Create all the buttons
-    for(int i=0, l=values.length; i<=l; i++) {
-      if(i<l) {
-        b = new ButtonSummonerSpell(values[i]);
-        b.addActionListener(list);
-        b.addMouseListener(ToolTipTimer.INSTANT_TOOLTIP);
-        b.setToolTipText(values[i].name);
-        contentPane.add(b);
-      }
-      else {
-        //The extra NULL button 
-        b = new ButtonSummonerSpell(null);
-        b.addActionListener(list);
-        b.addMouseListener(ToolTipTimer.INSTANT_TOOLTIP);
-        b.setToolTipText("Do not change spell");
-        contentPane.add(b);
-      }
+    for(SummonerSpell spell : spells) {
+      b = new ButtonSummonerSpell(spell.jsonKey);
+      b.addActionListener(list);
+      b.addMouseListener(ToolTipTimer.INSTANT_TOOLTIP);
+      b.setToolTipText(spell.name);
+      contentPane.add(b);
     }
+    /*for(int i=0, l=values.length; i<l; i++) {
+      b = new ButtonSummonerSpell(values[i]);
+      b.addActionListener(list);
+      b.addMouseListener(ToolTipTimer.INSTANT_TOOLTIP);
+      b.setToolTipText(values[i].name);
+      contentPane.add(b);
+    }*/
+    b = new ButtonSummonerSpell(null);
+    b.addActionListener(list);
+    b.addMouseListener(ToolTipTimer.INSTANT_TOOLTIP);
+    b.setToolTipText("Do not change spell");
+    contentPane.add(b);
+
     
   }
   private class buttonOnclick implements ActionListener {

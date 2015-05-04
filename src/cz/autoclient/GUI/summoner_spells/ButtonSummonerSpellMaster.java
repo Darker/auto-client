@@ -24,7 +24,7 @@ public class ButtonSummonerSpellMaster extends ButtonSummonerSpell implements Ev
   private FrameSummonerSpells popup;
   protected Settings settings;
   private ButtonSummonerSpellMaster twin;
-  public ButtonSummonerSpellMaster(SummonerSpell spell, Settings set) {
+  public ButtonSummonerSpellMaster(String spell, Settings set) {
     super(spell);
     this.addActionListener(new ActionListener() {
       @Override
@@ -55,10 +55,10 @@ public class ButtonSummonerSpellMaster extends ButtonSummonerSpell implements Ev
    *      THIS will become Flash
    * @param value The new spell used by this button
    */
-  public void setSpellSafe(SummonerSpell value) {
+  public void setSpellSafe(String value) {
     if(twin!=null && value!=null) {
-      SummonerSpell twin_value = twin.getSpell();
-      if(twin_value==value) {
+      String twin_value = twin.getSpell();
+      if(value.equals(twin_value)) {
         twin.setSpell(spell); 
       }
     }
@@ -69,14 +69,14 @@ public class ButtonSummonerSpellMaster extends ButtonSummonerSpell implements Ev
    * @param value the new value just as in the original function
    */
   @Override
-  public void setSpell(SummonerSpell value) {
+  public void setSpell(String value) {
     super.setSpell(value);
     dispatchEvent("change", value);
   }
   /** Silent set spell. Does not trigger the event.
    * @param value the new value just as in the original function
    */
-  public void setSpellSilent(SummonerSpell value) {
+  public void setSpellSilent(String value) {
     super.setSpell(value);
   }
   

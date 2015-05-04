@@ -7,9 +7,10 @@
 package cz.autoclient.GUI.summoner_spells;
 
 import cz.autoclient.GUI.ImageResources;
-import cz.autoclient.PVP_net.SummonerSpell;
-import java.awt.event.ActionEvent;
+import cz.autoclient.PVP_net.ConstData;
+import cz.autoclient.league_of_legends.SummonerSpell;
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.border.Border;
 
@@ -20,25 +21,44 @@ import javax.swing.border.Border;
 public class ButtonSummonerSpell extends JButton {
   
   public static final Border emptyBorder = BorderFactory.createEmptyBorder();
-  protected SummonerSpell spell;
+  protected String spell;
 
   
-  public ButtonSummonerSpell(SummonerSpell spell) {
-    super(spell!=null?spell.getIcon():ImageResources.SUMMONER_SPELLS_NOSPELL.getIcon());
+  public ButtonSummonerSpell(String spell) {
+    super(spell!=null?findSpellIcon(spell):ImageResources.SUMMONER_SPELLS_NOSPELL.getIcon());
       
     this.spell = spell;
     this.setBorder(emptyBorder);
     this.setContentAreaFilled(false);
   }
-  
-  public void setSpell(SummonerSpell spell) {
+  private static ImageIcon findSpellIcon(String name) {
+    try {
+      //return ConstData.lolData.getSummonerSpells().find(SummonerSpell.GET_NAME, name).img.getIcon();
+      SummonerSpell spell = ConstData.lolData.getSummonerSpells().get(name);
+      if(spell!=null) {
+        //System.out.println("Spell: "+spell.img.url);
+        return new ImageIcon(spell.img.getScaled(48,48, true));
+      }
+      else {
+        /*System.out.println("No spell at "+name+"\n   Available names: ");
+        for(String sname:ConstData.lolData.getSummonerSpells().keySet()) {
+           System.out.println("      "+sname);
+        }*/
+        return null;
+      }
+    }
+    catch(NullPointerException e) {
+      return null; 
+    }
+  }
+  public void setSpell(String spell) {
     if(spell!=null)
-      this.setIcon(spell.getIcon());
+      this.setIcon(findSpellIcon(spell));
     else 
       this.setIcon(ImageResources.SUMMONER_SPELLS_NOSPELL.getIcon());
     this.spell = spell; 
   }
-  public SummonerSpell getSpell() {
+  public String getSpell() {
     return spell;
   }
 }

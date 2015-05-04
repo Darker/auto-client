@@ -6,7 +6,6 @@
 
 package cz.autoclient.GUI.summoner_spells;
 
-import cz.autoclient.PVP_net.SummonerSpell;
 import cz.autoclient.event.EventCallback;
 import cz.autoclient.settings.Input;
 import cz.autoclient.settings.SettingsInputVerifier;
@@ -42,7 +41,7 @@ public class InputSummonerSpell implements Input {
     field.addEventListener("change", new EventCallback() {
       @Override
       public void event(Object... parameters) {
-        if(parameters[0] instanceof SummonerSpell || parameters[0]==null) {
+        if(parameters[0] instanceof String || parameters[0]==null) {
           //SummonerSpell value = (SummonerSpell)parameters[0];  
           onchange.changed(parameters[0]);
         }
@@ -66,12 +65,8 @@ public class InputSummonerSpell implements Input {
   }
   @Override
   public void setValue(Object value) {
-    //tmp variable
-    SummonerSpell val;
-    if(value instanceof SummonerSpell)
-      field.setSpell((SummonerSpell) value);
-    else if(value instanceof String && (val = SummonerSpell.byName((String)value))!=null) {
-      field.setSpell(val);
+    if(value instanceof String) {
+      field.setSpell((String)value);
     }
     else 
       field.setSpell(null);
