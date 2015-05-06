@@ -6,10 +6,13 @@
 
 package cz.autoclient.robots;
 
-import cz.autoclient.autoclick.ms_windows.MSWindow;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.windows.cache.title.CacheByTitle;
 import cz.autoclient.robots.exceptions.RobotDisabledException;
+import cz.autoclient.robots.helpers.DummyLogger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
+
 
 
 
@@ -18,6 +21,29 @@ import cz.autoclient.robots.exceptions.RobotDisabledException;
  * @author Jakub
  */
 public abstract class Robot implements Runnable {
+  
+  private Logger logger = null;
+  /**
+   * Retrieves logger  for this class.
+   * @return current logger. Creates new logger if no logger is available.
+   */
+  public Logger getLogger() {
+    return (logger!=null ?
+              logger
+               :
+              (DummyLogger.inst)
+           );
+  }
+  public void setLogger(Logger log) {
+    logger = log; 
+  }
+  /**
+   * Shortcut to {@link Robot#getLogger()}.
+   * @return see {@link Robot#getLogger()}.
+   */
+  public Logger glg() {
+    return getLogger(); 
+  }
   
   
   protected Window window = null;
@@ -49,6 +75,7 @@ public abstract class Robot implements Runnable {
    * @return true if this error is not significant enough to cancel this bot
    */
   protected boolean continueOnError(Throwable error, ExecutionPhase phase) {
+    glg().log(Level.ERROR, error.toString());
     //System.err.println("Error "+error+" caught in robot "+this.getClass().getName());
     //System.err.println("Last: "+lastError+((/*error.equals(lastError)*/errorsSame(error, lastError)?" which is the same as last":" which is defferent than last")));
     if(phase == ExecutionPhase.GET_WINDOW || (errorsSame(error, lastError) && phase==errorPhase)) {
@@ -163,31 +190,34 @@ public abstract class Robot implements Runnable {
     lastRan = System.currentTimeMillis();
     
     init();
-    t = new Thread(this);
+    t = new Thread(this, "Robot_"+this.getClass().getName());
     t.start();
   }
   
   public void stop() {
     if(t.isAlive()) {
       t.interrupt(); 
+      glg().debug("Robot stopped forcefully.");
     }
   }
   
   @Override
   public final void run() {
-    //System.out.println("Robot thread "+t.getName()+" started.");
-    if(listener!=null) 
+    glg().debug("Robot thread {0} started.", t.getName());//System.out.println("Robot thread "+t.getName()+" started.");
+    if(listener!=null)
       listener.started();
     try {
       go();
       if(listener!=null) 
         listener.terminated();
+      glg().debug("Robot thread {0} terminated.", t.getName());
       //System.out.println("Robot thread "+t.getName()+" terminated.");
     }
     catch(Throwable e) {
       //System.out.println(e);
       if(listener!=null)
         listener.terminated(e);
+      glg().debug("Robot thread {0} terminated with error: "+e.getMessage(), t.getName());
       //System.out.println("Robot thread "+t.getName()+" terminated with error:\n     "+e);
     }
     
@@ -215,8 +245,10 @@ public abstract class Robot implements Runnable {
         return lastCanRun = canRunEx();
       else {
         boolean can = canRunEx();
-        if(can!=lastCanRun)
+        if(can!=lastCanRun) {
+          glg().debug(can?"Robot can run now.":"Robot can't run anymore.");
           listener.enabledStateChanged(can);
+        }
         return lastCanRun = can;
       }
     }

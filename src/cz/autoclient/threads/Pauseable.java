@@ -20,11 +20,18 @@ public abstract class Pauseable extends Thread {
     private Condition mCondition;
     private AtomicBoolean mAwait;
 
+    public Pauseable(String threadName) {
+      super(threadName);
+      initLocks();
+    }
     public Pauseable() {
-        super();
-        this.mLock = new ReentrantLock();
-        this.mCondition = this.mLock.newCondition();
-        this.mAwait = new AtomicBoolean(false); 
+      super();
+      initLocks();
+    }
+    private void initLocks() {
+      this.mLock = new ReentrantLock();
+      this.mCondition = this.mLock.newCondition();
+      this.mAwait = new AtomicBoolean(false); 
     }
 
     /**

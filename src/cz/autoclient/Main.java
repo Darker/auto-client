@@ -4,16 +4,19 @@ import cz.autoclient.GUI.Gui;
 import cz.autoclient.GUI.summoner_spells.ButtonSummonerSpellMaster;
 import cz.autoclient.GUI.summoner_spells.InputSummonerSpell;
 import cz.autoclient.PVP_net.Setnames;
+import cz.autoclient.robots.Robot;
+import cz.autoclient.robots.exceptions.NoSuchRobotException;
 import cz.autoclient.settings.InputHandlers;
 import cz.autoclient.settings.Settings;
 import cz.autoclient.settings.input_handlers.*;
-import cz.autoclient.settings.secure.EncryptedSetting;
 import cz.autoclient.settings.secure.SecureSettings;
 import cz.autoclient.settings.secure.UniqueID;
+import java.beans.Expression;
 import java.io.File;
 import java.io.FileNotFoundException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
@@ -21,6 +24,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import org.apache.logging.log4j.LogManager;
 import sirius.constants.IMKConsts;
 import sirius.constants.IWMConsts;
  
@@ -36,6 +40,8 @@ import sirius.constants.IWMConsts;
    public Gui gui;
    
    private Settings settings;
+   
+   public final ArrayList<Robot> robots = new ArrayList<>();
    
  
    
@@ -111,7 +117,7 @@ import sirius.constants.IWMConsts;
      encryptor.addPassword("Constant password.");
      encryptor.addPassword(UniqueID.WINDOWS_USER_SID);
      
-     System.out.println("Encryption password: "+encryptor.getMergedPassword());
+     //System.out.println("Encryption password: "+encryptor.getMergedPassword());
      
      gui = new Gui(this, settings);
  
@@ -124,6 +130,23 @@ import sirius.constants.IWMConsts;
          gui.setVisible(true);
        }
      });
+   }
+   private <T extends Robot> T createRobot(Class<T> type) throws NoSuchRobotException {
+     try {
+       T robot = (T)new Expression(type, "new", new Object[]{}).getValue();
+       robot.setLogger(LogManager.getLogger(type.getName()));
+       return robot;
+     }
+     catch(Exception e) {
+       throw new NoSuchRobotException("Constructor has failed.");
+     }
+   }
+   public <T extends Robot> T findRobot(Class<T> type) throws NoSuchRobotException {
+     for(Robot r : robots) {
+       if(type.isInstance(r))
+         return (T)r;
+     }
+     return createRobot(type);
    }
    
    public static void main(String[] args)

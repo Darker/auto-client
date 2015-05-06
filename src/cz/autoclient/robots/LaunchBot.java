@@ -6,9 +6,10 @@
 
 package cz.autoclient.robots;
 
-import cz.autoclient.PVP_net.Constants;
+import cz.autoclient.PVP_net.WindowTools;
+import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.PixelOffset;
-import cz.autoclient.autoclick.ms_windows.MSWindow;
+import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.windows.WindowCallback;
@@ -25,7 +26,7 @@ public class LaunchBot extends Robot {
 
   @Override
   public String getWindowName() {
-    return Constants.patcher_window_title;
+    return ConstData.patcher_window_title;
   }
   /**
    * Remembers whether the last go() went with errors or not
@@ -96,7 +97,7 @@ public class LaunchBot extends Robot {
           System.out.println("   Window HWND : "+((MSWindow)window).hwnd);*/
           //Get the window again
           if(window.getRect().width<200) {
-            window = MSWindow.windowFromName(Constants.patcher_window_title, false);
+            window = MSWindow.windowFromName(ConstData.patcher_window_title, false);
           }
         }
         //System.out.println("  - Going to sleep.");
@@ -133,7 +134,7 @@ public class LaunchBot extends Robot {
     //if(System.currentTimeMillis()%5==0)
     //  throw new Error("TEST ERROR");
     //If the PVP.net client is running, the patcher cannot be running so this can be skipped
-    if(CacheByTitle.initalInst.getCache(Constants.window_title_part).hasValidWindow())
+    if(CacheByTitle.initalInst.getCache(ConstData.window_title_part).hasValidWindow())
       return false;
     return super.canRunEx() && (!overSuccesful || fromLastExit()>8000);
   }

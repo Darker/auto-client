@@ -6,6 +6,7 @@
 
 package cz.autoclient.league_of_legends;
 
+import cz.autoclient.league_of_legends.maps.Champions;
 import cz.autoclient.league_of_legends.maps.SummonerSpells;
 import java.io.File;
 import java.net.MalformedURLException;
@@ -26,9 +27,10 @@ public class LoLVersion extends DataLoader {
   private Realm realm;
   private String realm_str;
   
-  private Champions_old champion;
+  private Champions champion;
+  private final Object champion_mutex = new Object();
   private SummonerSpells spells;
-  
+  private final Object spells_mutex = new Object();
   public LoLVersion(Realm r, File p) {
     this(r, p, false); 
   }
@@ -83,17 +85,27 @@ public class LoLVersion extends DataLoader {
       unloadData();
   }
   
-  public Champions_old getChampions() {
-    if(champion==null) {
-      champion = new Champions_old(this, auto_download); 
+  public Champions getChampions() {
+    Champions champ = champion;
+    if(champ==null) {
+      synchronized(champion_mutex) {
+        if(champ==null) {
+          champ = champion = new Champions(this, auto_download);
+        }
+      }
     }
-    return champion; 
+    return champ; 
   }
   public SummonerSpells getSummonerSpells() {
-    if(spells==null) {
-      spells = new SummonerSpells(this, auto_download); 
+    SummonerSpells spls = spells;
+    if(spls==null) {
+      synchronized(spells_mutex) {
+        if(spls==null) {
+          spls = spells = new SummonerSpells(this, auto_download);
+        }
+      }
     }
-    return spells;  
+    return spls;  
   }
   @Override
   public String getFilename() {

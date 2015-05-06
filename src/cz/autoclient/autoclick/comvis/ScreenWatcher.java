@@ -70,7 +70,7 @@ public class ScreenWatcher {
         //Find first match below tolerance - ONLY USE WHEN YOUR SEARCHED OBJECT IS VERY UNIQUE
         else {
           if(diff<=tolerance) {
-            return Rect.byWidthHeight(rect_x, rect_y, ws, hs);
+            return Rect.byWidthHeight(rect_y, rect_x, ws, hs);
           }
         }
       }
@@ -78,7 +78,7 @@ public class ScreenWatcher {
     if(return_nearest) {
       //System.out.println("Lowest difference: "+difference+". Wolerance: "+tolerance);
       if(difference<=tolerance) {
-        return Rect.byWidthHeight(difference_pos[0], difference_pos[1], ws, hs);
+        return Rect.byWidthHeight(difference_pos[1], difference_pos[0], ws, hs);
       }      
     }
     //Nothing found - return null
@@ -264,7 +264,7 @@ public class ScreenWatcher {
           //This statement asks if the loop ended normally
           // - otherwise, the x and y are MAX_INT and greater than iw
           if(x==iw) {
-            return Rect.byWidthHeight(rect_x, rect_y, iw, ih); 
+            return Rect.byWidthHeight(rect_y, rect_x, iw, ih); 
           }
       }
     }
@@ -289,7 +289,7 @@ public class ScreenWatcher {
     BufferedImage after = new BufferedImage((int)Math.round(w*xscale), (int)Math.round(yscale*h), BufferedImage.TYPE_INT_ARGB);
     AffineTransform at = new AffineTransform();
     at.scale(xscale, yscale);
-    System.out.println("["+xscale+", "+yscale+"]");
+    //System.out.println("["+xscale+", "+yscale+"]");
     AffineTransformOp scaleOp = 
        new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
     after = scaleOp.filter(original, after);

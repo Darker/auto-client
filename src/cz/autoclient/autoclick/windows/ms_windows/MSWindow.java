@@ -398,7 +398,7 @@ public class MSWindow extends Common implements Window  {
 
    WinDef.HDC hdcWindow = User32Ext.INSTANCE.GetDC(hwnd);
    WinDef.HDC hdcMemDC = GDI32.INSTANCE.CreateCompatibleDC(hdcWindow);
-   Rect bounds = getRect();
+   //Rect bounds = getRect();
    
    /*if(x<0 || y<0 || x+w>bounds.width || y+h>bounds.height) {
      throw new IllegalArgumentException(
@@ -408,7 +408,7 @@ public class MSWindow extends Common implements Window  {
      ); 
    }*/
    
-   WinDef.HBITMAP hBitmap = GDI32.INSTANCE.CreateCompatibleBitmap(hdcWindow, w,h/*(int)bounds.width, (int)bounds.height*/);
+   WinDef.HBITMAP hBitmap = GDI32.INSTANCE.CreateCompatibleBitmap(hdcWindow, /**/ w,h /* (int)bounds.width, (int)bounds.height /**/);
    WinNT.HANDLE hOld = GDI32.INSTANCE.SelectObject(hdcMemDC, hBitmap);
    //getGDI32();
    GDIExt.BitBlt(hdcMemDC, 0, 0, w, h, hdcWindow, x, y, SRCCOPY);
@@ -421,7 +421,7 @@ public class MSWindow extends Common implements Window  {
    bmi.bmiHeader.biBitCount = 32;
    bmi.bmiHeader.biCompression = 0;
    Memory buffer = new Memory(w * h * 4);
-   GDI32.INSTANCE.GetDIBits(hdcWindow, hBitmap, 0, w, buffer, bmi, 0);
+   GDI32.INSTANCE.GetDIBits(hdcWindow, hBitmap, 0, h, buffer, bmi, 0);
    BufferedImage image = new BufferedImage(w, h, 1);
    image.setRGB(0, 0, w, h, buffer.getIntArray(0L, w * h), 0, w);
    GDI32.INSTANCE.DeleteObject(hBitmap);

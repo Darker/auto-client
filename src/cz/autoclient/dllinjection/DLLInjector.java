@@ -79,19 +79,19 @@ public class DLLInjector {
       res.run(false, "Injection files are missing.");
   }
   public static Process injectNow() throws ProcessNotFoundException, IOException {
-    int pid = NativeProcess.getProcessId(cz.autoclient.PVP_net.Constants.process_name);
+    int pid = NativeProcess.getProcessId(cz.autoclient.PVP_net.ConstData.process_name);
     if(pid>0) {
       String command_line = DLLInjector.getCommandLine(pid);
       return Runtime.getRuntime().exec(command_line);
     }
     else 
-      throw new ProcessNotFoundException("Process not seen in tasklist.", cz.autoclient.PVP_net.Constants.process_name);
+      throw new ProcessNotFoundException("Process not seen in tasklist.", cz.autoclient.PVP_net.ConstData.process_name);
   }
   public static String getCommandLine(int pid) {
     return injector.getAbsolutePath()+
                             " "+
                             command_line_pattern.replace("$PID", ""+pid)
-                                                .replace("$PNAME", cz.autoclient.PVP_net.Constants.process_name)
+                                                .replace("$PNAME", cz.autoclient.PVP_net.ConstData.process_name)
                                                 .replace("$DLL_PATH", dll.getAbsolutePath());
     
   }

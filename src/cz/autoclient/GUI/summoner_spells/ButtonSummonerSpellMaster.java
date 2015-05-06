@@ -6,7 +6,6 @@
 
 package cz.autoclient.GUI.summoner_spells;
 
-import cz.autoclient.PVP_net.SummonerSpell;
 import cz.autoclient.event.EventCallback;
 import cz.autoclient.event.Eventable;
 import cz.autoclient.settings.Settings;

@@ -25,6 +25,8 @@ public enum Images {
 
   //Green text indicating player has accepted invite to game
   INVITE_ACCEPTED("images/search_objects/accepted.png"),
+  //Same as above but cropped from the right side where friend list is
+  INVITE_ACCEPTED_SMALL("images/search_objects/accepted_small.png"),
   //Green text indicating player has not yet accepted or declined invite to game
   INVITE_PENDING("images/search_objects/pending.png"),
 

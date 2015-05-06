@@ -11,9 +11,14 @@ package cz.autoclient.autoclick;
  * @author Jakub
  */
 public interface RectInterface {
-  public int getTop();
-  public int getLeft();
-  public int getWidth();
-  public int getHeight();
-  public RectInterface getCenter();
+  public int top();
+  public int left();
+  public int width();
+  public int height();
+
+  /**
+   *
+   * @return Rectangle that represents the center point of this rectangle. Such rectangle has 0 size.
+   */
+  public RectInterface middle();
 }

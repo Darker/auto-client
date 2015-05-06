@@ -9,6 +9,7 @@ package cz.autoclient.autoclick.comvis;
 import cz.autoclient.autoclick.Rect;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -39,6 +40,19 @@ public class DebugDrawing {
      Graphics2D graph = target.createGraphics();
      graph.setColor(color);
      graph.drawRect((int)rect.left, (int)rect.top, (int)rect.width, (int)rect.height);
+     graph.dispose();
+   }
+   public static void drawResult(BufferedImage target, Rect rect, Color color, Color centerColor) {
+     //silent fail for invalid result
+     if(rect==null)
+       return;
+     //Draw rectangle on discovered position
+     Graphics2D graph = target.createGraphics();
+     graph.setColor(color);
+     graph.drawRect((int)rect.left, (int)rect.top, (int)rect.width, (int)rect.height);
+     
+     Rect mid = rect.middle();
+     DebugDrawing.drawPoint(target, mid.left, mid.top, mid.width/3, color);
      graph.dispose();
    }
    public static void drawResult(BufferedImage target, ArrayList<Rect> rect, Color color) {
@@ -92,7 +106,16 @@ public class DebugDrawing {
        drawPoint(target, rect.left, rect.top, 5, color); 
      }
    }
-   
+   public static void drawPointOrRect(BufferedImage target,  Color color, Rect... rects) {
+     for(Rect r:rects) {
+       drawPointOrRect(target, r, color);
+     }
+   }
+   public static void drawPointOrRect(BufferedImage target,  Color color, Iterable<? extends Rect> rects) {
+     for(Rect r:rects) {
+       drawPointOrRect(target, r, color);
+     }
+   }
    public static BufferedImage loadFromPath(String path) {
      File img = new File(path);
      BufferedImage thing = null;
@@ -115,32 +138,34 @@ public class DebugDrawing {
      return true;
    }
    public static void displayImage(final Image image, String message) throws InterruptedException {
-     
+     if(image==null)
+       throw new IllegalArgumentException("No image to draw. Given image is null.");
 
-     /*JPanel panel = new JPanel();
-     panel.add(label);
-
-     JScrollPane scrollPane = new JScrollPane(panel);*/
+     //The window
      JFrame frame = new JFrame();
+     //Topmost component of the window
      Container main = frame.getContentPane();
-     //main.setLayout(new GridLayout(1,1));
-     /*JLabel label = new JLabel(new ImageIcon(image));
-     JPanel panel = new JPanel();
-     panel.add(label);*/
+     //Turns out this is probably the simplest way to render image on screen 
+     //with guaranteed 1:1 aspect ratio
      JPanel panel = new JPanel() {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             g.drawImage(image, 0, 0, null);
         }
+        @Override
+        public Dimension getPreferredSize(){
+            return new Dimension(image.getWidth(null), image.getHeight(null));
+        }
      };
-     
+     panel.setSize(image.getWidth(null), image.getHeight(null));
+     //Put the image drawer in the topmost window component
      main.add(panel);
      //System.out.println(image.getWidth(null)+", "+image.getHeight(null));
      //frame.pack();
-     frame.setTitle(message);
-     frame.setSize(image.getWidth(null), image.getHeight(null));
-     //frame.revalidate();
+     frame.setTitle(message+" ["+image.getWidth(null)+" x "+image.getHeight(null)+"]");
+     //Set window size to the image size plus some padding dimensions
+     frame.pack();
      frame.setVisible(true);
      final Thread t = Thread.currentThread();
      frame.addWindowListener(new WindowListener() {
@@ -149,10 +174,12 @@ public class DebugDrawing {
        @Override
        public void windowClosing(WindowEvent e) {
          synchronized(t) {t.notify();}
-         System.out.println("Closing");}
+         //System.out.println("Closing");
+         frame.dispose();
+       }
        @Override
        public void windowClosed(WindowEvent e) {
-         System.out.println("Closed");
+         //System.out.println("Closed");
          //synchronized(t) {
            //t.notify();
          //}
@@ -168,6 +195,7 @@ public class DebugDrawing {
      });
      synchronized(t) {
        t.wait();
+       //System.out.println("Wait over.");
      }
      //JOptionPane.showMessageDialog(null, scrollPane, message, javax.swing.JOptionPane.INFORMATION_MESSAGE);
    }

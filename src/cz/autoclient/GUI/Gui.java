@@ -13,16 +13,17 @@ import cz.autoclient.GUI.passive_automation.PAMenu;
 import cz.autoclient.GUI.summoner_spells.ButtonSummonerSpellMaster;
 import cz.autoclient.GUI.tabs.MultiFieldDef;
 import cz.autoclient.Main;
-import cz.autoclient.PVP_net.Constants;
+import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.Setnames;
-import cz.autoclient.PVP_net.SummonerSpell;
 import cz.autoclient.settings.Settings;
 import cz.autoclient.dllinjection.DLLInjector;
 import cz.autoclient.dllinjection.InjectionResult;
+import cz.autoclient.league_of_legends.maps.Champions;
 import cz.autoclient.robots.AutoLoginBot;
 import cz.autoclient.robots.AutoQueueBot;
 import cz.autoclient.robots.LaunchBot;
 import cz.autoclient.robots.RobotManager;
+import cz.autoclient.robots.exceptions.NoSuchRobotException;
 import cz.autoclient.settings.SettingsInputVerifier;
 import cz.autoclient.settings.SettingsValueChanger;
 import cz.autoclient.settings.secure.EncryptedSetting;
@@ -125,13 +126,10 @@ import javax.swing.SwingUtilities;
      initMenu();
      initComponents();
      
-     
-
      //There is many factors that determine whether the icon will be shown
      // it must be both supported and enabled
      // 
      displayTrayEnabled();
-     
      
      guard = new StateGuard(this.ac, this);
      
@@ -462,7 +460,7 @@ import javax.swing.SwingUtilities;
        menuBar1.add(menu);
      }
      //======== Notifications menu ========
-     initTrayIcon() ;
+     initTrayIcon();
      {
        JMenu menu = new JMenu();
        menu.setText("Notifications");
@@ -486,11 +484,14 @@ import javax.swing.SwingUtilities;
         
         //======== Auto Launch ========
         {
-          PAMenu auto_launch = new PAMenu(new LaunchBot(), settings, "Auto launch");
-          auto_launch.setRobots(robots);
-          auto_launch.setAboutLink("https://github.com/Darker/auto-client/wiki/Passive-automation#auto-launch");
-          auto_launch.root.setToolTipText("Automatically press launch in patcher.");
-          menu.add(auto_launch.root);
+          try {
+            PAMenu auto_launch = new PAMenu(ac.findRobot(LaunchBot.class), settings, "Auto launch");
+            auto_launch.setRobots(robots);
+            auto_launch.setAboutLink("https://github.com/Darker/auto-client/wiki/Passive-automation#auto-launch");
+            auto_launch.root.setToolTipText("Automatically press launch in patcher.");
+            menu.add(auto_launch.root);
+          }
+          catch(NoSuchRobotException e) {}
         }
         
         //======== Auto queue ========
@@ -854,8 +855,8 @@ import javax.swing.SwingUtilities;
         win.addLine(field);
         
         multifield = new MultiFieldDef("Summoner spells:");
-        ButtonSummonerSpellMaster spell1 = new ButtonSummonerSpellMaster(SummonerSpell.Ignite, settings);
-        ButtonSummonerSpellMaster spell2 = new ButtonSummonerSpellMaster(SummonerSpell.Ignite, settings); 
+        ButtonSummonerSpellMaster spell1 = new ButtonSummonerSpellMaster(null, settings);
+        ButtonSummonerSpellMaster spell2 = new ButtonSummonerSpellMaster(null, settings); 
         spell1.setTwin(spell2);
         multifield.addField(spell1, settings, Setnames.BLIND_SUMMONER1);
         multifield.addField(spell2, settings, Setnames.BLIND_SUMMONER2);
@@ -916,10 +917,10 @@ import javax.swing.SwingUtilities;
        public void run()
        {
          //Object[] elements = new Object[] {"Cat", "Dog", "Lion", "Mouse"};
-         String[] elements = Constants.lolData.getChampions().allNames();
-         //System.out.println("Champions loaded: "+elements.length);
+         String[] elements = ConstData.lolData.getChampions().enumValues(Champions.getName, true).toArray(new String[0]);
+         //System.out.println("Champions_old loaded: "+elements.length);
          //Safe to unload all JSON data now
-         Constants.lolData.getChampions().unloadData();
+         ConstData.lolData.getChampions().unloadData();
          
          AutoCompleteSupport.install(field, GlazedLists.eventListOf((Object[])elements));
        }

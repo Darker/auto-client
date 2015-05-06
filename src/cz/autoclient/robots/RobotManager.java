@@ -20,6 +20,7 @@ public class RobotManager extends Thread {
   
   
   public RobotManager(int checkInterval) {
+    super("RobotManager");
     this.checkInterval = checkInterval;
     setDaemon(true);
     setPriority(Thread.MIN_PRIORITY);

@@ -8,13 +8,17 @@ package cz.autoclient.autoclick;
 import com.sun.jna.platform.win32.WinDef;
 //Used for exporting rect class as normal rectangle
 import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.PathIterator;
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.RectangularShape;
 import java.util.ArrayList;
 
 /**
  *
  * @author Jakub Mareda
  */
-public class Rect {
+public class Rect implements RectInterface {
   public final int width;
   public final int height;
   public final int top;
@@ -89,6 +93,15 @@ public class Rect {
                               (int)Math.round(((double)width)*scale),
                               (int)Math.round(((double)height)*scale));
   }
+  /** Get rect moved
+   * @param x how many units move to right
+   * @param y how many units move to bottom
+   * @return rect moved by given coordinates
+   */
+  public Rect move(int x, int y) {
+    //return Rect.byWidthHeight(top+y, left+x, width, height);
+    return new Rect(top+y, right+x, bottom+y, left+x);
+  }
   /** Check if two rectangles overlap (have nonempty intersection)
    * @param a forst rectangle
    * @param b second rectangle
@@ -107,6 +120,9 @@ public class Rect {
     ArrayList<Rect> currentGroup;
     //All groups
     ArrayList<ArrayList<Rect>> results = new ArrayList<>();
+    //Nobody ever said we can't get empty array
+    if(rects.length==0)
+      return results;
     
     int results_iterator = -1;
     //length-1 because the last one never needs to be checked
@@ -129,9 +145,9 @@ public class Rect {
         currentGroup.add(currentRect);
       }
       if(currentGroup!=null) {
-        //Check if the current group isn't fully contained within the previous group
+        //Check if the current group isn't fully contained within any previous group
         //this means, if all current groups element are the same as in the previous group, do not include it
-        if(results_iterator<0 || arrayMatches(currentGroup, results.get(results_iterator))<currentGroup.size()) {
+        if(results_iterator<0 || arrayMatchesMax(currentGroup, results)<currentGroup.size()) {
           results.add(currentGroup);
           results_iterator++;
         }
@@ -157,6 +173,15 @@ public class Rect {
   }
   public static ArrayList<ArrayList<Rect>> groupOverlapingRects(Rect rects[]) {
     return groupOverlapingRects(rects, true);
+  }
+  private static int arrayMatchesMax(ArrayList<Rect> small, ArrayList<ArrayList<Rect>> big) {
+    int result = 0;
+    for(ArrayList<Rect> list : big) {
+      int tmp = arrayMatches(small, list);
+      if(tmp>result)
+        result = tmp;
+    }
+    return result;    
   }
   private static int arrayMatches(ArrayList<Rect> small, ArrayList<Rect> big) {
     int matches = 0;
@@ -200,4 +225,26 @@ public class Rect {
   public Rectangle toStdRectangle() {
     return new Rectangle(top, left, width, height); 
   }
+
+  @Override
+  public int top() {
+    return top;
+  }
+
+  @Override
+  public int left() {
+    return left;
+  }
+
+  @Override
+  public int width() {
+    return width;
+  }
+
+  @Override
+  public int height() {
+    return height;
+  }
+
+
 }

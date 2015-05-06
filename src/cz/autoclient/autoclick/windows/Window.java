@@ -10,8 +10,9 @@ package cz.autoclient.autoclick.windows;
 
 import cz.autoclient.autoclick.MouseButton;
 import cz.autoclient.autoclick.Rect;
+import cz.autoclient.autoclick.RectInterface;
 import cz.autoclient.autoclick.exceptions.APIError;
-import cz.autoclient.autoclick.ms_windows.MSWindow;
+import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.List;
@@ -127,6 +128,10 @@ public interface Window {
   public Color getAvgColor(int x, int y, int w, int h);
   public BufferedImage screenshot() throws APIError;
   public BufferedImage screenshotCrop(int x, int y, int w, int h) throws APIError;
+  
+  public default BufferedImage screenshotCrop(RectInterface rect) {
+    return screenshotCrop(rect.left(), rect.top(), rect.width(), rect.height());
+  }
   public Rect getRect() throws APIError;
   
   /** WINDOW PROPERTIES **/

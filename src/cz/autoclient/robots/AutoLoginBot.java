@@ -6,8 +6,9 @@
 
 package cz.autoclient.robots;
 
+import cz.autoclient.PVP_net.WindowTools;
 import cz.autoclient.GUI.Gui;
-import cz.autoclient.PVP_net.Constants;
+import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.PVP_net.Setnames;
 import cz.autoclient.autoclick.Rect;
@@ -30,7 +31,7 @@ public class AutoLoginBot extends Robot {
   }
   @Override
   public String getWindowName() {
-    return Constants.window_title_part;
+    return ConstData.window_title_part;
   }
   private boolean initializing = false;
   

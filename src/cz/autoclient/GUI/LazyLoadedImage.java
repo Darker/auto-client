@@ -46,7 +46,7 @@ public class LazyLoadedImage {
   
   private final Object imageMutex = new Object();
   
-  private HashMap<Dimensions, BufferedImage> scaledInstances;
+  private volatile HashMap<Dimensions, BufferedImage> scaledInstances;
   
   private static class Dimensions {
     public final int x,y;

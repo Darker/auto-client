@@ -17,22 +17,11 @@ import org.json.JSONObject;
  */
 public class Champion extends GameObjectWithImage {
 
-  private Champions_old pool;
   
   public final LazyLoadedRemoteImage img;
   
   public final String name;
-  public Champion(Champions_old pool, JSONObject src) {
-    super(null, null, src);
-    this.pool = pool;
-    String name_tmp = "undefined";
-    try {
-      name_tmp = src.getString("name");
-    } catch (JSONException ex) {}
-    name = name_tmp;
-    
-    img = new LazyLoadedRemoteImage(getImgPath(), getImgUrl());
-  }
+
   
   public Champion(Champions pool, String key, JSONObject src) {
     super(pool, key, src);
@@ -52,11 +41,7 @@ public class Champion extends GameObjectWithImage {
   
   @Override
   public String createImgPath() {
-    if(pool!=null)
-      return pool.getRoot().getAbsolutePath()+"/champion_avatar/"+getImgName();
-    else {
-      return parent.getRoot().getAbsolutePath()+"/champion_avatar/"+getImgName();
-    }
+    return parent.getRoot().getAbsolutePath()+"/champion_avatar/"+getImgName();
   }
 
   /**
@@ -74,6 +59,6 @@ public class Champion extends GameObjectWithImage {
   }
   @Override
   public String createImgUrl() {
-    return "http://ddragon.leagueoflegends.com/cdn/"+(pool!=null?pool.getVersion():parent.getVersion())+"/img/champion/"+getImgName();
+    return "http://ddragon.leagueoflegends.com/cdn/"+parent.getVersion()+"/img/champion/"+getImgName();
   }
 }

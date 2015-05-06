@@ -7,7 +7,7 @@
 package cz.autoclient.GUI;
 import cz.autoclient.Main;
 import cz.autoclient.autoclick.windows.Window;
-import cz.autoclient.PVP_net.Constants;
+import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.autoclick.windows.cache.title.CacheByTitle;
 import cz.autoclient.threads.Pauseable;
 /**
@@ -26,9 +26,9 @@ public class StateGuard extends Pauseable {
   private Gui gui;
   
   public StateGuard(Main main_thread, Gui gui) {
+    super("GUIStateUpdater");
     main = main_thread; 
     this.gui = gui;
-
   }
   @Override
   public void run() {
@@ -42,7 +42,7 @@ public class StateGuard extends Pauseable {
     while(!isInterrupted()||true) {
       //Check whether window is running
       if(win==null) {
-        win = CacheByTitle.initalInst.getWindow(Constants.window_title_part);
+        win = CacheByTitle.initalInst.getWindow(ConstData.window_title_part);
         //if(win==null)
         //  System.out.println("Window from name failed...");
       }

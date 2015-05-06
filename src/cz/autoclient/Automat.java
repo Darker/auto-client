@@ -1,8 +1,9 @@
 package cz.autoclient;
 
 import cz.autoclient.GUI.Gui;
+import cz.autoclient.GUI.LazyLoadedImage;
 import cz.autoclient.GUI.notifications.Notification;
-import cz.autoclient.PVP_net.Constants;
+import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.ImageFrame;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.Rect;
@@ -11,7 +12,6 @@ import cz.autoclient.settings.Settings;
 import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.PVP_net.Images;
 import cz.autoclient.PVP_net.Setnames;
-import cz.autoclient.PVP_net.SummonerSpell;
 import cz.autoclient.PVP_net.TeamBuilderPlayerSlot;
 import cz.autoclient.autoclick.exceptions.APIError;
 import cz.autoclient.autoclick.ColorPixel;
@@ -22,6 +22,7 @@ import cz.autoclient.autoclick.comvis.ScreenWatcher;
 import cz.autoclient.autoclick.windows.cache.title.CacheByTitle;
 import cz.autoclient.PVP_net.WindowTools;
 import cz.autoclient.autoclick.comvis.DebugDrawing;
+import cz.autoclient.league_of_legends.SummonerSpell;
 import java.awt.image.BufferedImage;
 
 import java.io.IOException;
@@ -43,6 +44,7 @@ import java.util.ArrayList;
    
    public Automat(Gui acgui, Settings settings)
    {
+     super("LoLClientAutomation");
      this.settings = settings;
      this.gui = acgui;
    }
@@ -52,7 +54,7 @@ import java.util.ArrayList;
    {
      System.out.println("Automation started!");
      //Get PVP.net window
-     window = MSWindow.windowFromName(Constants.window_title_part, false);
+     window = MSWindow.windowFromName(ConstData.window_title_part, false);
      if(window==null) {
        System.err.println("No PVP.net window found!");
        end();
@@ -132,7 +134,7 @@ import java.util.ArrayList;
        }
        if (!isInterrupted())
        {
-         sleep(accepted>0 ? 100L : 600L);
+         sleep(accepted>0 ? 60L : 600L);
          try
          {
            if (accepted>0)
@@ -224,14 +226,16 @@ import java.util.ArrayList;
              //If this is a lobby with invited players
              else if(checkPoint(PixelOffset.InviteChat, 1) && checkPoint(PixelOffset.InviteStart, 8)) {
                invite_lobby();
+               gui.setTitle("Waiting for match.");
                play_button = false;
                
              }
              //If play button wasn't there and sudenly appeared, the program shall quit
              else if(checkPoint(PixelOffset.PlayButton_red, 15) && !play_button) {
-               System.out.println("The play button is red. Something must've gone wrong. Aborting.");
-               end();
-               break;
+               System.out.println("The play button is red. Something must've gone wrong.");
+               play_button = true;
+               tb = false;
+               gui.setTitle("Waiting for match.");
              }
 
              //Please kick me, I need to test something :)
@@ -277,6 +281,7 @@ import java.util.ArrayList;
    public boolean normal_lobby() throws InterruptedException, APIError {
      if(settings.getBoolean(Setnames.NOTIF_MENU_BLIND_IN_LOBBY.name, false))
        gui.notification(Notification.Def.BLIND_TEAM_JOINED);
+     
      System.out.println("In normal lobby.");
      boolean ARAM = false;
      //this.gui.getProgressBar1().setValue(70);
@@ -311,22 +316,22 @@ import java.util.ArrayList;
      
      
      //Set summoner spells
-     SummonerSpell[] spells = {
-       (SummonerSpell)settings.getSetting(Setnames.BLIND_SUMMONER1.name),
-       (SummonerSpell)settings.getSetting(Setnames.BLIND_SUMMONER2.name)
+     String[] spells = {
+       (String)settings.getSetting(Setnames.BLIND_SUMMONER1.name),
+       (String)settings.getSetting(Setnames.BLIND_SUMMONER2.name)
      };
 
      
 
      //Loop that just does the same thing for both spells
      Rect winRect = window.getRect();
-     double winSizeCoef = Constants.sizeCoeficientInverted(winRect);
+     double winSizeCoef = ConstData.sizeCoeficientInverted(winRect);
      Rect cropRect = null;
      for(int i=0; i<2; i++) {
-       SummonerSpell s = spells[i];
+       SummonerSpell s = ConstData.lolData.getSummonerSpells().get(spells[i]);
        if(s!=null) {
          //Crop the icon - the GUI disorts the icon borders so I ignore them
-         BufferedImage icon = s.image.getCropped(5);
+         BufferedImage icon = LazyLoadedImage.crop(s.img.getScaled(48, 48, true), 5);
          if(icon!=null) {
            click(i==0?PixelOffset.Blind_SumSpell1:PixelOffset.Blind_SumSpell2);
            //Wait till the launcher screen redraws
@@ -338,7 +343,7 @@ import java.util.ArrayList;
            //Use base resolution window - the icons are saved in base resolution too
            /*BufferedImage screenshot = ScreenWatcher.resampleImageTo(
                   window.screenshot(),
-                  Constants.smallestSize.width, Constants.smallestSize.height);*/
+                  ConstData.smallestSize.width, ConstData.smallestSize.height);*/
            
            BufferedImage screenshot = ScreenWatcher.resampleImage(
                   window.screenshotCrop(cropRect),
@@ -355,9 +360,9 @@ import java.util.ArrayList;
              
              screenshot = ScreenWatcher.resampleImageTo(
                   window.screenshot(),
-                  Constants.smallestSize.width, Constants.smallestSize.height);*/
+                  ConstData.smallestSize.width, ConstData.smallestSize.height);*/
              //Add the normalized top/left coordinates of the search rectangle we used
-             Rect cropNormalized = Constants.normalize(cropRect, winRect);
+             Rect cropNormalized = ConstData.normalize(cropRect, winRect);
              pos = pos.move(cropNormalized.left, cropNormalized.top);
              /*System.out.println("Search region: "+cropNormalized);
              System.out.println("Moved result: "+pos);
@@ -378,7 +383,7 @@ import java.util.ArrayList;
              //De normalize the rectangle (don't forget we rescaled the screenshot prior to 
              // searching the summoner spell)
              
-             pos = Constants.deNormalize(pos, winRect);
+             pos = ConstData.deNormalize(pos, winRect);
              
              /*screenshot = window.screenshot();
              DebugDrawing.drawResult(screenshot, pos, Color.RED, Color.YELLOW);
@@ -464,7 +469,7 @@ import java.util.ArrayList;
              return false;
            }
            //Check if the game is running, return true if it does
-           else if(CacheByTitle.initalInst.getWindow(Constants.game_window_title)!=null) {
+           else if(CacheByTitle.initalInst.getWindow(ConstData.game_window_title)!=null) {
              System.out.println("NORMAL LOBBY: Game started.");
              return true;
            }

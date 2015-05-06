@@ -6,11 +6,12 @@
 
 package cz.autoclient.robots;
 
+import cz.autoclient.PVP_net.WindowTools;
 import cz.autoclient.robots.helpers.ValueChangeToWatcher;
-import cz.autoclient.PVP_net.Constants;
+import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.PVP_net.Setnames;
-import cz.autoclient.autoclick.ms_windows.MSWindow;
+import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.exceptions.APIError;
@@ -33,7 +34,7 @@ public class AutoQueueBot extends Robot {
   }
   @Override
   public String getWindowName() {
-    return Constants.window_title_part;
+    return ConstData.window_title_part;
   }
   /**
    * Remembers whether the last go() went with errors or not
@@ -117,7 +118,7 @@ public class AutoQueueBot extends Robot {
   @Override
   public boolean canRunEx() {
     //Check if League of legends is running
-    if(watchLoLExit.checkValueChangedDebug(MSWindow.windowFromName(Constants.game_window_title, false)!=null)) {
+    if(watchLoLExit.checkValueChangedDebug(MSWindow.windowFromName(ConstData.game_window_title, false)!=null)) {
       System.out.println("AUTOQUEUE: Game just was closed!"); 
     }
     return watchLoLExit.hasChanged() && super.canRunEx() && window.isVisible();

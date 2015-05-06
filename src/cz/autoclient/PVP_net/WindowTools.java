@@ -4,9 +4,8 @@
  * and open the template in the editor.
  */
 
-package cz.autoclient.robots;
+package cz.autoclient.PVP_net;
 
-import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.autoclick.ColorPixel;
 import cz.autoclient.autoclick.ComparablePixel;
 import cz.autoclient.autoclick.Rect;

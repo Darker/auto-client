@@ -6,9 +6,9 @@
 
 package cz.autoclient.robots;
 
-import cz.autoclient.PVP_net.Constants;
+import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.PixelOffset;
-import cz.autoclient.autoclick.ms_windows.MSWindow;
+import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.windows.WindowCallback;
@@ -23,7 +23,7 @@ public class ContinueBot extends Robot {
 
   @Override
   public String getWindowName() {
-    return Constants.game_window_title;
+    return ConstData.game_window_title;
   }
   /**
    * Remembers whether the last go() went with errors or not

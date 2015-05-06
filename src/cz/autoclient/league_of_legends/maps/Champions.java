@@ -7,10 +7,12 @@
 package cz.autoclient.league_of_legends.maps;
 
 import cz.autoclient.league_of_legends.Champion;
+import cz.autoclient.league_of_legends.GameObject;
 import cz.autoclient.league_of_legends.LoLVersion;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import org.json.JSONException;
 
 /**
  *
@@ -20,7 +22,17 @@ public class Champions extends GameObjectMap<Champion> {
   public Champions(LoLVersion v, boolean download_if_missing) {
     super(Champion.class, v, download_if_missing);
   }
-
+  public static final ValueGetter<Champion, String> getName = new ValueGetter<Champion, String>() {
+    @Override
+    public String getValue(Champion source) {
+      try {
+        return source.getName();
+      }
+      catch(JSONException e) {
+        throw new RuntimeException("Failed to fetch the champion name."); 
+      }
+    }
+  };
   @Override
   public String getFilename() {
     return "champions";

@@ -36,6 +36,9 @@ public abstract class GameObjectMap<T extends GameObject>
   
   public String version = null;
   
+  private volatile HashMap<Integer, List> cachedValueLists;
+  private final Object cachedValueLists_mutex = new Object();
+  
   
 
   public GameObjectMap(Class<T> type, LoLVersion v, boolean download_if_missing) {
@@ -51,7 +54,7 @@ public abstract class GameObjectMap<T extends GameObject>
     }
     return data;
   }
-  public void loadData() {
+  public synchronized void loadData() {
     if(data!=null)
       return;
     data = new HashMap();
@@ -124,6 +127,7 @@ public abstract class GameObjectMap<T extends GameObject>
       return value.equals(val2);
     }
   }
+  
   /**
    * Will call the given value getter for all elements and return array of values.
    * @param <V>
@@ -131,6 +135,14 @@ public abstract class GameObjectMap<T extends GameObject>
    * @return 
    */
   public <V> List<V> enumValues(ValueGetter<T, V> reader) {
+    if(cachedValueLists != null) {
+      synchronized(cachedValueLists_mutex) {
+        int code = reader.getClass().hashCode();
+        if(cachedValueLists.containsKey(code))
+          return cachedValueLists.get(code);
+      }
+    }
+    //System.out.println("Enumerating values using "+reader.getClass().getName());
     List<V> vals = new ArrayList();
     
     for(T o : this) {
@@ -138,6 +150,27 @@ public abstract class GameObjectMap<T extends GameObject>
     }
     return vals;
   }
+  /**
+   * Will call the given value getter for all elements and return array of values.
+   * @param <V>
+   * @param reader
+   * @param cached true if you want to cache the resulting array
+   * @return 
+   */
+  public <V> List<V> enumValues(ValueGetter<T, V> reader, boolean cached) {
+    List<V> vals = enumValues(reader);
+    if(cached) {
+      synchronized(cachedValueLists_mutex) {
+        if(cachedValueLists == null)
+          cachedValueLists = new HashMap();
+        int code = reader.getClass().hashCode();
+        if(!cachedValueLists.containsKey(code))
+          cachedValueLists.put(reader.getClass().hashCode(), vals);
+      }
+    }
+    return vals;
+  }
+  
   /**
    * Will try this getter for every value untill one equals the second parameter
    * @param <V>

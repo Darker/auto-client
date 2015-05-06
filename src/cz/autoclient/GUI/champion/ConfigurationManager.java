@@ -8,8 +8,9 @@ package cz.autoclient.GUI.champion;
 
 import cz.autoclient.GUI.ImageResources;
 import cz.autoclient.GUI.summoner_spells.ButtonSummonerSpell;
-import cz.autoclient.PVP_net.Constants;
+import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.Setnames;
+import cz.autoclient.league_of_legends.maps.Champions;
 import cz.autoclient.settings.Settings;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -136,17 +137,19 @@ public class ConfigurationManager {
    * Call this bebore saving main settings.
    */
   public void cleanBeforeSave() {
+    
+    //CHANGE - null entry is now saved too
     //Remove the null entry. Last entry shall be remembered anyway, so 
     //null entry would be overwrited once the user starts typping in the field
     //Nobody cares about the null entry.
-    settings.remove(null); 
+    //settings.remove(null); 
   }
   protected void updateButtons() {
     //Component[] comps = input.getComponents();
     String item = (String)input.getEditor().getItem();//(String)input.getSelectedItem();
     
     if(champion_names==null)
-      champion_names = Constants.lolData.getChampions().allNamesList();
+      champion_names = ConstData.lolData.getChampions().enumValues(Champions.getName, true);
     if(item!=null) {
       //System.out.println("JComboBox.getEditor().getItem() = "+input.getEditor().getItem()+"");
       //System.out.println("JComboBox.getSelectedItem()     = "+input.getSelectedItem()+"");
@@ -157,7 +160,8 @@ public class ConfigurationManager {
           return;
         save.setEnabled(true);
         //save old setting - only if already exists or is null
-        if(currentSetup==null&&currentChampion==null || currentSetup!=null&&!currentSetup.equals(item)&&settings.containsKey(currentSetup)) {
+        if(currentSetup==null&&currentChampion==null ||
+           currentSetup!=null&&!currentSetup.equals(item)&&settings.containsKey(currentSetup)) {
           saveSettings();
         }
 
@@ -204,7 +208,13 @@ public class ConfigurationManager {
       currentSetup = name;
     }
     else {
+      set = settings.get(null);
       currentSetup = null;
+      //Settings for null can be null too
+      if(set!=null) {
+        set.copyTo(main_settings, names);
+        main_settings.displaySettingsOnBoundFields(names);
+      }
     }
     System.out.println("Loaded settings for "+name);
     if(currentSetup==null && name!=null)

@@ -6,7 +6,7 @@
 
 package cz.autoclient;
 
-import cz.autoclient.autoclick.ms_windows.MSWindow;
+import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
 import cz.autoclient.autoclick.windows.Window;
 
 /**

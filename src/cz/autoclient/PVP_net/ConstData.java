@@ -8,14 +8,14 @@ package cz.autoclient.PVP_net;
 
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.league_of_legends.DataLoader;
-import cz.autoclient.league_of_legends.Version;
+import cz.autoclient.league_of_legends.LoLVersion;
 import java.io.File;
 
 /**
  *
  * @author Jakub
  */
-public class Constants {
+public class ConstData {
   public static final String window_title = "PVP.net Client";
   public static final String window_title_part = "PVP.net";
   public static final String process_name = "LolClient.exe";
@@ -26,18 +26,36 @@ public class Constants {
   public static final String game_window_title = "League of Legends";
   public static final Rect normalSize = new Rect(0, 1152, 720, 0);
   public static final Rect smallestSize = new Rect(0, 1024, 640, 0);
-  public static final Version lolData = new Version(DataLoader.Realm.NA, new File("LOLResources"), true);
+  public static final LoLVersion lolData = new LoLVersion(LoLVersion.Realm.NA, new File("LOLResources"), true);
   public static double sizeCoeficient(Rect size) {
     //With cold blood, I'll assume these Riot idiots will never allow you to change Client aspect ratio
     return size.right/(double)smallestSize.right;
   }
+  public static double sizeCoeficientInverted(Rect size) {
+    //With cold blood, I'll assume these Riot idiots will never allow you to change Client aspect ratio
+    return (double)smallestSize.right/size.right;
+  }
    /** Denormalize rectangle. 
     * 
-    * @param in Rectangle in normalized coordinates. This means Rect using the smallest window coordinates - Constants.smallestSize
+    * @param in Rectangle in normalized coordinates. This means Rect using the smallest window coordinates - ConstData.smallestSize
    * @param window Window actual dimensions
    * @return De-normalised rectangle - that is, rectangle valid on the window
    */
    public static Rect deNormalize(Rect in, Rect window) {
      return in.multiply(sizeCoeficient(window));
+   }
+   /** Normalize rectangle. 
+    * 
+    * @param in Rectangle in non-normalized coordinates. This means Rect 
+    *           using current window coordinates.
+   * @param window Window dimensions
+   * @return Normalised rectangle - that is, rectangle valid relative to most saved images
+   */
+   public static Rect normalize(Rect in, Rect window) {
+     return in.multiply(sizeCoeficientInverted(window));
+   }
+   
+   public static Rect deNormalize(ImageFrame in, Rect window) {
+     return in.multiplyBySize(window);
    }
 }

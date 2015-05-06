@@ -9,7 +9,9 @@ import com.sun.jna.platform.win32.WinDef.POINT;
 import com.sun.jna.platform.win32.WinDef.WPARAM;
 import com.sun.jna.platform.win32.WinUser;
 import com.sun.jna.platform.win32.WinUser.HOOKPROC;
-import cz.autoclient.autoclick.ms_windows.MSWindow;
+import cz.autoclient.PVP_net.ConstData;
+import cz.autoclient.PVP_net.ImageFrame;
+import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
 import cz.autoclient.autoclick.MouseButton;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.windows.Window;
@@ -55,28 +57,45 @@ public class WindowTester {
     frame.setVisible(true);*/
      
      // "LoL Patcher" "firefox"  
-     MSWindow test = MSWindow.windowFromName("League of Legends", false);
+     MSWindow test = MSWindow.windowFromName("pvp.net", false);
      System.out.println(test==null?"Fail.":"Success");
      if(test!=null) {
        //test.typeString("PoJus.'\\#`&[]*-č");
        /*Rect rect = test.getRect();
        System.out.println(rect);
-       System.out.println("Ratio = " + rect.right + "/" + Constants.smallestSize.right + " = " + Constants.sizeCoeficient(test.getRect()));
+       System.out.println("Ratio = " + rect.right + "/" + ConstData.smallestSize.right + " = " + ConstData.sizeCoeficient(test.getRect()));
      */
        //test.slowClick(288, 114, 100);
-       wintree(test);
-       while(true) {
+       //wintree(test);
+       //9, 643, 62, 496
+       //Rect testrect = Rect.byWidthHeight(100, 100, 100, 50);
+       /*BufferedImage scrn = test.screenshot();
+       DebugDrawing.drawPointOrRect(scrn, testrect, Color.red);
+       DebugDrawing.displayImage(scrn);*/
+       //DebugDrawing.displayImage(test.screenshotCrop(testrect));
+       /*while(true) {
          System.out.println("Taking screenshot:");
-         DebugDrawing.displayImage(ScreenWatcher.resampleImage(MSWindow.screenshotAll(), 0.8, 0.8));
-         Thread.sleep(4000);
-       }
+         //DebugDrawing.displayImage(ScreenWatcher.resampleImage(MSWindow.screenshotAll(), 0.8, 0.8));
+         
+         //Thread.sleep(4000);
+       }*/
        /*WinUser.HOOKPROC hkprc = new WinUser.HOOKPROC() {
          
        };
        test.UserExt.SetWindowsHookEx(7, hkprc, null, test.UserExt.GetWindowThreadProcessId(test.hwnd, null));*/
-     
+       testPercentRect(test);
      }
+     System.out.println("Main over.");
      //TestGetByPID(6568);
+   }
+   private static void testPercentRect(Window window) throws Exception {
+     BufferedImage scrn = window.screenshot();
+     Rect testrect = ConstData.deNormalize(ImageFrame.ble, window.getRect());
+     System.out.println("Created rectangle: "+testrect);
+     DebugDrawing.drawPointOrRect(scrn, testrect, Color.red);
+     DebugDrawing.displayImage(scrn);
+     DebugDrawing.displayImage(window.screenshotCrop(testrect));
+     
    }
    private static void wintree(Window window, int indent) {
      for(int i=0;i<indent; i++)

@@ -8,7 +8,6 @@ package cz.autoclient;
 
 
 import cz.autoclient.PVP_net.Images;
-import cz.autoclient.PVP_net.SummonerSpell;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.comvis.ScreenWatcher;
 import cz.autoclient.autoclick.comvis.RectMatch;
@@ -45,6 +44,7 @@ public class ScreenWatcherMain {
    
    public static void main(String[] args) throws Exception
    {
+     TestRectangles();
      /*TestRectangles();
      if(true)
        return;/* */
@@ -53,7 +53,7 @@ public class ScreenWatcherMain {
      BufferedImage thing2 = loadFromPath("launcher_screens/search_objects/accepted.png");*/
      //The big image to search in
      //BufferedImage screenshot = loadFromPath(/*"screenshot.png"*/"launcher_screens/INVITE-PENDING.png");
-     BufferedImage screenshot = loadFromPath(path+"LOBBY-SPELL_1.png");
+     /*BufferedImage screenshot = loadFromPath(path+"LOBBY-SPELL_1.png");
      screenshot = ScreenWatcher.resampleImageTo(screenshot, 1024, 640);
      BufferedImage thing = loadFromPath("images/SummonerBarrier.png");
      
@@ -62,7 +62,7 @@ public class ScreenWatcherMain {
        //TestSearch(thing, screenshot);
        //TestBestWhile(thing, thing2, screenshot);
        //TestRectangles();
-     }
+     }*/
    }
    public static void TestRectangles() {
      ArrayList<Rect> test = new ArrayList<>();
@@ -205,53 +205,53 @@ public class ScreenWatcherMain {
         System.err.println("Found nothing.");
      }
    }
-   public static void TestSearchColorSumSpell(BufferedImage screenshot) {
-     SummonerSpell[] spells = SummonerSpell.values();
-     Map<SummonerSpell, Rect> finds = new HashMap<>();
-     /** HIDE SOM SPELLS FOR TESTING **/
-     SummonerSpell[] hide = {SummonerSpell.Teleport, SummonerSpell.Smite, SummonerSpell.Clarity};
-     //Cache integral image
-     double[][][] iimg = ScreenWatcher.integralImage(screenshot);
-     displayImage(ScreenWatcher.drawIntegralImage(iimg));
-     
-     for(SummonerSpell spell : hide) {
-       BufferedImage im = spell.image.getCropped(5);
-       if(im==null) {
-         //System.err.println("["+spell.name+"] NO IMAGE!!!");
-         continue;
-       }
-       Rect pos = ScreenWatcher.findByAvgColor(im, iimg, 0.005f, true);
-       if(pos!=null) {
-          //System.out.println("["+spell.name+"] Found object: "+pos);
-          filledRect(screenshot, pos, Color.BLACK);
-          drawText(screenshot, pos.left, pos.top, spell.name, Color.GRAY);
-       }
-       
-     }ScreenWatcherMain.displayImage(screenshot, "Hidden spells");
-     /** NOW SEARCH **/
-     for(SummonerSpell spell : spells) {
-       BufferedImage im = spell.image.getCropped(5);
-       if(im==null) {
-         System.err.println("["+spell.name+"] NO IMAGE!!!");
-         continue;
-       }
-       //displayImage(im);
-       
-       Rect pos = ScreenWatcher.findByAvgColor(im, iimg, 0.0001f, true);
-       if(pos!=null) {
-          System.out.println("["+spell.name+"] Found object: "+pos);
-          drawResult(screenshot, pos, Color.RED);
-          drawText(screenshot, pos.left, pos.bottom, spell.name, Color.WHITE);
-          //ScreenWatcherMain.displayImage(screenshot, spell.name);
-          finds.put(spell, pos);
-          //ScreenWatcherMain.displayImage(screenshot);
-       }
-       else {
-          System.err.println("["+spell.name+"] Found nothing.");
-       }
-     }
-     ScreenWatcherMain.displayImage(screenshot);
-   }
+//   public static void TestSearchColorSumSpell(BufferedImage screenshot) {
+//     SummonerSpell[] spells = SummonerSpell.values();
+//     Map<SummonerSpell, Rect> finds = new HashMap<>();
+//     /** HIDE SOM SPELLS FOR TESTING **/
+//     SummonerSpell[] hide = {SummonerSpell.Teleport, SummonerSpell.Smite, SummonerSpell.Clarity};
+//     //Cache integral image
+//     double[][][] iimg = ScreenWatcher.integralImage(screenshot);
+//     displayImage(ScreenWatcher.drawIntegralImage(iimg));
+//     
+//     for(SummonerSpell spell : hide) {
+//       BufferedImage im = spell.image.getCropped(5);
+//       if(im==null) {
+//         //System.err.println("["+spell.name+"] NO IMAGE!!!");
+//         continue;
+//       }
+//       Rect pos = ScreenWatcher.findByAvgColor(im, iimg, 0.005f, true);
+//       if(pos!=null) {
+//          //System.out.println("["+spell.name+"] Found object: "+pos);
+//          filledRect(screenshot, pos, Color.BLACK);
+//          drawText(screenshot, pos.left, pos.top, spell.name, Color.GRAY);
+//       }
+//       
+//     }ScreenWatcherMain.displayImage(screenshot, "Hidden spells");
+//     /** NOW SEARCH **/
+//     for(SummonerSpell spell : spells) {
+//       BufferedImage im = spell.image.getCropped(5);
+//       if(im==null) {
+//         System.err.println("["+spell.name+"] NO IMAGE!!!");
+//         continue;
+//       }
+//       //displayImage(im);
+//       
+//       Rect pos = ScreenWatcher.findByAvgColor(im, iimg, 0.0001f, true);
+//       if(pos!=null) {
+//          System.out.println("["+spell.name+"] Found object: "+pos);
+//          drawResult(screenshot, pos, Color.RED);
+//          drawText(screenshot, pos.left, pos.bottom, spell.name, Color.WHITE);
+//          //ScreenWatcherMain.displayImage(screenshot, spell.name);
+//          finds.put(spell, pos);
+//          //ScreenWatcherMain.displayImage(screenshot);
+//       }
+//       else {
+//          System.err.println("["+spell.name+"] Found nothing.");
+//       }
+//     }
+//     ScreenWatcherMain.displayImage(screenshot);
+//   }
    public static void TestSearchColorAll(BufferedImage thing, BufferedImage screenshot) {
      double start = System.nanoTime();
      ArrayList<RectMatch> matches = new ArrayList<>();

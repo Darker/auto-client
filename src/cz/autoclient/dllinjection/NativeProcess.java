@@ -60,6 +60,7 @@ public class NativeProcess {
     public String result;
     private boolean terminatedOk = false;
     public ProcessReader(Process p) {
+      super("ProcessReader - read native process output");
       process = p;
     }
     @Override
