@@ -15,6 +15,11 @@ import cz.autoclient.GUI.tabs.MultiFieldDef;
 import cz.autoclient.Main;
 import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.Setnames;
+import cz.autoclient.autoclick.comvis.DebugDrawing;
+import cz.autoclient.autoclick.exceptions.APIException;
+import cz.autoclient.autoclick.windows.ClickProxy;
+import cz.autoclient.autoclick.windows.Window;
+import cz.autoclient.autoclick.windows.cache.title.CacheByTitle;
 import cz.autoclient.settings.Settings;
 import cz.autoclient.dllinjection.DLLInjector;
 import cz.autoclient.dllinjection.InjectionResult;
@@ -45,7 +50,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.ParallelGroup;
@@ -81,7 +89,7 @@ import javax.swing.SwingUtilities;
    //Was our DLL loaded by the user?
    private boolean dll_loaded = false;
    
-   private JMenuItem manu_threadcontrol_pretend_accepted;
+   private JMenuItem menu_threadcontrol_pretend_accepted;
    private JMenuItem menu_dll_additions;
    private JCheckBoxMenuItem menu_tray_enabled;
    private JCheckBoxMenuItem menu_tray_minimize;
@@ -91,7 +99,7 @@ import javax.swing.SwingUtilities;
    private boolean tray_added = false;
    private final SystemTray tray;
    
-   RobotManager robots;
+   public RobotManager robots;
    
    /**
     * Is set to true if the AutoClient anti-annoyance functions are in place
@@ -160,27 +168,13 @@ import javax.swing.SwingUtilities;
           System.out.println("Window is closing!");
           //Stop updating GUI
           guard.interrupt();
-          //Save settings
-          if(settings==null) {
-            System.out.println("Settings is null!");
-            return;
-          }
-          try {
-            settings.loadSettingsFromBoundFields();
-            settings.saveToFile(Main.SETTINGS_FILE, false);
-          }
-          catch(IOException e) {
-            System.err.println("Problem saving settings:");
-            e.printStackTrace(System.err);
-          }
-          //Hide tray icon
-          if(canTray())
-            tray.remove(tray_icon);
+          //Terminate the program
+          ac.TerminateAsync();
         }
         @Override
         public void windowClosed(WindowEvent event)
         {
-          System.out.println("This function is never called.");
+          //System.out.println("This function is never called.");
         }
         @Override
         public void windowIconified(WindowEvent event) {
@@ -202,7 +196,7 @@ import javax.swing.SwingUtilities;
      toggleButton1.setSelected(state);
      toggleButton1.setBackground(state? Color.RED:null);
      //Enable/disable thread control
-     manu_threadcontrol_pretend_accepted.setEnabled(state);
+     menu_threadcontrol_pretend_accepted.setEnabled(state);
      
      if(!state) {
        setTitle("Stopped."); 
@@ -246,14 +240,22 @@ import javax.swing.SwingUtilities;
    public void displayTrayEnabled(boolean enabled) {
      displayTrayEnabled(enabled, settings.getBoolean(Setnames.TRAY_ICON_MINIMIZE.name, (Boolean)Setnames.TRAY_ICON_MINIMIZE.default_val), false);
    }
-
+   
    public void displayTrayEnabled() {
      displayTrayEnabled(
          settings.getBoolean(Setnames.TRAY_ICON_ENABLED.name, (Boolean)Setnames.TRAY_ICON_ENABLED.default_val),
          settings.getBoolean(Setnames.TRAY_ICON_MINIMIZE.name, (Boolean)Setnames.TRAY_ICON_MINIMIZE.default_val),
          false);
    }
-   
+   /**
+    * Hides the tray icon.
+    */
+   public void destroyTray() {
+     //Hide tray icon
+     if(canTray()) {
+       showTrayIcon(false);
+     }
+   }
    public void displayDllStatus(boolean loaded) {
      dll_loaded = loaded;
      if(loaded) {
@@ -368,7 +370,7 @@ import javax.swing.SwingUtilities;
      {
        menu1 = new JMenu();
 
-       menu1.setText("Settings");
+       menu1.setText("Tools");
 
        //---- menuItem1 ----
        /*menuItem1 = new JMenuItem();
@@ -403,20 +405,95 @@ import javax.swing.SwingUtilities;
        });
        menu1.add(menuItem2);
        menu_dll_additions = menuItem2;
+       /** Run as administrator**/
+         if(!Main.isAdmin()) {
+         JMenuItem item = new JMenuItem();
+         item.setText("Restart as administrator...");
+         item.setToolTipText("If you run PVP.net Client under admin account, you must run this tool elevated too.");
+         item.setEnabled(true);
+         item.addActionListener(new ActionListener() {
+             @Override
+             public void actionPerformed(ActionEvent e) {
+               try {
+                 Gui.this.ac.RestartWithAdminRightsAsync();
+               }
+               catch (FileNotFoundException ex) {
+                 dialogErrorAsync(ex.getMessage());
+               }
+               catch (IOException ex) {
+                 dialogErrorAsync("Cannot read the helper VBS file.\n    "+ex);
+               }
+             }
+         });
+         menu1.add(item);
+       }
        //Update dll aditions status
        displayDllStatus(false);
-
-       manu_threadcontrol_pretend_accepted = new JMenuItem();
-       manu_threadcontrol_pretend_accepted.setText("Detect game lobby");
-       manu_threadcontrol_pretend_accepted.setToolTipText("If the lobby has been already invoked, skip accept phase.");
-       manu_threadcontrol_pretend_accepted.setEnabled(false);
-       manu_threadcontrol_pretend_accepted.addActionListener(new ActionListener() {
-           @Override
-           public void actionPerformed(ActionEvent e) {
-             Gui.this.ac.ac.simulateAccepted();
-           }
-       });
-       menu1.add(manu_threadcontrol_pretend_accepted);
+       //======== menu2 ========
+       {
+         JMenu menu = new JMenu();
+         menu.setText("Debug");
+         menu_threadcontrol_pretend_accepted = new JMenuItem();
+         menu_threadcontrol_pretend_accepted.setText("Detect game lobby");
+         menu_threadcontrol_pretend_accepted.setToolTipText("If the lobby has been already invoked, skip accept phase.");
+         menu_threadcontrol_pretend_accepted.setEnabled(false);
+         menu_threadcontrol_pretend_accepted.addActionListener(new ActionListener() {
+             @Override
+             public void actionPerformed(ActionEvent e) {
+               Gui.this.ac.ac.simulateAccepted();
+             }
+         });
+         menu.add(menu_threadcontrol_pretend_accepted);
+         JMenuItem item = new JMenuItem();
+         item.setText("Show current screenshot.");
+         item.setToolTipText("Serves as debug feature to check whether Winapi is working.");
+         item.setEnabled(true);
+         item.addActionListener(new ActionListener() {
+             @Override
+             public void actionPerformed(ActionEvent e) {
+               Window window = CacheByTitle.initalInst.getWindow(ConstData.window_title_part);
+               if(window!=null) {
+                 try {
+                   DebugDrawing.displayImage(window.screenshot(), "Screnshot", false);
+                 }
+                 catch(InterruptedException ex) {
+                   
+                 }
+                 catch(APIException ex) {
+                   dialogErrorAsync("Window can't return screenshot. This is the last error: \n"+ex);
+                 }
+               }
+               else {
+                 dialogErrorAsync("No window found that contains '"+ConstData.window_title_part+"' in title.");
+               }
+             }
+         });
+         menu.add(item);
+         
+         item = new JMenuItem();
+         item.setText("Create remote window.");
+         item.setToolTipText("Creates a window that mimics everything you see in PVP.net launcher and passes your clicks.");
+         item.setEnabled(true);
+         final ClickProxy proxy = new ClickProxy(null);
+         item.addActionListener(new ActionListener() {
+             @Override
+             public void actionPerformed(ActionEvent e) {
+               if(!proxy.isRunning()) {
+                 proxy.setWindow(CacheByTitle.initalInst.getWindow(ConstData.window_title_part));
+                 try {
+                   proxy.start();
+                 }
+                 catch(IllegalStateException er) {
+                   Gui.this.dialogErrorAsync(er.getMessage(), "Cannot create the click proxy.");
+                 }
+               }
+             }
+         });
+         menu.add(item);
+         
+         menu1.add(menu);
+       }
+       
      }
      menuBar1.add(menu1);
      //======== menu2 ========

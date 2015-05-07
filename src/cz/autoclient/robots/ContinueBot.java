@@ -13,7 +13,7 @@ import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.windows.WindowCallback;
 import cz.autoclient.autoclick.comvis.DebugDrawing;
-import cz.autoclient.autoclick.exceptions.APIError;
+import cz.autoclient.autoclick.exceptions.APIException;
 
 /**
  *
@@ -47,7 +47,7 @@ public class ContinueBot extends Robot {
         //System.out.println("  - Going to sleep.");
         Thread.sleep(2000);
       }
-    } catch(APIError e) {
+    } catch(APIException e) {
       lastError = true;
       //Recover if the window is still valid
       if(window.isValid() && !lastError) {

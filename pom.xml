@@ -70,6 +70,36 @@
           <outputDirectory>${project.build.directory}/</outputDirectory>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <version>2.6</version>
+        <configuration>
+          <skip>true</skip>
+          <formats>
+            <format>html</format>		
+            <format>xml</format>
+          </formats>
+          <outputDirectory>${project.build.directory}/surefire-reports/cobertura</outputDirectory>		
+          <instrumentation>
+            <ignoreTrivial>true</ignoreTrivial>			
+            <ignores>
+              <ignore>org.slf4j.Logger.*</ignore>		
+            </ignores>
+            <excludes>	
+            </excludes>
+          </instrumentation>
+        </configuration>
+        <executions>
+  
+          <execution>
+            <phase>package</phase>			
+            <goals>
+              <goal>cobertura</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
 
   </build>

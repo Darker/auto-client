@@ -12,7 +12,7 @@ import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.PVP_net.Setnames;
 import cz.autoclient.autoclick.Rect;
-import cz.autoclient.autoclick.exceptions.APIError;
+import cz.autoclient.autoclick.exceptions.APIException;
 import cz.autoclient.robots.exceptions.RobotNotConfiguredException;
 import cz.autoclient.robots.helpers.ValueChangeToWatcher;
 import cz.autoclient.settings.Settings;
@@ -45,7 +45,7 @@ public class AutoLoginBot extends Robot {
    * @throws InterruptedException when the htread is iterrupted externally
    */
   @Override
-  protected void go() throws InterruptedException, APIError {
+  protected void go() throws InterruptedException, APIException {
     
     System.out.println("Start waiting for login screen.");
     if(initializing) {

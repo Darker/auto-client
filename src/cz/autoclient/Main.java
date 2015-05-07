@@ -11,15 +11,24 @@ import cz.autoclient.settings.Settings;
 import cz.autoclient.settings.input_handlers.*;
 import cz.autoclient.settings.secure.SecureSettings;
 import cz.autoclient.settings.secure.UniqueID;
+import java.awt.Frame;
 import java.beans.Expression;
 import java.io.File;
 import java.io.FileNotFoundException;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
@@ -126,7 +135,7 @@ import sirius.constants.IWMConsts;
        @Override
        public void run()
        {
-         gui.setDefaultCloseOperation(3);
+         gui.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
          gui.setVisible(true);
        }
      });
@@ -142,11 +151,18 @@ import sirius.constants.IWMConsts;
      }
    }
    public <T extends Robot> T findRobot(Class<T> type) throws NoSuchRobotException {
+     T result = null;
      for(Robot r : robots) {
-       if(type.isInstance(r))
-         return (T)r;
+       if(type.isInstance(r)) {
+         result = (T)r;
+         break;
+       }
      }
-     return createRobot(type);
+     if(result==null) {
+       result = createRobot(type);
+       robots.add(result);
+     }
+     return result;
    }
    
    public static void main(String[] args)
@@ -162,6 +178,98 @@ import sirius.constants.IWMConsts;
      InputHandlers.register(InputSummonerSpell.class,  ButtonSummonerSpellMaster.class);
      //Start program
      Main ac = new Main();
+   }
+   public Thread TerminateAsync() {
+     Thread t = new Thread() {
+       @Override
+       public void run() {
+         Main.this.Terminate();
+       }
+     };
+     t.start();
+     return t;
+   }
+   /**
+    * Terminates the whole program while saving settings.
+    */
+   public void Terminate() {
+     //gui is JFrame representing the application window
+     gui.setVisible(false);
+     gui.destroyTray();
+     gui.dispose();
+     gui.robots.interrupt();
+     //Stop tool thread if running
+     if(ToolRunning())
+       StopTool();
+     //Save settings
+     if(settings==null) {
+       System.out.println("Settings is null!");
+       return;
+     }
+     try {
+       settings.loadSettingsFromBoundFields();
+       settings.saveToFile(SETTINGS_FILE, false);
+     }
+     catch(IOException e) {
+       System.err.println("Problem saving settings:");
+       e.printStackTrace(System.err);
+     }
+     for(Frame frame : JFrame.getFrames()) {
+       //System.out.println("Frame " + frame.getTitle());
+       if(frame.isDisplayable()) {
+         //System.out.println("  Destroying frame " + frame.getTitle());
+         frame.dispose();
+       }
+     }
+     //Here, no non-deamon threads should be running (daemon thread does not prolong the applicatione execution).
+     //System.exit(0);
+   }
+   public void RestartWithAdminRightsAsync() throws FileNotFoundException, IOException {
+     StartWithAdminRights();
+     Terminate();
+     System.exit(0);
+   }
+   private static Boolean isAdmin = null;
+   public static boolean isAdmin(){
+     if(isAdmin!=null)
+       return isAdmin;
+     Preferences prefs = Preferences.systemRoot();
+     try {
+       prefs.put("foo", "bar"); // SecurityException on Windows
+       prefs.remove("foo");
+       prefs.flush(); // BackingStoreException on Linux
+       return isAdmin = true;
+     }
+     catch(Exception e){
+       return isAdmin = false;
+     }
+  }
+   public void StartWithAdminRights() throws FileNotFoundException, IOException {
+     
+     File runAsAdmin = new File("run-as-admin.vbs");;
+     String param1;
+
+     //System.out.println("Current relative path is: " + s);
+     try {
+       param1 = "\""+new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getAbsolutePath()+"\"";
+     } catch (URISyntaxException ex) {
+       throw new FileNotFoundException("Could not fetch the path to the current jar file.");
+     }
+     if(!param1.contains(".jar")) {
+       Path currentRelativePath = Paths.get("");
+       param1 = "\""+currentRelativePath.toAbsolutePath().toString()+"\\AutoClient.jar\"";
+     }
+     
+     if(runAsAdmin.exists()) {
+       String command = "cscript \""+runAsAdmin.getAbsolutePath()+"\" "+param1;
+       System.out.println("Executing '"+command+"'");
+       Runtime.getRuntime().exec(command);
+       
+     }
+     else
+       throw new FileNotFoundException("The VBSScript used for elevation not found at "+runAsAdmin.getAbsolutePath());
+     //Terminate();
+     //System.exit(0);
    }
  }
 

@@ -13,7 +13,7 @@ import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.windows.WindowCallback;
-import cz.autoclient.autoclick.exceptions.APIError;
+import cz.autoclient.autoclick.exceptions.APIException;
 import cz.autoclient.autoclick.windows.cache.title.CacheByTitle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -70,7 +70,7 @@ public class LaunchBot extends Robot {
                     w.slowClick(PixelOffset.Patcher_Eula_Button.toRect(win_rect), 80);
                     Thread.sleep(180);
                   }
-                } catch (APIError ex) {
+                } catch (APIException ex) {
                   Logger.getLogger(LaunchBot.class.getName()).log(Level.SEVERE, null, ex);
                 }
               }
@@ -103,7 +103,7 @@ public class LaunchBot extends Robot {
         //System.out.println("  - Going to sleep.");
         Thread.sleep(1000);
       }
-    } catch(APIError e) {
+    } catch(APIException e) {
       lastError = true;
       //Recover if the window is still valid
       if(window.isValid() && !lastError) {

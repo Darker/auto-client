@@ -43,4 +43,11 @@
                 <exec.executable>java</exec.executable>
             </properties>
         </action>
+        <action>
+            <actionName>CUSTOM-Cobertura</actionName>
+            <displayName>Cobertura</displayName>
+            <goals>
+                <goal>cobertura:cobertura</goal>
+            </goals>
+        </action>
     </actions>

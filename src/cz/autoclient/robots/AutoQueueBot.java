@@ -14,7 +14,7 @@ import cz.autoclient.PVP_net.Setnames;
 import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.windows.Window;
-import cz.autoclient.autoclick.exceptions.APIError;
+import cz.autoclient.autoclick.exceptions.APIException;
 import cz.autoclient.robots.helpers.IterationLimiter;
 import cz.autoclient.settings.Settings;
 import java.awt.event.ActionListener;
@@ -100,7 +100,7 @@ public class AutoQueueBot extends Robot {
         //System.out.println("  - Going to sleep.");
         Thread.sleep(3000);
       }
-    } catch(APIError e) {
+    } catch(APIException e) {
       lastError = true;
       //Recover if the window is still valid
       if(window.isValid() && !lastError) {

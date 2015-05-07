@@ -6,7 +6,7 @@
 
 package cz.autoclient.autoclick.windows.ms_windows;
 
-import cz.autoclient.autoclick.exceptions.APIError;
+import cz.autoclient.autoclick.exceptions.APIException;
 import cz.autoclient.autoclick.windows.ms_windows.Messages;
 import cz.autoclient.autoclick.windows.ms_windows.ShowWindow;
 import com.sun.jna.Memory;
@@ -18,7 +18,7 @@ import com.sun.jna.platform.win32.WinNT;
 import com.sun.jna.platform.win32.WinUser;
 import com.sun.jna.ptr.IntByReference;
 import cz.autoclient.autoclick.ColorRef;
-import cz.autoclient.autoclick.MouseButton;
+import cz.autoclient.autoclick.windows.MouseButton;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.windows.WindowValidator;
@@ -60,7 +60,7 @@ public class MSWindow extends Common implements Window  {
   }
   @Override
   public void mouseDown(int x, int y, MouseButton button, boolean isControl, boolean isAlt, boolean isShift) {
-    sendMessage(hwnd_id,
+    sendMsg(
                 button.win_message_id_down,
                 makeWinapiMouseEventFlags(isControl, isAlt, isShift),
                 makeLParam(x, y).intValue());
@@ -76,7 +76,7 @@ public class MSWindow extends Common implements Window  {
   }
   @Override
   public void mouseUp(int x, int y, MouseButton button, boolean isControl, boolean isAlt, boolean isShift) {
-    sendMessage(hwnd_id,
+    sendMsg(
                 button.win_message_id_up,
                 makeWinapiMouseEventFlags(isControl, isAlt, isShift),
                 makeLParam(x, y).intValue());
@@ -266,13 +266,13 @@ public class MSWindow extends Common implements Window  {
     throw new UnsupportedOperationException("Not supported yet.");
   }
   @Override
-  public void move(int x, int y) throws APIError {
+  public void move(int x, int y) throws APIException {
      Rect rc = getRect();
      UserExt.MoveWindow(hwnd, x, y, (int)(rc.right - rc.left), (int)(rc.bottom - rc.top), true);
   }
 
   @Override
-  public void resize(int w, int h) throws APIError {
+  public void resize(int w, int h) throws APIException {
      Rect rc = getRect();
      UserExt.MoveWindow(hwnd, (int)rc.left, (int)rc.top, w, h, true);
   }
@@ -311,7 +311,7 @@ public class MSWindow extends Common implements Window  {
     throw new UnsupportedOperationException("Not supported yet.");
   }
   @Override
-  public BufferedImage screenshot() throws APIError
+  public BufferedImage screenshot() throws APIException
    {
    //Wtf is this, seriously? Random number?
    WinDef.DWORD SRCCOPY = new WinDef.DWORD(13369376L);
@@ -392,7 +392,7 @@ public class MSWindow extends Common implements Window  {
   }
   
   @Override
-  public BufferedImage screenshotCrop(int x, int y, int w, int h) throws APIError {
+  public BufferedImage screenshotCrop(int x, int y, int w, int h) throws APIException {
    //Wtf is this, seriously
    WinDef.DWORD SRCCOPY = new WinDef.DWORD(13369376L);
 
@@ -432,15 +432,15 @@ public class MSWindow extends Common implements Window  {
   /**
    * Creates autoclick.Rect object describing dimensions of this window.
    * @return Rect object describing window size and on-screen position
-   * @throws APIError - when internal API function returns false
+   * @throws APIException - when internal API function returns false
    */
   @Override
-  public Rect getRect() throws APIError
+  public Rect getRect() throws APIException
   {
    WinDef.RECT result = new WinDef.RECT();
    
    if(!UserExt.GetClientRect(hwnd, result)) {
-     throw new APIError("API failed to retrieve valid window rectangle!"); 
+     throw new APIException("API failed to retrieve valid window rectangle!"); 
    }
    return new Rect(result);
   }
@@ -454,11 +454,13 @@ public class MSWindow extends Common implements Window  {
    UserExt.GetClientRect(hwnd, result);
    return result;
   }
-  private void sendMsg(int msg, int wparam, int lparam) {
-    UserExt.SendMessage(hwnd, msg, new WinDef.WPARAM(wparam), new WinDef.LPARAM(lparam));
+  private int sendMsg(int msg, int wparam, int lparam) {
+    
+    return UserExt.SendMessage(hwnd, msg, new WinDef.WPARAM(wparam), new WinDef.LPARAM(lparam));
+    //UserExt.GetL
   }
   private void sendMsg(Messages msg, int wparam, int lparam) {
-    sendMsg(msg.code, wparam, lparam);
+    System.out.println("Message "+msg.name()+" result: "+sendMsg(msg.code, wparam, lparam));
   }
   public static User32Ext UserExt = User32Ext.INSTANCE;
   public static GDI32Ext GDIExt = GDI32Ext.INSTANCE;

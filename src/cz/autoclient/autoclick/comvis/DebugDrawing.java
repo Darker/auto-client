@@ -137,7 +137,7 @@ public class DebugDrawing {
      }
      return true;
    }
-   public static void displayImage(final Image image, String message) throws InterruptedException {
+   public static void displayImage(final Image image, String message, boolean synchronous) throws InterruptedException {
      if(image==null)
        throw new IllegalArgumentException("No image to draw. Given image is null.");
 
@@ -193,14 +193,19 @@ public class DebugDrawing {
        @Override
        public void windowDeactivated(WindowEvent e) {}
      });
-     synchronized(t) {
-       t.wait();
-       //System.out.println("Wait over.");
+     if(synchronous) {
+       synchronized(t) {
+         t.wait();
+         //System.out.println("Wait over.");
+       }
      }
      //JOptionPane.showMessageDialog(null, scrollPane, message, javax.swing.JOptionPane.INFORMATION_MESSAGE);
    }
    public static void displayImage(Image image) throws InterruptedException {
-     displayImage(image, "Debug");
+     displayImage(image, "Debug", true);
+   }
+   public static void displayImage(Image image, String title) throws InterruptedException {
+     displayImage(image, title, true);
    }
    static BufferedImage cloneImage(BufferedImage bi) {
      ColorModel cm = bi.getColorModel();

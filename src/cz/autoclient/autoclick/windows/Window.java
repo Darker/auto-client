@@ -8,10 +8,9 @@
  
 package cz.autoclient.autoclick.windows;
 
-import cz.autoclient.autoclick.MouseButton;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.RectInterface;
-import cz.autoclient.autoclick.exceptions.APIError;
+import cz.autoclient.autoclick.exceptions.APIException;
 import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -21,9 +20,21 @@ import java.util.List;
  *
  * @author Jakub
  */
+
 public interface Window {
   /** MOUSE EVENTS **/
+  /**
+   * Simulates {@link MouseButton.Left} mouse bottun down event in the target window.
+   * @param x x coordinate form the top-left corner of the window client area
+   * @param y y coordinate form the top-left corner of the window client area
+   */
   public void mouseDown(int x, int y);
+  /**
+   * Simulates mouse botton down event in the target window.
+   * @param x x coordinate form the top-left corner of the window client area
+   * @param y y coordinate form the top-left corner of the window client area
+   * @param button button picked from supplied enum {@link MouseButton}
+   */
   public void mouseDown(int x, int y, MouseButton button);
   public void mouseDown(int x, int y, MouseButton button, boolean isControl, boolean isAlt, boolean isShift);
   
@@ -108,8 +119,8 @@ public interface Window {
    */
   public boolean isValid();
   
-  public void move(int x, int y) throws APIError;
-  public void resize(int w, int h) throws APIError;
+  public void move(int x, int y) throws APIException;
+  public void resize(int w, int h) throws APIException;
   /** Force window to repaint **/
   public void repaint();
 
@@ -119,20 +130,20 @@ public interface Window {
    * @param y left position
    * @param w new width
    * @param h new height
-   * @throws APIError when the API fails, whis is system specific. Not every system may provide feedback
+   * @throws APIException when the API fails, whis is system specific. Not every system may provide feedback
    */
-  public void moveresize(int x, int y, int w, int h) throws APIError;
+  public void moveresize(int x, int y, int w, int h) throws APIException;
   
   /** GETTING VISUAL FEEDBACK **/
   public Color getColor(int x, int y);
   public Color getAvgColor(int x, int y, int w, int h);
-  public BufferedImage screenshot() throws APIError;
-  public BufferedImage screenshotCrop(int x, int y, int w, int h) throws APIError;
+  public BufferedImage screenshot() throws APIException;
+  public BufferedImage screenshotCrop(int x, int y, int w, int h) throws APIException;
   
   public default BufferedImage screenshotCrop(RectInterface rect) {
     return screenshotCrop(rect.left(), rect.top(), rect.width(), rect.height());
   }
-  public Rect getRect() throws APIError;
+  public Rect getRect() throws APIException;
   
   /** WINDOW PROPERTIES **/
   public String getTitle();

@@ -13,7 +13,7 @@ import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.PVP_net.Images;
 import cz.autoclient.PVP_net.Setnames;
 import cz.autoclient.PVP_net.TeamBuilderPlayerSlot;
-import cz.autoclient.autoclick.exceptions.APIError;
+import cz.autoclient.autoclick.exceptions.APIException;
 import cz.autoclient.autoclick.ColorPixel;
 import java.awt.Color;
 
@@ -73,7 +73,7 @@ import java.util.ArrayList;
        System.out.println(e);
        end();
      }
-     catch (APIError e) {
+     catch (APIException e) {
        System.out.println("The Window API has failed:" +e);
        end();
      }
@@ -110,7 +110,7 @@ import java.util.ArrayList;
    }
    
    private void handleMatch()
-     throws InterruptedException, APIError
+     throws InterruptedException, APIException
    {
      /*Rect cRec = window.getRect();
      int height = cRec.height;
@@ -278,7 +278,7 @@ import java.util.ArrayList;
    public synchronized void simulateAccepted() {
      pretendAccepted = true;     
    }
-   public boolean normal_lobby() throws InterruptedException, APIError {
+   public boolean normal_lobby() throws InterruptedException, APIException {
      if(settings.getBoolean(Setnames.NOTIF_MENU_BLIND_IN_LOBBY.name, false))
        gui.notification(Notification.Def.BLIND_TEAM_JOINED);
      
@@ -616,7 +616,7 @@ import java.util.ArrayList;
                  Color a = window.getColor((int)(rect.width * point.x), (int)(rect.height * point.y));
                  System.out.println("     - Real color: "+ColorPixel.ColorToSource(a));
                }
-               catch(APIError e) {
+               catch(APIException e) {
 
                }
              }
@@ -711,7 +711,7 @@ import java.util.ArrayList;
      else
        return false;*/
    }
-   public void invite_lobby() throws APIError, InterruptedException {
+   public void invite_lobby() throws APIException, InterruptedException {
      //Handle disabled invite lobby
      if(!settings.getBoolean(Setnames.INVITE_ENABLED.name, (boolean)Setnames.INVITE_ENABLED.default_val)) {
        System.out.println("Invite lobby automation disabled, waiting.");
@@ -804,7 +804,7 @@ import java.util.ArrayList;
        Rect rect = window.getRect();
        window.click((int)(rect.width * pos.x), (int)(rect.height * pos.y));
      }
-     catch(APIError e) {
+     catch(APIException e) {
        System.err.println("Can't click because no window is available for clicking :("); 
      }
    }
@@ -813,7 +813,7 @@ import java.util.ArrayList;
        Rect rect = window.getRect();
        window.click((int)(rect.width * pos.x), (int)(rect.height * pos.y));
      }
-     catch(APIError e) {
+     catch(APIException e) {
        System.err.println("Can't click because no window is available for clicking :("); 
      }
    }
@@ -826,7 +826,7 @@ import java.util.ArrayList;
        Rect rect = window.getRect();
        window.click((int)(rect.width * pos.left), (int)(rect.height * pos.top));
      }
-     catch(APIError e) {
+     catch(APIException e) {
        System.err.println("Can't click because no window is available for clicking :("); 
      }
    }
@@ -837,7 +837,7 @@ import java.util.ArrayList;
        Rect rect = window.getRect();
        return point.color.equals(window.getColor((int)(rect.width * point.x), (int)(rect.height * point.y)));
      }
-     catch(APIError e) {
+     catch(APIException e) {
        System.err.println("Can't click because no window is available for clicking :("); 
        return false;
      }
@@ -863,7 +863,7 @@ import java.util.ArrayList;
               (Math.abs(a.getGreen() - b.getGreen()) < tolerance) &&
               (Math.abs(a.getBlue() -  b.getBlue())  < tolerance);
      }
-     catch(APIError e) {
+     catch(APIException e) {
        System.err.println("Can't click because no window is available for clicking :("); 
        return false;
      }
@@ -880,7 +880,7 @@ import java.util.ArrayList;
               (Math.abs(a.getGreen() - b.getGreen()) < tolerance) &&
               (Math.abs(a.getBlue() -  b.getBlue())  < tolerance);
      }
-     catch(APIError e) {
+     catch(APIException e) {
        System.err.println("Can't click because no window is available for clicking :("); 
        return false;
      }

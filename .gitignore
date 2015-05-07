@@ -4,8 +4,11 @@
 *.exe
 /data/*
 /LOLResources/*
+/test_data/*
 /images/unused/*
 /launcher_screens/*.png
 exclude.txt
 release.bat
+./run_as_admin.bat
+./run_with_commandline.bat
 /release/tmp/*

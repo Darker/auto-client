@@ -11,7 +11,7 @@ import cz.autoclient.autoclick.ComparablePixel;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.comvis.DebugDrawing;
-import cz.autoclient.autoclick.exceptions.APIError;
+import cz.autoclient.autoclick.exceptions.APIException;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
@@ -35,20 +35,20 @@ public class WindowTools {
    {
      enter(window, 0);
    }
-   public static void click(Window window, PixelOffset pos)  throws APIError {
+   public static void click(Window window, PixelOffset pos)  throws APIException {
  
      Rect rect = window.getRect();
      window.click((int)(rect.width * pos.x), (int)(rect.height * pos.y));
 
    }
-   public static void click(Window window, ColorPixel pos) throws APIError {
+   public static void click(Window window, ColorPixel pos) throws APIException {
    
      Rect rect = window.getRect();
      window.click((int)(rect.width * pos.x), (int)(rect.height * pos.y));
  
    }
 
-   public static boolean checkPoint(Window window, ComparablePixel point) throws APIError {
+   public static boolean checkPoint(Window window, ComparablePixel point) throws APIException {
      if(point.getColor()==null)
        return false;
      if(point.getTolerance()<1) {
@@ -64,7 +64,7 @@ public class WindowTools {
        return checkPoint(window, point, point.getTolerance());
      }
    }
-   public static int checkPoint(Window window, ComparablePixel... points) throws APIError {
+   public static int checkPoint(Window window, ComparablePixel... points) throws APIException {
      int matches = 0;
      if(points.length<3) {
        for(ComparablePixel point:points) {
@@ -82,10 +82,10 @@ public class WindowTools {
      return matches;
    }
    
-   public static boolean checkPoint(Window window, ComparablePixel point, int tolerance) throws APIError {
+   public static boolean checkPoint(Window window, ComparablePixel point, int tolerance) throws APIException {
      return checkPoint(window, point, tolerance, null);
    }
-   public static boolean checkPoint(Window window, ComparablePixel point, int tolerance, String debug) throws APIError {
+   public static boolean checkPoint(Window window, ComparablePixel point, int tolerance, String debug) throws APIException {
      Color b = point.getColor();
      if(b==null)
        return false;
@@ -107,10 +107,10 @@ public class WindowTools {
      
 
    }
-   public static boolean checkPoint(BufferedImage img, ComparablePixel point) throws APIError {
+   public static boolean checkPoint(BufferedImage img, ComparablePixel point) throws APIException {
      return checkPoint(img, point, point.getTolerance());
    }
-   public static boolean checkPoint(BufferedImage img, ComparablePixel point, int tolerance) throws APIError {
+   public static boolean checkPoint(BufferedImage img, ComparablePixel point, int tolerance) throws APIException {
      Color b = point.getColor();
      if(b==null)
        return false;
@@ -122,14 +122,14 @@ public class WindowTools {
             (Math.abs(a.getBlue() -  b.getBlue())  < tolerance);
    }
 
-   public static boolean checkPoint(BufferedImage img, PixelOffset point, int tolerance) throws APIError {
+   public static boolean checkPoint(BufferedImage img, PixelOffset point, int tolerance) throws APIException {
      return checkPoint(img, point.offset(0, 0), tolerance);
    }
    public static Color getColor(BufferedImage img, int x, int y) {
      int pixel = img.getRGB(x, y);
      return new Color(((pixel&0x00FF0000)>>16),((pixel&0x0000FF00)>>8), (pixel&0x000000FF)); 
    }
-   public static int[] diffPoint(Window window, ColorPixel point) throws APIError {
+   public static int[] diffPoint(Window window, ColorPixel point) throws APIException {
      if(point.color==null)
        return new int[] {255,255,255};
      
@@ -141,7 +141,7 @@ public class WindowTools {
                        (int)Math.abs(a.getGreen() - b.getGreen()),
                        (int)Math.abs(a.getBlue() -  b.getBlue())};
    }
-   public static void drawCheckPoint(BufferedImage img, ComparablePixel p, int tolerance) throws APIError {
+   public static void drawCheckPoint(BufferedImage img, ComparablePixel p, int tolerance) throws APIException {
      Rect preal = p.toRect(img.getWidth(), img.getHeight());
      DebugDrawing.drawPoint(
         img, 
@@ -152,20 +152,20 @@ public class WindowTools {
         (p instanceof Enum)?((Enum)p).name() : null
      );
    }
-   public static void drawCheckPoint(BufferedImage img, ComparablePixel pixelOffset) throws APIError {
+   public static void drawCheckPoint(BufferedImage img, ComparablePixel pixelOffset) throws APIException {
      drawCheckPoint(img, pixelOffset, pixelOffset.getTolerance());
    }
-   public static void drawCheckPoint(BufferedImage img, ComparablePixel[] pixels) throws APIError {
+   public static void drawCheckPoint(BufferedImage img, ComparablePixel[] pixels) throws APIException {
      for(ComparablePixel p : pixels) {
        drawCheckPoint(img, p);
      }
    }
-   public static void showDrawCheckPoint(BufferedImage img, ComparablePixel[] pixels) throws APIError, InterruptedException {
+   public static void showDrawCheckPoint(BufferedImage img, ComparablePixel[] pixels) throws APIException, InterruptedException {
      drawCheckPoint(img, pixels);
      DebugDrawing.displayImage(img);
    }
    
-   public static void say(Window w, String text, Rect field) throws APIError, InterruptedException {
+   public static void say(Window w, String text, Rect field) throws APIException, InterruptedException {
      if(text==null || text.isEmpty())
        return;
      w.slowClick(field, 30);
@@ -173,7 +173,7 @@ public class WindowTools {
      w.keyDown(13);
      w.keyUp(13);
    }
-   public static void say(Window w, String text, PixelOffset field) throws APIError, InterruptedException {
+   public static void say(Window w, String text, PixelOffset field) throws APIException, InterruptedException {
      if(text==null || text.isEmpty())
        return;
      say(w, text, field.toRect(w.getRect()));
