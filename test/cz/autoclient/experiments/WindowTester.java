@@ -1,4 +1,4 @@
-package cz.autoclient;
+package cz.autoclient.experiments;
 
 import com.sun.jna.NativeLong;
 import com.sun.jna.Structure;
@@ -7,17 +7,18 @@ import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinDef.LRESULT;
 import com.sun.jna.platform.win32.WinDef.POINT;
 import com.sun.jna.platform.win32.WinDef.WPARAM;
-import com.sun.jna.platform.win32.WinUser;
 import com.sun.jna.platform.win32.WinUser.HOOKPROC;
+import cz.autoclient.Main;
 import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.ImageFrame;
 import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
-import cz.autoclient.autoclick.MouseButton;
+import cz.autoclient.autoclick.windows.MouseButton;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.comvis.DebugDrawing;
 import cz.autoclient.autoclick.comvis.ScreenWatcher;
-import cz.autoclient.autoclick.exceptions.APIError;
+import cz.autoclient.autoclick.exceptions.APIException;
+import cz.autoclient.autoclick.windows.ClickProxy;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -57,7 +58,7 @@ public class WindowTester {
     frame.setVisible(true);*/
      
      // "LoL Patcher" "firefox"  
-     MSWindow test = MSWindow.windowFromName("pvp.net", false);
+     MSWindow test = MSWindow.windowFromName("Firefox", false);
      System.out.println(test==null?"Fail.":"Success");
      if(test!=null) {
        //test.typeString("PoJus.'\\#`&[]*-č");
@@ -83,7 +84,9 @@ public class WindowTester {
          
        };
        test.UserExt.SetWindowsHookEx(7, hkprc, null, test.UserExt.GetWindowThreadProcessId(test.hwnd, null));*/
-       testPercentRect(test);
+       //testPercentRect(test);
+       ClickProxy proxy = new ClickProxy(test);
+       proxy.start();
      }
      System.out.println("Main over.");
      //TestGetByPID(6568);
@@ -168,7 +171,7 @@ public class WindowTester {
        try {
          screenshot = test.screenshot();
        }
-       catch(APIError e) {
+       catch(APIException e) {
          System.err.println("No screenshot. Error: "+e);
        }      
        if(screenshot!=null) {

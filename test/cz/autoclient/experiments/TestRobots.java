@@ -1,4 +1,4 @@
-package cz.autoclient;
+package cz.autoclient.experiments;
 
 import cz.autoclient.PVP_net.Setnames;
 import cz.autoclient.robots.*;

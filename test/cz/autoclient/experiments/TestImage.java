@@ -4,8 +4,9 @@
  * and open the template in the editor.
  */
 
-package cz.autoclient;
+package cz.autoclient.experiments;
 
+import cz.autoclient.experiments.ScreenWatcherMain;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.File;

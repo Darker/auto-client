@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package cz.autoclient;
+package cz.autoclient.experiments;
 
 import cz.autoclient.scripting.OneLineScript;
 import cz.autoclient.scripting.ScriptSymbol;

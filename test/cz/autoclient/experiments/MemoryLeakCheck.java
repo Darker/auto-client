@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package cz.autoclient;
+package cz.autoclient.experiments;
 
 import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
 import cz.autoclient.autoclick.windows.Window;

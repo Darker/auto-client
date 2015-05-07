@@ -1,4 +1,4 @@
-package cz.autoclient;
+package cz.autoclient.experiments;
 
 import cz.autoclient.settings.input_handlers.InputJTextField;
 import cz.autoclient.settings.input_handlers.InputJCheckBox;

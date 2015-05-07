@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package cz.autoclient;
+package cz.autoclient.experiments;
 
 import cz.autoclient.autoclick.comvis.DebugDrawing;
 import cz.autoclient.league_of_legends.Champion;

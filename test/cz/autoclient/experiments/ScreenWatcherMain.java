@@ -4,14 +4,14 @@
  * and open the template in the editor.
  */
 
-package cz.autoclient;
+package cz.autoclient.experiments;
 
 
 import cz.autoclient.PVP_net.Images;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.comvis.ScreenWatcher;
 import cz.autoclient.autoclick.comvis.RectMatch;
-import cz.autoclient.autoclick.exceptions.APIError;
+import cz.autoclient.autoclick.exceptions.APIException;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -141,7 +141,7 @@ public class ScreenWatcherMain {
      saveToPath("ScreenWatcher.BestMatches.png", screenshot);
      saveToPath("ScreenWatcher.Test1.png", thing1);
    }
-   public static void TestBestWhile(BufferedImage thing1, BufferedImage thing2, BufferedImage screenshot) throws APIError, InterruptedException {
+   public static void TestBestWhile(BufferedImage thing1, BufferedImage thing2, BufferedImage screenshot) throws APIException, InterruptedException {
      System.out.println("Inviting players now. ");
      double[][][] integral_image;
      double[] accepted, pending;

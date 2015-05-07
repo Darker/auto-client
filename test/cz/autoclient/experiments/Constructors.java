@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package cz.autoclient;
+package cz.autoclient.experiments;
 
 import java.beans.Expression;
 import java.lang.reflect.Constructor;

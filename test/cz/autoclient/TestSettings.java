@@ -129,13 +129,13 @@ public class TestSettings {
     assertTrue("Just a moment ago, settings had encryptor class.", outputSet.hasEncryptor());
     outputSet.prepareForEncryptionChange();
     SecureSettings encr = outputSet.getEncryptor();
-    System.out.println("Old password: "+encr.getMergedPassword());
+    //System.out.println("Old password: "+encr.getMergedPassword());
     encr.clearPasswords();
     encr.addPassword("PW_NEW");
-    System.out.println("New password: "+encr.getMergedPassword());
+    //System.out.println("New password: "+encr.getMergedPassword());
     assertTrue("The instance of encryptor in and out of settings must be same.", 
         outputSet.getSetting("encrypted int", EncryptedSetting.class).getEncryptor()==encr);
-    System.out.println("    Single item password: "+outputSet.getSetting("encrypted int", EncryptedSetting.class).getEncryptor().getMergedPassword());
+    //System.out.println("    Single item password: "+outputSet.getSetting("encrypted int", EncryptedSetting.class).getEncryptor().getMergedPassword());
     //Changeone item
     outputSet.setEncrypted("encrypted int", intval2);
     assertEquals("The setting value was supposed to change to new value!", intval2, outputSet.getEncrypted("encrypted int"));
@@ -146,16 +146,16 @@ public class TestSettings {
   @Test
   public void test12_SaveLoadBack() throws IOException {
     path2.mkdirs();
-    System.out.println("Saving with password: "+outputSet.getEncryptor().getMergedPassword());
-    System.out.println("    Single item password: "+outputSet.getSetting("encrypted int", EncryptedSetting.class).getEncryptor().getMergedPassword());
-    System.out.println("    Single item value: "+outputSet.getEncrypted("encrypted int"));
+    //System.out.println("Saving with password: "+outputSet.getEncryptor().getMergedPassword());
+    //System.out.println("    Single item password: "+outputSet.getSetting("encrypted int", EncryptedSetting.class).getEncryptor().getMergedPassword());
+    //System.out.println("    Single item value: "+outputSet.getEncrypted("encrypted int"));
   
     outputSet.saveToFile(path2);
     assertNotEquals("File "+path2.getAbsolutePath()+" is empty! Size: ", 0, path2.length());
     //ystem.out.println("File size: "+path.length());
     inputSet.clearSettings();
     assertEquals("Settings should be empty now!", 0, inputSet.size());
-    System.out.println("Loading with password: "+inputSet.getEncryptor().getMergedPassword());
+    //System.out.println("Loading with password: "+inputSet.getEncryptor().getMergedPassword());
     
     inputSet.loadFromFile(path2);
     assertEquals("The added setting was lost.", 2.0, inputSet.getSetting("VERSION"));
@@ -174,13 +174,13 @@ public class TestSettings {
   public void test14_DecryptWithChangedPassword() {
     //Output set has still set the original "PW" password
     System.out.println("Decrypted int: " + inputSet.getEncrypted("encrypted int"));
-    System.out.println("    Using password: "+inputSet.getSetting("encrypted int", EncryptedSetting.class).getEncryptor().getMergedPassword());
+    //System.out.println("    Using password: "+inputSet.getSetting("encrypted int", EncryptedSetting.class).getEncryptor().getMergedPassword());
   }
   @Test(expected = InvalidPasswordException.class)
   public void test15_DecryptWithChangedPassword() {
     //Output set has still set the original "PW" password
     System.out.println("Decrypted string: " + inputSet.getEncrypted("encrypted string"));
-    System.out.println("    Using password: "+inputSet.getSetting("encrypted string", EncryptedSetting.class).getEncryptor().getMergedPassword());
+    //System.out.println("    Using password: "+inputSet.getSetting("encrypted string", EncryptedSetting.class).getEncryptor().getMergedPassword());
   }
   
   public void test16_DecryptWithChangedCorrectPassword() {
