@@ -53,10 +53,16 @@ public class WindowTools {
        return false;
      if(point.getTolerance()<1) {
        Rect rect = window.getRect();
+       if(rect.width==0 || rect.height==0)
+         return false;
+       
+       int x = (int)(rect.width * point.getX());
+       int y = (int)(rect.height * point.getY());
+       
        return point.getColor().equals(
                   window.getColor(
-                      (int)(rect.width * point.getX()),
-                      (int)(rect.height * point.getY())
+                      x,
+                      y
                   )
        );
      }
@@ -91,6 +97,9 @@ public class WindowTools {
        return false;
      
      Rect rect = window.getRect();
+     //When the client is minimized...
+     if(rect.height<100)
+       return false;
      
      Color a = window.getColor((int)(rect.width * point.getX()), (int)(rect.height * point.getY()));
      
