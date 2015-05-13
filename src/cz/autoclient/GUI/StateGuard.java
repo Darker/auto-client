@@ -8,6 +8,7 @@ package cz.autoclient.GUI;
 import cz.autoclient.Main;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.PVP_net.ConstData;
+import cz.autoclient.PVP_net.Setnames;
 import cz.autoclient.autoclick.windows.cache.title.CacheByTitle;
 import cz.autoclient.threads.Pauseable;
 /**
@@ -28,6 +29,7 @@ public class StateGuard extends Pauseable {
   public StateGuard(Main main_thread, Gui gui) {
     super("GUIStateUpdater");
     main = main_thread; 
+    setDaemon(true);
     this.gui = gui;
   }
   @Override
@@ -38,7 +40,7 @@ public class StateGuard extends Pauseable {
     pvp_net_changed(false);
     
     Window win = null;
-    boolean thread_running;
+
     while(!isInterrupted()||true) {
       //Check whether window is running
       if(win==null) {
@@ -50,6 +52,12 @@ public class StateGuard extends Pauseable {
         win = null;
         //System.out.println("Window is invalid...");
       }
+      else if(
+              main.ToolRunning() && 
+              main.settings.getBoolean(Setnames.PREVENT_CLIENT_MINIMIZE.name, (Boolean)Setnames.PREVENT_CLIENT_MINIMIZE.default_val) &&
+              win.isMinimized()) {
+        win.restoreNoActivate();
+      }
       pvp_net = win!=null;
       //On an change, update GUI
       if(pvp_net!=pvp_net_running) {
@@ -59,9 +67,9 @@ public class StateGuard extends Pauseable {
       /*thread_running = main.ToolRunning();
       if(thread_running!=automation_thread_running)
         thread_changed(thread_running);*/
-      
+
       try {
-        sleep(800L);
+        sleep(900L);
         //Wait some more if paused
         waitPause();
       }
