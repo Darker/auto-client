@@ -21,7 +21,7 @@ import cz.autoclient.autoclick.comvis.RectMatch;
 import cz.autoclient.autoclick.comvis.ScreenWatcher;
 import cz.autoclient.autoclick.windows.cache.title.CacheByTitle;
 import cz.autoclient.PVP_net.WindowTools;
-import cz.autoclient.autoclick.comvis.DebugDrawing;
+import cz.autoclient.autoclick.exceptions.WindowAccessDeniedException;
 import cz.autoclient.league_of_legends.SummonerSpell;
 import java.awt.image.BufferedImage;
 
@@ -63,6 +63,16 @@ import java.util.ArrayList;
      System.out.println("PVP.net window available.");
      //long cID = this.window.FindWindow("PVP");
      //this.gui.getProgressBar1().setValue(0);
+     //First check if we have access to the window
+     try {
+       window.mouseOver(0, 0);
+     }
+     catch(WindowAccessDeniedException e) {
+       gui.dialogElevateAsync();
+       end();
+       return;
+     }
+     
      
      try
      {
@@ -523,7 +533,7 @@ import java.util.ArrayList;
        //If ready button is available
        if(checkPoint(PixelOffset.TeamBuilder_Ready_Enabled, 5)) {
          System.out.println("Clicking ready button!");
-         click(PixelOffset.TeamBuilder_Ready);
+         WindowTools.click(window, PixelOffset.TeamBuilder_Ready);
        }
        //If ready button is selected
        else if(checkPoint(PixelOffset.TeamBuilder_CaptainReady, 5) && checkPoint(PixelOffset.PlayButton_SearchingForGame_Approx, 10)) {
