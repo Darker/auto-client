@@ -46,8 +46,6 @@ public class AutoLoginBot extends Robot {
    */
   @Override
   protected void go() throws InterruptedException, APIException {
-    
-    System.out.println("Start waiting for login screen.");
     if(initializing) {
       System.out.println("Initializing phase of auto login.");
       initializing = false;
@@ -65,14 +63,16 @@ public class AutoLoginBot extends Robot {
         brokenPassword(e);
       }
       if(!canRun()) {
+        System.out.println("Initializing done. Nothing more to do, so terminating.");
         return;
       }
     }
+    System.out.println("Start waiting for login screen at "+window.getTitle());
     PVPAppeared.resetChanged();
     try {
       //Increment as the bot is running, terminate bot at certain value
       int duration = 0;
-      while(!Thread.interrupted() && duration++<8) {
+      while(!Thread.interrupted() && duration++<15) {
         BufferedImage img = window.screenshot();
         
         if(WindowTools.checkPoint(img, PixelOffset.Login_ButtonDisabled, 5) && 
@@ -138,7 +138,7 @@ public class AutoLoginBot extends Robot {
     //if(initializing)
     //  return false;
     
-    if(!initialized || initializing) {
+    if(!initialized && !initializing) {
       //System.out.println("Initializing - run once.");
       initializing = true;
       return true;
