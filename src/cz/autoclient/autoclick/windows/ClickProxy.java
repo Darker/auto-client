@@ -7,6 +7,7 @@
 package cz.autoclient.autoclick.windows;
 
 import cz.autoclient.autoclick.exceptions.APIException;
+import cz.autoclient.autoclick.exceptions.WindowAccessDeniedException;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -60,7 +61,9 @@ public class ClickProxy implements Runnable {
     thread = new Thread(this, "Mouse proxy UI");
     thread.start();
   }
-
+  public void stop() {
+    thread.interrupt();
+  }
   @Override
   public void run() {
     if(thread==null || thread!=Thread.currentThread())
@@ -71,7 +74,7 @@ public class ClickProxy implements Runnable {
     Container main = frame.getContentPane();
     //Turns out this is probably the simplest way to render image on screen 
     //with guaranteed 1:1 aspect ratio
-    final ScreenDisplay display = new ScreenDisplay(window.screenshot(), frame);
+    final ScreenDisplay display = new ScreenDisplay(window, frame);
     MouseProxy mprox = new MouseProxy();
     display.addMouseListener(mprox);
     display.addMouseMotionListener(mprox);
@@ -116,17 +119,18 @@ public class ClickProxy implements Runnable {
       public void actionPerformed(ActionEvent e) {
         //System.out.println("Redrawing");
         try {
-        display.setImage(window.screenshot());
+          display.forceRedraw();
         }
         catch(APIException error) {
           //Terminate the program if window is lost
           frame.setVisible(false);
           frame.dispose();
+          error.printStackTrace();
           synchronized(thread) {thread.notify();}
         }
       }
     };
-    Timer timer = new Timer(200, task);
+    Timer timer = new Timer(100, task);
     timer.start();
     synchronized(thread) {
       try {
@@ -152,13 +156,23 @@ public class ClickProxy implements Runnable {
     @Override
     public void mousePressed(MouseEvent e) {
       //System.out.println("Mousedown: ["+e.getX()+", "+e.getY()+"]"+MouseButton.fromJavaAwtMouseEvent(e).name());
-      window.mouseDown(e.getX(), e.getY(), MouseButton.fromJavaAwtMouseEvent(e));
+      try {
+        window.mouseDown(e.getX(), e.getY(), MouseButton.fromJavaAwtMouseEvent(e));
+      }
+      catch(WindowAccessDeniedException ex) {
+        ClickProxy.this.stop();
+      }
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
       //System.out.println("Mouseup: ["+e.getX()+", "+e.getY()+"] "+MouseButton.fromJavaAwtMouseEvent(e).name());
-      window.mouseUp(e.getX(), e.getY(), MouseButton.fromJavaAwtMouseEvent(e));
+      try {
+        window.mouseUp(e.getX(), e.getY(), MouseButton.fromJavaAwtMouseEvent(e));
+      }
+      catch(WindowAccessDeniedException ex) {
+        ClickProxy.this.stop();
+      }
     }
 
     @Override
@@ -173,38 +187,66 @@ public class ClickProxy implements Runnable {
 
     @Override
     public void mouseDragged(MouseEvent e) {
-      //No way to proxy this now
+      try {
+        window.mouseOver(e.getX(), e.getY());
+      }
+      catch(WindowAccessDeniedException ex) {
+        ClickProxy.this.stop();
+      }
     }
 
     @Override
     public void mouseMoved(MouseEvent e) {
-      window.mouseOver(e.getX(), e.getY());
+      try {
+        window.mouseOver(e.getX(), e.getY());
+      }
+      catch(WindowAccessDeniedException ex) {
+        ClickProxy.this.stop();
+      }
     }
   }
   private static class ScreenDisplay extends JPanel {
     private BufferedImage image;
+    private Window window;
     private JFrame parentFrame;
-    public ScreenDisplay(BufferedImage img, JFrame fr) {
-      this.image = img;
+    public ScreenDisplay(Window w, JFrame fr) {
+      this.window = w;
       parentFrame = fr;
     }
     public BufferedImage getImage() {
-      return image;
+      return image!=null?image:(image=window.screenshot());
     }
 
-    public void setImage(BufferedImage image) {
-      this.image = image;
+    public void forceRedraw() {
       parentFrame.repaint();
       parentFrame.pack();
     }
+    private long lastDraw = 0;
+    private final int MAX_FPS = 30;
+    private final int MIN_INTERVAL = 1000/MAX_FPS;
+    
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        g.drawImage(image, 0, 0, null);
+      super.paintComponent(g);
+      long time = System.currentTimeMillis();
+      if(image!=null && MIN_INTERVAL>time-lastDraw) {
+        g.drawImage(image, 0, 0, null);          
+      }
+      else {
+        try {
+          g.drawImage(image=window.screenshot(), 0, 0, null);
+          lastDraw = time;
+        }
+        catch(APIException e) {
+          if(image!=null) {
+            g.drawImage(image, 0, 0, null);
+          }
+        }
+      }
     }
     @Override
     public Dimension getPreferredSize(){
-        return new Dimension(image.getWidth(null), image.getHeight(null));
+        return new Dimension(getImage().getWidth(null), getImage().getHeight(null));
     }
   }
 }
