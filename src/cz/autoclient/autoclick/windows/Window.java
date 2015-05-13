@@ -11,6 +11,7 @@ package cz.autoclient.autoclick.windows;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.RectInterface;
 import cz.autoclient.autoclick.exceptions.APIException;
+import cz.autoclient.autoclick.exceptions.WindowAccessDeniedException;
 import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -35,27 +36,39 @@ public interface Window {
    * @param y y coordinate form the top-left corner of the window client area
    * @param button button picked from supplied enum {@link MouseButton}
    */
-  public void mouseDown(int x, int y, MouseButton button);
-  public void mouseDown(int x, int y, MouseButton button, boolean isControl, boolean isAlt, boolean isShift);
+  public void mouseDown(int x, int y, MouseButton button) throws WindowAccessDeniedException;
+  public void mouseDown(int x, int y, MouseButton button, boolean isControl, boolean isAlt, boolean isShift) throws WindowAccessDeniedException;
   
-  public void mouseUp(int x, int y);
-  public void mouseUp(int x, int y, MouseButton button);
-  public void mouseUp(int x, int y, MouseButton button, boolean isControl, boolean isAlt, boolean isShift);
+  public void mouseUp(int x, int y) throws WindowAccessDeniedException;
+  public void mouseUp(int x, int y, MouseButton button) throws WindowAccessDeniedException;
+  public void mouseUp(int x, int y, MouseButton button, boolean isControl, boolean isAlt, boolean isShift) throws WindowAccessDeniedException;
   
-  public void click(int x, int y);
-  public void click(int x, int y, MouseButton button);
-  public void click(int x, int y, MouseButton button, boolean isControl, boolean isAlt, boolean isShift);
+  public void click(int x, int y) throws WindowAccessDeniedException;
+  public void click(int x, int y, MouseButton button) throws WindowAccessDeniedException;
+  public void click(int x, int y, MouseButton button, boolean isControl, boolean isAlt, boolean isShift) throws WindowAccessDeniedException;
 
-  public void doubleclick(int x, int y);
-  public void doubleclick(int x, int y, MouseButton button);
-  public void doubleclick(int x, int y, MouseButton button, boolean isControl, boolean isAlt, boolean isShift);
+  public void doubleclick(int x, int y) throws WindowAccessDeniedException;
+  public void doubleclick(int x, int y, MouseButton button) throws WindowAccessDeniedException;
+  public void doubleclick(int x, int y, MouseButton button, boolean isControl, boolean isAlt, boolean isShift) throws WindowAccessDeniedException;
   
+  /**
+   * 
+   * @param x
+   * @param y
+   * @throws WindowAccessDeniedException If the control of the window was denied
+   */
+  public void mouseOver(int x, int y) throws WindowAccessDeniedException;
   
-  public void mouseOver(int x, int y);
-  
-  /**Default methodss **/
-  
-  public default void slowClick(int x, int y, int delay) throws InterruptedException {
+  /**Default methods **/
+  /**
+   * Simulates slow mouse click using mouseUp and mouseDown methods. If interrupted, throws the exception.
+   * @param x
+   * @param y
+   * @param delay
+   * @throws InterruptedException If the owner thread was interrupted.
+   * @throws WindowAccessDeniedException If the control of the window was denied
+   */
+  public default void slowClick(int x, int y, int delay) throws InterruptedException, WindowAccessDeniedException {
     mouseDown(x,y);
   
     Thread.sleep(delay);
@@ -64,14 +77,15 @@ public interface Window {
   }
   /**
    * Clicks at the top left corner of the rectangle. Use Rect.middle() to click in the middle.
-   * @param window
+   * @param delay
    * @param pos rectangle to click on.
+   * @throws java.lang.InterruptedException
    */
   public default void slowClick(Rect pos, int delay) throws InterruptedException {
     slowClick(pos.left, pos.top, delay);
   }
   
-  public default void click(Rect pos) {
+  public default void click(Rect pos) throws WindowAccessDeniedException {
     //Rect rect = getRect();
     click(pos.left, pos.top);
   }
@@ -146,8 +160,19 @@ public interface Window {
   public Rect getRect() throws APIException;
   
   /** WINDOW PROPERTIES **/
-  public String getTitle();
   
+  /**
+   * Returns window's displayed title.
+   * @return Empty string if no title, never null
+   */
+  public String getTitle();
+  /**
+   * Determine whether this window is running under administrator account.
+   * @return 
+   */
+  public boolean isAdmin();
+  
+  public Process getProcess();
   /** OTHER WINDOWS **/
   
   /**
@@ -185,6 +210,21 @@ public interface Window {
     String sysname = System.getProperty("os.name");
     if(sysname.contains("Windows")) {
       return MSWindow.windowFromName(name, strict);
+    }
+    else {
+      throw new UnsupportedOperationException("Window API not supported on this OS.");
+    }
+  }
+  /**
+   * Fetch windows based on the callback validator.
+   * @param validator
+   * @return Window instance or null if no window is found
+   * @throws UnsupportedOperationException 
+   */
+  public static List<Window> FindWindows(WindowValidator validator) throws UnsupportedOperationException {
+    String sysname = System.getProperty("os.name");
+    if(sysname.contains("Windows")) {
+      return MSWindow.windows(validator);
     }
     else {
       throw new UnsupportedOperationException("Window API not supported on this OS.");
