@@ -123,7 +123,7 @@ import javax.swing.SwingUtilities;
      
      inst = this;
      
-     setIconImage(ImageResources.ICON.getImage());
+     
      //The tray is final so it must be initialised in constructor
      if(SystemTray.isSupported())
        tray = SystemTray.getSystemTray();
@@ -134,23 +134,31 @@ import javax.swing.SwingUtilities;
      initMenu();
      initComponents();
      
-     //There is many factors that determine whether the icon will be shown
-     // it must be both supported and enabled
-     // 
-     displayTrayEnabled();
      
-     guard = new StateGuard(this.ac, this);
-     
+     final Thread finalize = new Thread("Starting GUI threads") {
+       @Override
+       public void run() {
+         setIconImage(ImageResources.ICON.getImage());
+         //There is many factors that determine whether the icon will be shown
+         // it must be both supported and enabled
+         displayTrayEnabled();
+         
+         guard = new StateGuard(Gui.this.ac, Gui.this);
+         //Start passive automation
+         robots.start();
+       }
+     };
      //After creating the GUI, render the settings
      SwingUtilities.invokeLater(new Runnable()
      {
        @Override
        public void run()
        {
+        //Finish other gui crap
+        finalize.start();
         //Display settings:
         settings.displaySettingsOnBoundFields();
-        //Start passive automation
-        robots.start();
+
        }
      });
      //notification(Notification.Def.TB_GAME_CAN_START);
@@ -167,7 +175,8 @@ import javax.swing.SwingUtilities;
         {
           System.out.println("Window is closing!");
           //Stop updating GUI
-          guard.interrupt();
+          if(guard!=null)
+            guard.interrupt();
           //Terminate the program
           ac.TerminateAsync();
         }
@@ -406,27 +415,36 @@ import javax.swing.SwingUtilities;
        menu1.add(menuItem2);
        menu_dll_additions = menuItem2;
        /** Run as administrator**/
-         if(!Main.isAdmin()) {
-         JMenuItem item = new JMenuItem();
+       {
+         final JMenuItem item = new JMenuItem();
          item.setText("Restart as administrator...");
          item.setToolTipText("If you run PVP.net Client under admin account, you must run this tool elevated too.");
          item.setEnabled(true);
+         
          item.addActionListener(new ActionListener() {
              @Override
              public void actionPerformed(ActionEvent e) {
-               try {
-                 Gui.this.ac.RestartWithAdminRightsAsync();
-               }
-               catch (FileNotFoundException ex) {
-                 dialogErrorAsync(ex.getMessage());
-               }
-               catch (IOException ex) {
-                 dialogErrorAsync("Cannot read the helper VBS file.\n    "+ex);
-               }
+               Gui.this.tryRestartAsAdmin();
              }
          });
          menu1.add(item);
+         //Later, check if this menu item should be enabled
+         SwingUtilities.invokeLater(new Runnable() {
+           @Override
+           public void run() {
+             if(Main.isAdmin()) {
+               item.setEnabled(false);
+               item.setToolTipText("Already running with adiministrator privilegies.");
+             }
+           }
+         });
        }
+       //Prevent accidental PVP.net minimization
+       JCheckBoxMenuItem checkBox = new JCheckBoxMenuItem("Prevent Client minimize");
+       checkBox.setToolTipText("If you accidentally minimize PVP.net window when robot is running it will be restored on background.");
+       settings.bindToInput(Setnames.PREVENT_CLIENT_MINIMIZE.name, checkBox, true);
+       menu1.add(checkBox); 
+         
        //Update dll aditions status
        displayDllStatus(false);
        //======== menu2 ========
@@ -919,6 +937,7 @@ import javax.swing.SwingUtilities;
         multifield.addField(/*new JTextField()*/champion, settings, Setnames.BLIND_CHAMP_NAME);
         
         champ_config = new ConfigurationManager(champion, settings);
+        champ_config.setChampion(settings.getStringEquivalent(Setnames.BLIND_CHAMP_NAME.name));
         multifield.addField(champ_config.save, null, null);
         multifield.addField(champ_config.delete, null, null);
     
@@ -1081,7 +1100,7 @@ import javax.swing.SwingUtilities;
     
     //Dialogs
     public void dialogErrorAsync(String message, String title) {
-        new Thread() {
+        new Thread("AsyncErrorDialog") {
           @Override
           public void run() {
             JOptionPane.showMessageDialog(
@@ -1095,6 +1114,53 @@ import javax.swing.SwingUtilities;
     }
     public void dialogErrorAsync(String message) {
       dialogErrorAsync(message, "Error");
+    }
+    
+    private void tryRestartAsAdmin(final boolean force) {
+      try {
+        Gui.this.ac.RestartWithAdminRightsAsync(force);
+      }
+      catch (FileNotFoundException ex) {
+        dialogErrorAsync(ex.getMessage());
+      }
+      catch (IOException ex) {
+        dialogErrorAsync("Cannot read or use the helper VBS file.\n    "+ex);
+      } 
+    }
+    private void tryRestartAsAdmin() {
+      tryRestartAsAdmin(false);
+    }
+    private final Object dialogElevateMutex = new Object();
+    private boolean elevateDialogIgnore = false;
+    public void dialogElevateAsync() {
+        new Thread("ElevationDialog") {
+          @Override
+          public void run() {
+            //Custom button text
+            Object[] options = {"Restart as administrator.",
+                                "Exit program",
+                                "Ignore this problem"};
+            int n = JOptionPane.showOptionDialog(Gui.this,
+                "It has been noticed that this program cannot "
+                    + "send windows messages to the PVP.net Client. Most often "
+                    + "this happens, \n because PVP.net Client is ran under administrator account.\n\n"
+                    + "It is recommended that you run PVP.net Client under normal account. If "
+                    + "you need to run it under administrator account,\n you will have "
+                    + "to elevate this application. Read more in FAQ.",
+                "Administrator access required.",
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                JOptionPane.ERROR_MESSAGE,
+                null,
+                options,
+                options[2]);
+            if(n==0) {
+              tryRestartAsAdmin(true);
+            }
+            else if(n==1) {
+              Gui.this.ac.TerminateAsync(true);
+            }
+          }
+        }.start();
     }
  }
 
