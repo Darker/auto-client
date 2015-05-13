@@ -27,6 +27,7 @@ import static cz.autoclient.GUI.ImageResources.PA_BOT_STOPPED;
 import static cz.autoclient.GUI.ImageResources.PA_BOT_PAUSED;
 import static cz.autoclient.GUI.ImageResources.PA_BOT_RUNNING;
 import cz.autoclient.settings.input_handlers.InputJCheckBoxMenuItem;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
@@ -123,12 +124,12 @@ public class PAMenu {
     if(true)
       return;*/
     if(running)
-      root.setIcon(PA_BOT_RUNNING.getIcon());
+      IconChanger.setIcon(PA_BOT_RUNNING.getIcon(), root);
     else {
       if(enabled) 
-        root.setIcon(PA_BOT_PAUSED.getIcon());
+        IconChanger.setIcon(PA_BOT_PAUSED.getIcon(), root);
       else
-        root.setIcon(robot.isErrorDisabled()?PA_BOT_DISABLED_ERROR.getIcon():PA_BOT_STOPPED.getIcon());
+        IconChanger.setIcon(robot.isErrorDisabled()?PA_BOT_DISABLED_ERROR.getIcon():PA_BOT_STOPPED.getIcon(), root);
     } 
   }
   protected void setIcon(boolean enabled) {
@@ -189,30 +190,16 @@ public class PAMenu {
   protected class BOTStateUpdater implements BotActionListener {
     @Override
     public void started() {
-      SwingUtilities.invokeLater(
-        new Runnable() {
-          @Override
-          public void run() {
-            setIcon();
-            System.out.println("Bot "+name+" started.");
-          }
-        }
-      );
+      setIcon();
+      System.out.println("Bot "+name+" started.");
     };
     @Override
     public void terminated(Throwable e) {
-      SwingUtilities.invokeLater(
-        new Runnable() {
-          @Override
-          public void run() {
-            setIcon(enable.getState(), false);
-            if(e==null)
-              System.out.println("Bot "+name+" terminated.");
-            else
-              System.out.println("Bot "+name+" terminated with error: \n     "+e);
-          }
-        }
-      );
+      setIcon(enable.getState(), false);
+      if(e==null)
+        System.out.println("Bot "+name+" terminated.");
+      else
+        System.out.println("Bot "+name+" terminated with error: \n     "+e);
     };
     @Override
     public void disabledByError(Throwable e) {
@@ -245,6 +232,23 @@ public class PAMenu {
           }
         }
       );
+    }
+  }
+  public static class IconChanger implements Runnable {
+    public final ImageIcon icon;
+    public final JMenu menu;
+
+    public IconChanger(ImageIcon icon, JMenu menu) {
+      this.icon = icon;
+      this.menu = menu;
+    }
+
+    @Override
+    public void run() {
+      menu.setIcon(icon);
+    }
+    public static void setIcon(ImageIcon icon, JMenu menu) {
+       SwingUtilities.invokeLater(new IconChanger(icon, menu));
     }
   }
   public final EnableBlocker enableBlocker = new EnableBlocker(null);
