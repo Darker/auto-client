@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Level;
 public abstract class Robot implements Runnable {
   
   private Logger logger = null;
+  
   /**
    * Retrieves logger  for this class.
    * @return current logger. Creates new logger if no logger is available.
@@ -108,7 +109,7 @@ public abstract class Robot implements Runnable {
     //Same instance (or two nulls) is always equal
     if(A==B)
       return true;
-    //if one of them is null and other is not, they are equal
+    //if one of them is null and other is not, they are not equal
     if(B!=A && (A==null || B==null))
       return false;
     //Check messages
@@ -190,12 +191,13 @@ public abstract class Robot implements Runnable {
     lastRan = System.currentTimeMillis();
     
     init();
-    t = new Thread(this, "Robot_"+this.getClass().getName());
+    t = new Thread(this, "Robot "+this.getClass().getName());
+    t.setDaemon(true);
     t.start();
   }
   
   public void stop() {
-    if(t.isAlive()) {
+    if(t!=null && t.isAlive()) {
       t.interrupt(); 
       glg().debug("Robot stopped forcefully.");
     }
@@ -218,6 +220,7 @@ public abstract class Robot implements Runnable {
       if(listener!=null)
         listener.terminated(e);
       glg().debug("Robot thread {0} terminated with error: "+e.getMessage(), t.getName());
+      continueOnError(e, ExecutionPhase.RUN);
       //System.out.println("Robot thread "+t.getName()+" terminated with error:\n     "+e);
     }
     
