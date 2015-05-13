@@ -4,7 +4,6 @@ if WScript.Arguments.Count = 0 then
   WScript.Quit 1
 end if
 
-
 ' Get the script location, the directorry where it's running
 Set objShell = CreateObject("Wscript.Shell")
 

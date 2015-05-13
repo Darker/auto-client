@@ -87,7 +87,19 @@ public class ScreenWatcher {
   public static Rect findByAvgGrayscale(BufferedImage image, BufferedImage bigImage) {
     return findByAvgGrayscale(image, bigImage, 0.5f, true); 
   }
-  
+  /**
+   * Searches integral image and returns either first (by treshold) or best match as Rect object. 
+   * @param sum_small sum of color components (R, G, B) of the small image we're searching for. This must be array with 3 elements
+   * @param integral_image 
+   * @param ws width of the small image
+   * @param hs height of the small image
+   * @param wb width of the big image
+   * @param hb height of the big image
+   * @param tolerance threshold
+   * @param return_nearest true if you want to remember all matches and return the best.
+   * @param matches if this is not null, it will be filled with all matches that are below threshold
+   * @return Rect object or null if nothing was found below threshold.
+   */
   public static Rect findByAvgColor(double sum_small[], double integral_image[][][], final int ws, final int hs, final int wb, final int hb, float tolerance, boolean return_nearest, ArrayList<RectMatch> matches) {
     //These variables will be used to return the best (nearest) match
     //If return_nearest is false, these will not be used
@@ -319,9 +331,10 @@ public class ScreenWatcher {
     int num = w * h;
     return new Color(sumr / num, sumg / num, sumb / num);
   }
-  /* Generate an integral image. Every pixel on such image contains sum of colors or all the
-     pixels before and itself.
-  */
+  /** Generate an integral image. Every pixel on such image contains sum of colors or all the
+   *  pixels before and itself.
+      @return array in format double[collumn index, y][row index, x][color index, 0:r, 1:g, 2:b]
+  **/
   public static double[][][] integralImage(BufferedImage image) {
     /* */
     //Cache width and height in variables

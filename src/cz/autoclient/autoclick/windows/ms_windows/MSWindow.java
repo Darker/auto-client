@@ -7,11 +7,10 @@
 package cz.autoclient.autoclick.windows.ms_windows;
 
 import cz.autoclient.autoclick.exceptions.APIException;
-import cz.autoclient.autoclick.windows.ms_windows.Messages;
-import cz.autoclient.autoclick.windows.ms_windows.ShowWindow;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.GDI32;
+import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinGDI;
 import com.sun.jna.platform.win32.WinNT;
@@ -20,13 +19,16 @@ import com.sun.jna.ptr.IntByReference;
 import cz.autoclient.autoclick.ColorRef;
 import cz.autoclient.autoclick.windows.MouseButton;
 import cz.autoclient.autoclick.Rect;
+import cz.autoclient.autoclick.exceptions.WindowAccessDeniedException;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.windows.WindowValidator;
+import cz.autoclient.dllinjection.NativeProcess;
 import sirius.classes.Common;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import sirius.core.GDI32Ext;
@@ -163,6 +165,13 @@ public class MSWindow extends Common implements Window  {
    }
   }
 
+  public int getLastError() {
+    return Kernel32.INSTANCE.GetLastError();
+  }
+  public void clearLastError() {
+    Kernel32.INSTANCE.SetLastError(0);
+  }
+  
   @Override
   /***
    * Maximizes the specified window.
@@ -313,14 +322,17 @@ public class MSWindow extends Common implements Window  {
   @Override
   public BufferedImage screenshot() throws APIException
    {
+   //bounds contains .width, .height, .top, .left, .bottom and .right
+   Rect bounds = getRect();
+   if(bounds.width == 0 || bounds.height == 0) {
+     throw new APIException("One or both of the window dimensions is zero. Can't make screenshot for such dimensions.");
+   }
    //Wtf is this, seriously? Random number?
    WinDef.DWORD SRCCOPY = new WinDef.DWORD(13369376L);
    //I guess here we retrieve the drawing context of the window...
    WinDef.HDC hdcWindow = User32Ext.INSTANCE.GetDC(hwnd);
    //But what is this then? Why two HDC objects?
    WinDef.HDC hdcMemDC = GDI32.INSTANCE.CreateCompatibleDC(hdcWindow);
-   //bounds contains .width, .height, .top, .left, .bottom and .right
-   Rect bounds = getRect();
    //And this is some kind of image representation?
    WinDef.HBITMAP hBitmap = GDI32.INSTANCE.CreateCompatibleBitmap(hdcWindow, (int)bounds.width, (int)bounds.height);
    //This is another total mystery
@@ -454,13 +466,18 @@ public class MSWindow extends Common implements Window  {
    UserExt.GetClientRect(hwnd, result);
    return result;
   }
-  private int sendMsg(int msg, int wparam, int lparam) {
-    
-    return UserExt.SendMessage(hwnd, msg, new WinDef.WPARAM(wparam), new WinDef.LPARAM(lparam));
-    //UserExt.GetL
+  private int sendMsg(int msg, int wparam, int lparam) throws WindowAccessDeniedException {
+    clearLastError();
+    int retval = UserExt.SendMessage(hwnd, msg, new WinDef.WPARAM(wparam), new WinDef.LPARAM(lparam));
+    if(getLastError()==5) {
+      throw new WindowAccessDeniedException("The message was blocked by UIPI."); 
+    }
+    return retval;
   }
   private void sendMsg(Messages msg, int wparam, int lparam) {
-    System.out.println("Message "+msg.name()+" result: "+sendMsg(msg.code, wparam, lparam));
+    sendMsg(msg.code, wparam, lparam);
+    //System.out.println("Message "+msg.name()+" result: "+sendMsg(msg.code, wparam, lparam));
+    //System.out.println("   ERRORLEVEL: "+getLastError());
   }
   public static User32Ext UserExt = User32Ext.INSTANCE;
   public static GDI32Ext GDIExt = GDI32Ext.INSTANCE;
@@ -663,4 +680,23 @@ public class MSWindow extends Common implements Window  {
      
      return list;
   }
+
+  @Override
+  public boolean isAdmin() {
+    String title = getTitle();
+    String processes;
+    try {
+      processes = NativeProcess.readWholeOutput(Runtime.getRuntime().exec("tasklist /FO CSV /V"));
+    } catch (IOException ex) {
+      return false;
+    }
+    
+    return false;
+  }
+
+  @Override
+  public Process getProcess() {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+  
 }

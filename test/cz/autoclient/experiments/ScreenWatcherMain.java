@@ -9,6 +9,7 @@ package cz.autoclient.experiments;
 
 import cz.autoclient.PVP_net.Images;
 import cz.autoclient.autoclick.Rect;
+import cz.autoclient.autoclick.comvis.DebugDrawing;
 import cz.autoclient.autoclick.comvis.ScreenWatcher;
 import cz.autoclient.autoclick.comvis.RectMatch;
 import cz.autoclient.autoclick.exceptions.APIException;
@@ -44,7 +45,8 @@ public class ScreenWatcherMain {
    
    public static void main(String[] args) throws Exception
    {
-     TestRectangles();
+     //TestRectangles();
+     ShowAveragedImage(loadFromPath("../debug/launcher_screens/LOBBY-SPELL_1.png"), new Rect(0,50,50,0));
      /*TestRectangles();
      if(true)
        return;/* */
@@ -323,6 +325,50 @@ public class ScreenWatcherMain {
        System.err.println("No object found!"); 
      }
    }
+   /**
+    * Displays an image created by calculating average values over selected region on whole image.
+    * @param image 
+    * @param region 
+    */
+   public static void ShowAveragedImage(BufferedImage image, Rect region) throws InterruptedException {
+     BufferedImage output = new BufferedImage(image.getWidth()-region.width, image.getHeight()-region.height, BufferedImage.TYPE_3BYTE_BGR);
+     double[][][] colorIntegral = ScreenWatcher.integralImage(image);
+     int y=0,x=0,h=0,w=0;
+     for(y=0, h=image.getHeight()-region.height; y<h; y++) {
+       for(x=0, w=image.getWidth()-region.width; x<w; x++) {
+         output.setRGB(x, y, getAverageColorAt(colorIntegral, x, y, region.width, region.height).getRGB());
+       }
+     }
+     System.out.println("Ended at ["+x+", "+y+"] of ["+w+", "+h+"]");
+     
+     DebugDrawing.displayImage(output, "Averaged values.");
+   }
+   /**
+    * Returns average value over rectangle in integrakl image
+    * @param integral_image
+    * @param x offset
+    * @param y offset
+    * @return 
+    */
+   public static Color getAverageColorAt(double[][][] integral_image, int x, int y, int width, int height) {
+     short[] colors = new short[3];
+     int no_pixels = width*height;
+     for(byte i=0; i<3; i++) {
+       //Calculate sum of colors on that region (please read this article: http://en.wikipedia.org/wiki/Summed_area_table
+       colors[i] = (short)Math.round(
+                    (+ integral_image[y][x][i]  
+                    + integral_image[y+height][x+width][i] 
+                    - integral_image[y+height][x][i]  
+                    - integral_image[y][x+width][i])/no_pixels);
+     }
+     return new Color(colors[0], colors[1], colors[2]);
+   }
+   /*public static double getSumAtRect(double[][][] integral_image, int x, int y, int width, int height, int color_index) {
+     return (+ integral_image[y][x][i]  
+                      + integral_image[y+height][rect_x+ws][i] 
+                      - integral_image[y+hs][rect_x][i]  
+                      - integral_image[rect_y][rect_x+ws][i])
+   }*/
    public static void TestSearchColor(BufferedImage thing, BufferedImage screenshot) {
      double start = System.nanoTime();
 

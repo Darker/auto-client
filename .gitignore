@@ -1,9 +1,10 @@
 /dist/
 /build/*
-/target/
+/target/*
 *.exe
 /data/*
 /LOLResources/*
+/LOLResources/*.*
 /test_data/*
 /images/unused/*
 /launcher_screens/*.png
@@ -12,3 +13,11 @@ release.bat
 ./run_as_admin.bat
 ./run_with_commandline.bat
 /release/tmp/*
+*.7z
+/cleanest.cfg
+/proguard/
+/proguard/*.*
+/release/last_release/data/settings.bin
+/stop_flashing/wrong_return_value.txt
+*.jar
+!/release/*/*.jar

@@ -8,6 +8,7 @@ package cz.autoclient.autoclick.windows.cache.title;
 
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.windows.cache.CachedWindow;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -61,4 +62,7 @@ public class CachedWindowByTitle implements CachedWindow<String> {
     return strict?cachedTitle.equals(valueToCompare):cachedTitleLowercase.contains(valueToCompare.toLowerCase());
   }
   
+  public boolean isMatch(Pattern regex) {
+    return regex.matcher(cachedTitle).matches();
+  }
 }

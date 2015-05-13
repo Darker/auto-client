@@ -64,6 +64,8 @@
    public abstract boolean SetWindowText(WinDef.HWND paramHWND, char[] paramArrayOfChar);
    
    public abstract boolean EnableWindow(WinDef.HWND paramHWND, boolean enable);
+   
+  
  }
 
 

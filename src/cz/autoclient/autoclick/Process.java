@@ -6,16 +6,16 @@
 
 package cz.autoclient.autoclick;
 
-import cz.autoclient.autoclick.windows.Window;
-
 /**
  *
  * @author Jakub
  */
 public interface Process {
   public boolean terminate();
-  public Window showConsole();
-  public int getPID();
+  //public Window showConsole();
+  public long getPID();
   public String getName();
+  public String getUser();
+  public boolean isAdmin();
   public int getMemory();
 }

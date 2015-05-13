@@ -114,6 +114,12 @@ public class RobotManager extends Thread {
       }
     }
     catch(InterruptedException e) {
+      //Terminate all robots
+      synchronized (robots) {
+        for(Robot r: robots) {
+          r.stop();
+        }
+      }
       return;
     }
     catch(Throwable e) {

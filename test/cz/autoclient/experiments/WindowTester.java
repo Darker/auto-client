@@ -58,7 +58,7 @@ public class WindowTester {
     frame.setVisible(true);*/
      
      // "LoL Patcher" "firefox"  
-     MSWindow test = MSWindow.windowFromName("Firefox", false);
+     MSWindow test = MSWindow.windowFromName("[GUIDE] Suppress PVP.net", false);
      System.out.println(test==null?"Fail.":"Success");
      if(test!=null) {
        //test.typeString("PoJus.'\\#`&[]*-č");
@@ -87,6 +87,17 @@ public class WindowTester {
        //testPercentRect(test);
        ClickProxy proxy = new ClickProxy(test);
        proxy.start();
+       while(proxy.isRunning()) {
+         System.out.println("Minimized: "+test.isMinimized());
+         System.out.println("Visible: "+test.isVisible());
+         System.out.println("---------------------------");
+         if(test.isMinimized()) {
+           test.restoreNoActivate();
+         }
+         
+         Thread.sleep(1000);
+         //test.close();
+       }
      }
      System.out.println("Main over.");
      //TestGetByPID(6568);

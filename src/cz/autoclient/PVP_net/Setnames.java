@@ -19,10 +19,21 @@ public enum Setnames {
   INVITE_ENABLED("invite_enabled", false),
   TRAY_ICON_ENABLED("tray_enabled", true),
   TRAY_ICON_MINIMIZE("tray_minimize", false),
-  
+  /**
+   * First summoner spell name (string or null)
+   */
   BLIND_SUMMONER1("sumspell1", null),
+  /**
+   * Seconds summoner spell name (string or null)
+   */
   BLIND_SUMMONER2("sumspell2", null),
+  /**
+   * Champion name to pick
+   */
   BLIND_CHAMP_NAME(""),
+  /**
+   * Text to call after entering normal lobby
+   */
   BLIND_CALL_TEXT(""),
   
   BLIND_MASTERY("masterypg", 0),
@@ -44,6 +55,9 @@ public enum Setnames {
   ENCRYPTION_USE_PW(false),
   ENCRYPTION_PW(null),
   ENCRYPTION_USE_HWID(true),
+  //Automation settings
+  PREVENT_CLIENT_MINIMIZE(false)
+  
   
   //PA names
   

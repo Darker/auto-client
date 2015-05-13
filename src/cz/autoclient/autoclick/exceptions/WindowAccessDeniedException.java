@@ -7,7 +7,8 @@
 package cz.autoclient.autoclick.exceptions;
 
 /**
- *
+ * This exception indicated that the operating system refused an operation. Typically, this will happen if
+ * you try to control window that is being ran by different user.
  * @author Jakub
  */
 public class WindowAccessDeniedException extends APIException {
