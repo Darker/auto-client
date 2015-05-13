@@ -17,13 +17,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
@@ -48,7 +46,7 @@ import sirius.constants.IWMConsts;
    public Automat ac;
    public Gui gui;
    
-   private Settings settings;
+   public Settings settings;
    
    public final ArrayList<Robot> robots = new ArrayList<>();
    
@@ -179,25 +177,37 @@ import sirius.constants.IWMConsts;
      //Start program
      Main ac = new Main();
    }
-   public Thread TerminateAsync() {
-     Thread t = new Thread() {
+   public Thread TerminateAsync(final boolean force) {
+     Thread t = new Thread("Terminate AutoClient") {
        @Override
        public void run() {
-         Main.this.Terminate();
+         Main.this.Terminate(force);
        }
      };
      t.start();
      return t;
    }
+   public Thread TerminateAsync() {
+     return TerminateAsync(false);
+   }
    /**
     * Terminates the whole program while saving settings.
+   * @param force if true, terminates the program using System.exit(0)
     */
-   public void Terminate() {
+   public void Terminate(final boolean force) {
      //gui is JFrame representing the application window
      gui.setVisible(false);
      gui.destroyTray();
      gui.dispose();
      gui.robots.interrupt();
+     
+     for(Frame frame : JFrame.getFrames()) {
+       //System.out.println("Frame " + frame.getTitle());
+       if(frame.isDisplayable()) {
+         //System.out.println("  Destroying frame " + frame.getTitle());
+         frame.dispose();
+       }
+     }
      //Stop tool thread if running
      if(ToolRunning())
        StopTool();
@@ -214,62 +224,89 @@ import sirius.constants.IWMConsts;
        System.err.println("Problem saving settings:");
        e.printStackTrace(System.err);
      }
-     for(Frame frame : JFrame.getFrames()) {
-       //System.out.println("Frame " + frame.getTitle());
-       if(frame.isDisplayable()) {
-         //System.out.println("  Destroying frame " + frame.getTitle());
-         frame.dispose();
+
+     //Here, no non-deamon threads should be running (daemon thread does not prolong the applicatione execution).
+     if(force)
+       System.exit(0);
+   }
+   public void Terminate() {
+     Terminate(false); 
+   }
+   
+   public void RestartWithAdminRightsAsync() throws FileNotFoundException, IOException {
+     RestartWithAdminRightsAsync(false);
+   }
+   public void RestartWithAdminRightsAsync(final boolean force) throws FileNotFoundException, IOException {
+     StartWithAdminRights();
+     Terminate(force);
+   }
+   private static volatile Boolean isAdmin = null;
+   private static final Object isAdmin_mutex = new Object();
+   public static boolean isAdmin(){
+     Boolean is = isAdmin;
+     if(is!=null)
+       return is;
+     synchronized(isAdmin_mutex) {
+       if((is = isAdmin)!=null)
+         return is;
+       PrintStream systemErr = System.err;
+       Preferences prefs = Preferences.systemRoot();
+       synchronized(systemErr) {    // better synchroize to avoid problems with other threads that access System.err
+         System.setErr(null);
+         try{
+           prefs.put("foo", "bar"); // SecurityException on Windows
+           prefs.remove("foo");
+           prefs.flush(); // BackingStoreException on Linux
+           return isAdmin = true;
+         }
+         catch(Exception e) {
+           return isAdmin = false;
+         }
+         finally {
+           System.setErr(systemErr);
+         }
        }
      }
-     //Here, no non-deamon threads should be running (daemon thread does not prolong the applicatione execution).
-     //System.exit(0);
    }
-   public void RestartWithAdminRightsAsync() throws FileNotFoundException, IOException {
-     StartWithAdminRights();
-     Terminate();
-     System.exit(0);
-   }
-   private static Boolean isAdmin = null;
-   public static boolean isAdmin(){
-     if(isAdmin!=null)
-       return isAdmin;
-     Preferences prefs = Preferences.systemRoot();
-     try {
-       prefs.put("foo", "bar"); // SecurityException on Windows
-       prefs.remove("foo");
-       prefs.flush(); // BackingStoreException on Linux
-       return isAdmin = true;
-     }
-     catch(Exception e){
-       return isAdmin = false;
-     }
-  }
+   /**
+    * Start this very jar file elevated on Windows. It is strongly recommended to close any existing IO
+    * before calling this method and avoid writing anything more to files. The new instance of this same
+    * program will be started and simultaneous write/write or read/write would cause errors.
+    * @throws FileNotFoundException if the helper vbs script was not found
+    * @throws IOException if there was another failure inboking VBS script
+    */
    public void StartWithAdminRights() throws FileNotFoundException, IOException {
-     
+     //The path to the helper script. This scripts takes 1 argument which is a Jar file full path
      File runAsAdmin = new File("run-as-admin.vbs");;
-     String param1;
+     //Our 
+     String jarPath;
 
      //System.out.println("Current relative path is: " + s);
-     try {
-       param1 = "\""+new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getAbsolutePath()+"\"";
-     } catch (URISyntaxException ex) {
-       throw new FileNotFoundException("Could not fetch the path to the current jar file.");
-     }
-     if(!param1.contains(".jar")) {
-       Path currentRelativePath = Paths.get("");
-       param1 = "\""+currentRelativePath.toAbsolutePath().toString()+"\\AutoClient.jar\"";
-     }
      
+     try {
+       jarPath = "\""+new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getAbsolutePath()+"\"";
+     } catch (URISyntaxException ex) {
+       throw new FileNotFoundException("Could not fetch the path to the current jar file. Got this URISyntax exception:"+ex);
+     }
+     //If the jar path was created but doesn't contain .jar, we're (most likely) not running from jar
+     //typically this happens when running the program from IDE
+     //These 4 lines just serve as a fallback in testing, should be deleted in production
+     //code and replaced with another FileNotFoundException
+     if(!jarPath.contains(".jar")) {
+       Path currentRelativePath = Paths.get("");
+       jarPath = "\""+currentRelativePath.toAbsolutePath().toString()+"\\AutoClient.jar\"";
+     }
+     //Now we check if the path to vbs script exists, if it does we execute it
      if(runAsAdmin.exists()) {
-       String command = "cscript \""+runAsAdmin.getAbsolutePath()+"\" "+param1;
+       String command = "cscript \""+runAsAdmin.getAbsolutePath()+"\" "+jarPath;
        System.out.println("Executing '"+command+"'");
+       //Note that .exec is asynchronous
+       //After it starts, you must terminate your program ASAP, or you'll have 2 instances running
        Runtime.getRuntime().exec(command);
        
      }
      else
        throw new FileNotFoundException("The VBSScript used for elevation not found at "+runAsAdmin.getAbsolutePath());
-     //Terminate();
-     //System.exit(0);
    }
  }
 
