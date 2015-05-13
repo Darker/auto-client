@@ -73,6 +73,17 @@ public class ConfigurationManager {
     this.delete = new JButton();
     createGUI();
   }
+  public void setChampion(String champion) {
+    if(champion.isEmpty())
+      champion = null;
+    currentChampion = champion;
+    if(champion!=null && settings.containsKey(champion)) {
+      currentSetup = champion; 
+    }
+    else {
+      currentSetup = null; 
+    }
+  }
   private void createGUI() {
     save.setIcon(ImageResources.SAVE.getIcon());
     save.setBorder(ButtonSummonerSpell.emptyBorder);
