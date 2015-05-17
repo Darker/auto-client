@@ -55,6 +55,9 @@ public class WindowTools {
        Rect rect = window.getRect();
        if(rect.width==0 || rect.height==0)
          return false;
+       //Return false automatically if the point is outside the window scope
+       if(rect.width<point.getX() || rect.height<point.getY())
+         return false;
        
        int x = (int)(rect.width * point.getX());
        int y = (int)(rect.height * point.getY());
