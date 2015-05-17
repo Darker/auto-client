@@ -101,7 +101,7 @@ public class WindowTools {
      
      Rect rect = window.getRect();
      //When the client is minimized...
-     if(rect.height<100)
+     if(rect.width<point.getX() || rect.height < point.getY())
        return false;
      
      Color a = window.getColor((int)(rect.width * point.getX()), (int)(rect.height * point.getY()));
