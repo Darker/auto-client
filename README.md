@@ -17,6 +17,10 @@
 For detailed information, [please refer to wiki](https://github.com/Darker/auto-client/wiki). On this page I'll
 rather post some technical info and SEO meaningless texts.
 
+## [Videos and tutorials](https://www.youtube.com/channel/UCKBWfX3cbOy9xeBKPGwsx-g/videos)
+
+I have created a video [chanel called LoL AutoClient](https://www.youtube.com/channel/UCKBWfX3cbOy9xeBKPGwsx-g/videos) where all features will be eventually explained and discussed. You can contact me using this channel as well.
+
 ## What is this?
 **This text partially exists for search engines, you can skip it if you have the general idea.**
 This repository presents sourcecode for League of Legends PVP.net client bot that automatically accepts games, 
