@@ -21,6 +21,7 @@ import javax.swing.JLabel;
  */
 public enum ImageResources {
   ICON("icon.png"),
+  ICON_NO_COPYRIGHT("icon_handmade.png"),
   SUMMONER_SPELLS_NOSPELL("nospell.png"),
   SAVE("save.png"),
   DELETE("delete.png"),

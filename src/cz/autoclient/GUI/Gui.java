@@ -36,7 +36,6 @@ import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GridLayout;
@@ -52,12 +51,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.ParallelGroup;
 import javax.swing.GroupLayout.SequentialGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
@@ -144,7 +142,7 @@ import javax.swing.SwingUtilities;
      final Thread finalize = new Thread("Starting GUI threads") {
        @Override
        public void run() {
-         setIconImage(ImageResources.ICON.getImage());
+         setIconImage(getIcon().getImage());
          //There is many factors that determine whether the icon will be shown
          // it must be both supported and enabled
          displayTrayEnabled();
@@ -317,12 +315,15 @@ import javax.swing.SwingUtilities;
    public void notification(Notification.Def... names) {
      notifications.notification(names);
    }
+   public ImageResources getIcon() {
+     return ImageResources.ICON_NO_COPYRIGHT;
+   }
    
    private void initTrayIcon() {
      if(tray_icon!=null)
        return;
      if (SystemTray.isSupported() && settings.getBoolean(Setnames.TRAY_ICON_ENABLED.name, true)) {
-       tray_icon = new TrayIcon(ImageResources.ICON.getImage());
+       tray_icon = new TrayIcon(getIcon().getImage());
        tray_icon.setImageAutoSize(true);
        tray_icon.addMouseListener(new MouseListener() {
          @Override
