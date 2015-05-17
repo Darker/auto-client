@@ -447,7 +447,13 @@ public class Settings implements java.io.Serializable {
     }
     catch(ClassNotFoundException e) {
     
+    }
+    finally {
+      input.close();
+      buffer.close();
+      file.close();
     };  
+
   }
   public void loadFromFile(String path) throws IOException {   
     loadFromFile(new File(path)); 
@@ -472,13 +478,13 @@ public class Settings implements java.io.Serializable {
     return encryptor!=null; 
   }
 
-  public void setEncryptor(SecureSettings encryptor) {
+  public synchronized void setEncryptor(SecureSettings encryptor) {
     this.encryptor = encryptor;
   }
   /** Loops through all secure settings and sets the own encryptor to them.
    * 
    */
-  private void assignEncryptorToAllEncryptedSettings() {
+  private synchronized void assignEncryptorToAllEncryptedSettings() {
     //Unlike other functions, this one is internal and fails silently
     if(encryptor==null)
       return;

@@ -71,6 +71,8 @@ public class FrameSummonerSpells extends JDialog {
     }
     super.setVisible(visible); 
   }
+  
+  private final Object createButtonMutex = new Object();
   private void createButtons() {
     //Get all existing SummonerSpells
     SummonerSpells spells = ConstData.lolData.getSummonerSpells();
@@ -111,8 +113,36 @@ public class FrameSummonerSpells extends JDialog {
     b.addMouseListener(ToolTipTimer.INSTANT_TOOLTIP);
     b.setToolTipText("Do not change spell");
     contentPane.add(b);
-
+  }
+  private static final Object butSumSpell_mutex = new Object();
+  public static ButtonSummonerSpell[] generateButtons(buttonOnclick listener) {
+    SummonerSpells spells = ConstData.lolData.getSummonerSpells();
+    int length = spells.size();
+    ButtonSummonerSpell[] spell_buts = new ButtonSummonerSpell[length+1];
+    //Calculate number of rows and cells for the frame grid
+    //We add 1 to length because there will be allways the NULL button
+    int width = (int)Math.ceil(Math.sqrt(length+1)),
+        height = (int)Math.round(Math.sqrt(length+1));
+    //Temporary variable
+    ButtonSummonerSpell b;
+    //Iterator for the array
+    int i = 0;
+    //Create all the buttons
+    for(SummonerSpell spell : spells) {
+      b = new ButtonSummonerSpell(spell.jsonKey);
+      b.addActionListener(listener);
+      b.addMouseListener(ToolTipTimer.INSTANT_TOOLTIP);
+      b.setToolTipText(spell.name);
+      spell_buts[i++] = b;
+    }
+    //Create the NO SPELL button
+    b = new ButtonSummonerSpell(null);
+    b.addActionListener(listener);
+    b.addMouseListener(ToolTipTimer.INSTANT_TOOLTIP);
+    b.setToolTipText("Do not change spell");
+    spell_buts[i] = b;
     
+    return spell_buts;
   }
   private class buttonOnclick implements ActionListener {
     @Override

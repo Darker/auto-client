@@ -6,6 +6,7 @@
 
 package cz.autoclient.GUI.passive_automation;
 
+import cz.autoclient.GUI.Gui;
 import cz.autoclient.robots.BotActionListener;
 import cz.autoclient.robots.Robot;
 import cz.autoclient.robots.RobotManager;
@@ -114,8 +115,14 @@ public class PAMenu {
       try {
         desktop.browse(page.toURI());
       } catch (Exception e) {
-        e.printStackTrace();
+        Gui.inst.dialogErrorAsync("Due to an error, the help page can't"
+            + " be opened in your browser. The error was\n    "+e+"\n"
+            + "You can manually type the following url of the help page: "+page.toString());
       }
+    }
+    else {
+        Gui.inst.dialogErrorAsync("Your system doesn't support opening URL in browser. Try to open it manually:\n"
+            +page.toString());
     }
   }
   
@@ -123,7 +130,10 @@ public class PAMenu {
     /*root.setIcon(PA_BOT_DISABLED_ERROR.getIcon());
     if(true)
       return;*/
-    if(running)
+    //We must assume that disabled robot cannot run
+    // other wise, you may happen to get running icon right after robot diables itself
+    // this happens because while the icon is being set, the robot is still running
+    if(running && !robot.isErrorDisabled())
       IconChanger.setIcon(PA_BOT_RUNNING.getIcon(), root);
     else {
       if(enabled) 
@@ -245,6 +255,8 @@ public class PAMenu {
 
     @Override
     public void run() {
+      //System.out.println("Changing icon to "+icon.getDescription());
+      //new Exception().printStackTrace();
       menu.setIcon(icon);
     }
     public static void setIcon(ImageIcon icon, JMenu menu) {

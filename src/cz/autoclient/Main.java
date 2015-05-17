@@ -19,6 +19,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ import sirius.constants.IWMConsts;
  {
    //Some application constants
    public static final String SETTINGS_FILE = "data/settings.bin";
+   public static final File BACKUP_DIR = new File("data/backup/");
    public static boolean debug = true;
    
    public Automat ac;
@@ -98,16 +100,51 @@ import sirius.constants.IWMConsts;
      catch(IOException e) {
        //This means the settings probably exist but are corrupted
        System.err.println("Settings corrupted. Error:"+e);
-       if((new File(SETTINGS_FILE)).exists()) {
+       e.printStackTrace();
+       
+       File setFile = new File(SETTINGS_FILE);
+       
+       if(setFile.isFile()) {
+         File newFile = null;
+         boolean copySuccess = false;
+         Exception copyError = null;
+         try {
+           BACKUP_DIR.mkdirs();
+           String filename = BACKUP_DIR.getAbsolutePath()+"/backup_";
+           int iterator = 1;
+           while((newFile = new File(filename+(iterator++)+".bin")).exists()) {
+             //Sometimes you're so pro you do everything in the while condition
+           }
+
+           Files.copy(setFile.toPath(), newFile.toPath());
+           copySuccess = true;
+         }
+         catch(Exception ex) {
+           copyError = ex;
+           newFile = null;
+         }
+         
+         final String path = copySuccess?newFile.getAbsolutePath():copyError.toString();
+         final boolean success = copySuccess;
          new Thread() {
            @Override
            public void run() {
-             JOptionPane.showMessageDialog(null, "Your settings file was corrupted. Defaults will be loaded."
-                 //+ "It will be moved into data/backup/ directory and default settings will be used."
-                 , "Error",JOptionPane.ERROR_MESSAGE);
+             StringBuilder message = new StringBuilder("Your settings file was corrupted.\n");
+             if(success) {
+               message.append("Corrupted file was moved into ");
+               message.append(path);
+               message.append(" for backup and default settings will now be used.");
+             }
+             else {
+               message.append("Additionally, an following error has occured when attempting to backup corrupted file:\n    ");
+               message.append(path);  
+               message.append("\nWe're sorry, all your settings are lost :(");
+             }
+             JOptionPane.showMessageDialog(null, 
+                   message.toString()
+                   , "Settings corrupted",JOptionPane.ERROR_MESSAGE);
            }
          }.start();
-         e.printStackTrace();
          
        }
      }

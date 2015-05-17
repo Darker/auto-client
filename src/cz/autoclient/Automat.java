@@ -296,7 +296,7 @@ import java.util.ArrayList;
      boolean ARAM = false;
      //this.gui.getProgressBar1().setValue(70);
      if(settings.getStringEquivalent(Setnames.BLIND_CALL_TEXT.name).length()>0) {
-       sleep(this.gui.getDelay());
+       //sleep(this.gui.getDelay());
        click(PixelOffset.LobbyChat);
        click(PixelOffset.LobbyChat);
        sleep(10L);
@@ -341,7 +341,7 @@ import java.util.ArrayList;
        SummonerSpell s = ConstData.lolData.getSummonerSpells().get(spells[i]);
        if(s!=null) {
          //Crop the icon - the GUI disorts the icon borders so I ignore them
-         BufferedImage icon = LazyLoadedImage.crop(s.img.getScaled(48, 48, true), 5);
+         BufferedImage icon = LazyLoadedImage.crop(s.img.getScaledDiscardOriginal(48, 48), 5);
          if(icon!=null) {
            click(i==0?PixelOffset.Blind_SumSpell1:PixelOffset.Blind_SumSpell2);
            //Wait till the launcher screen redraws

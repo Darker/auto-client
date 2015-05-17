@@ -37,7 +37,7 @@ public class ButtonSummonerSpell extends JButton {
       SummonerSpell spell = ConstData.lolData.getSummonerSpells().get(name);
       if(spell!=null) {
         //System.out.println("Spell: "+spell.img.url);
-        return new ImageIcon(spell.img.getScaled(48,48, true));
+        return new ImageIcon(spell.img.getScaledDiscardOriginal(48,48));
       }
       else {
         /*System.out.println("No spell at "+name+"\n   Available names: ");

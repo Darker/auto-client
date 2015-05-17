@@ -44,7 +44,9 @@ public class LazyLoadedImage {
   //If image has failed, we'll not try to load it again and will return null straight away
   protected boolean image_failed = false;
   
-  private final Object imageMutex = new Object();
+  private final Object image_mutex = new Object();
+  private final Object icon_mutex = new Object();
+  private final Object b_image_mutex = new Object();
   
   private volatile HashMap<Dimensions, BufferedImage> scaledInstances;
   
@@ -102,6 +104,11 @@ public class LazyLoadedImage {
   public Image getImage() {
     return type==Type.FILE?getImageFile():getImageResource(); 
   }
+  /**
+   * Creates buffered image from {@link #image}. If image is not 
+   * BufferedImage, it's converted to buffered image then discarded.
+   * @return 
+   */
   public BufferedImage getBufferedImage() {
     if(b_image!=null)
       return b_image;
@@ -122,7 +129,7 @@ public class LazyLoadedImage {
       bGr.drawImage(im, 0, 0, null);
       bGr.dispose();
       //Do not hold two instances of the same image
-      synchronized(imageMutex) {
+      synchronized(image_mutex) {
         image = b_image;
       }
       // Return the buffered image
@@ -176,9 +183,49 @@ public class LazyLoadedImage {
     }
     return null;
   }
+  /**
+   * Calls {@link #getScaled(int, int, boolean) } and then deletes the original size of this image.
+   * @return rescaled image, just as with normal getScaled
+   */
+  public BufferedImage getScaledDiscardOriginal(int width, int height) {
+    BufferedImage result = getScaled(width, height, true);
+    delete_b_image();
+    delete_image();
+    return result;
+  }
+  /**
+   * Deletes image while performing double checked lock.
+   */
+  private void delete_image() {
+    if(image!=null) {
+       synchronized(image_mutex) {
+         if(image!=null) {
+           image = null;
+         }
+       }
+    }
+  }
+  private void delete_icon() {
+    if(icon!=null) {
+       synchronized(icon_mutex) {
+         if(icon!=null) {
+           icon = null;
+         }
+       }
+    }
+  }
+  private void delete_b_image() {
+    if(b_image!=null) {
+       synchronized(b_image_mutex) {
+         if(b_image!=null) {
+           b_image = null;
+         }
+       }
+    }
+  }
   public Image getImageFile() {
     if(image==null && !image_failed) {
-      synchronized(imageMutex) {
+      synchronized(image_mutex) {
         //If was blocked, check for the null once again
         if(image==null && !image_failed) {
           File file = new File(path);
@@ -225,7 +272,7 @@ public class LazyLoadedImage {
   private Image getImageResource() {
     //Lazy load...
     if(image==null) {
-      synchronized(imageMutex) {
+      synchronized(image_mutex) {
           if(image==null) {
           //Since the .jar is constant (it's packed) we can
           //Remember the image is unavailable

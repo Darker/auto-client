@@ -88,24 +88,29 @@ import javax.swing.SwingUtilities;
    private boolean pvp_net_window = false;
    //Was our DLL loaded by the user?
    private boolean dll_loaded = false;
+   /** GUI ELEMENTS **/
    
    private JMenuItem menu_threadcontrol_pretend_accepted;
    private JMenuItem menu_dll_additions;
    private JCheckBoxMenuItem menu_tray_enabled;
    private JCheckBoxMenuItem menu_tray_minimize;
    
+   
+   
+   //TRAY ICON STUFF
    private TrayIcon tray_icon;
    //Remember whether tray icon has been added or not
    private boolean tray_added = false;
    private final SystemTray tray;
    
+   //Robot management
    public RobotManager robots;
    
    /**
     * Is set to true if the AutoClient anti-annoyance functions are in place
     */
    private boolean anoyance_disabled = false;
-  private ConfigurationManager champ_config;
+   private ConfigurationManager champ_config;
    
    
    public String[] getSelectedMode()
@@ -113,6 +118,7 @@ import javax.swing.SwingUtilities;
      return new String[0];//(String[]) (selected != null ? selected : "");
    }
    public static Gui inst;
+   
    public Gui(Main acmain, final Settings settings)
    {
      if(inst!=null)
@@ -201,9 +207,9 @@ import javax.swing.SwingUtilities;
    }
    
    public void displayToolAction(boolean state) {
-     toggleButton1.setText(state ? "Stop" : "Start");
-     toggleButton1.setSelected(state);
-     toggleButton1.setBackground(state? Color.RED:null);
+     buttonStartStop.setText(state ? "Stop" : "Start");
+     buttonStartStop.setSelected(state);
+     buttonStartStop.setBackground(state? Color.RED:null);
      //Enable/disable thread control
      menu_threadcontrol_pretend_accepted.setEnabled(state);
      
@@ -216,14 +222,14 @@ import javax.swing.SwingUtilities;
    }
    
    public void displayClientAvailable(boolean available) {
-    toggleButton1.setEnabled(available);
+    buttonStartStop.setEnabled(available);
     pvp_net_window = available;
     if(available) {
-      toggleButton1.setToolTipText(Text.TOGGLE_BUTTON_TITLE_ENABLED.text);
+      buttonStartStop.setToolTipText(Text.TOGGLE_BUTTON_TITLE_ENABLED.text);
       displayDllStatus(dll_loaded);
     }
     else {
-      toggleButton1.setToolTipText(Text.TOGGLE_BUTTON_TITLE_DISABLED.text);
+      buttonStartStop.setToolTipText(Text.TOGGLE_BUTTON_TITLE_DISABLED.text);
       menu_dll_additions.setEnabled(false);
     } 
    }
@@ -305,26 +311,13 @@ import javax.swing.SwingUtilities;
    
    public JToggleButton getToggleButton1()
    {
-     return this.toggleButton1;
-   }
-  
-   private void DelaySelected(ActionEvent e)
-   {
-     this.chatDialog.setVisible(true);
+     return this.buttonStartStop;
    }
    
-   private void ChatOKClicked(ActionEvent e)
-   {
-     this.chatDialog.setVisible(false);
-   }
    public void notification(Notification.Def... names) {
      notifications.notification(names);
    }
    
-   public int getDelay()
-   {
-     return (int)(((Double)this.spinner1.getValue()).doubleValue() * 1000.0D);
-   }
    private void initTrayIcon() {
      if(tray_icon!=null)
        return;
@@ -375,11 +368,11 @@ import javax.swing.SwingUtilities;
    }
    private void initMenu() {
      menuBar1 = new JMenuBar();
-     //======== menu1 ========
+     //======== menuTools ========
      {
-       menu1 = new JMenu();
+       menuTools = new JMenu();
 
-       menu1.setText("Tools");
+       menuTools.setText("Tools");
 
        //---- menuItem1 ----
        /*menuItem1 = new JMenuItem();
@@ -390,7 +383,7 @@ import javax.swing.SwingUtilities;
                DelaySelected(e);
            }
        });
-       menu1.add(menuItem1);*/
+       menuTools.add(menuItem1);*/
 
        final JMenuItem menuItem2 = new JMenuItem();
        menuItem2.addActionListener(new ActionListener() {
@@ -412,7 +405,7 @@ import javax.swing.SwingUtilities;
                });
            }
        });
-       menu1.add(menuItem2);
+       menuTools.add(menuItem2);
        menu_dll_additions = menuItem2;
        /** Run as administrator**/
        {
@@ -427,8 +420,8 @@ import javax.swing.SwingUtilities;
                Gui.this.tryRestartAsAdmin();
              }
          });
-         menu1.add(item);
-         //Later, check if this menu item should be enabled
+         menuTools.add(item);
+         //Later, check if this menuAutomation item should be enabled
          SwingUtilities.invokeLater(new Runnable() {
            @Override
            public void run() {
@@ -443,7 +436,7 @@ import javax.swing.SwingUtilities;
        JCheckBoxMenuItem checkBox = new JCheckBoxMenuItem("Prevent Client minimize");
        checkBox.setToolTipText("If you accidentally minimize PVP.net window when robot is running it will be restored on background.");
        settings.bindToInput(Setnames.PREVENT_CLIENT_MINIMIZE.name, checkBox, true);
-       menu1.add(checkBox); 
+       menuTools.add(checkBox); 
          
        //Update dll aditions status
        displayDllStatus(false);
@@ -509,15 +502,15 @@ import javax.swing.SwingUtilities;
          });
          menu.add(item);
          
-         menu1.add(menu);
+         menuTools.add(menu);
        }
        
      }
-     menuBar1.add(menu1);
+     menuBar1.add(menuTools);
      //======== menu2 ========
      {
-       JMenu menu = new JMenu();
-       menu.setText("Display");
+       menuDisplay = new JMenu();
+       menuDisplay.setText("Display");
 
        menu_tray_enabled = new JCheckBoxMenuItem("Show in system tray");
        menu_tray_enabled.addActionListener(new ActionListener() {
@@ -537,7 +530,7 @@ import javax.swing.SwingUtilities;
              }
            }
        });
-       menu.add(menu_tray_enabled);
+       menuDisplay.add(menu_tray_enabled);
        settings.bindToInput(Setnames.TRAY_ICON_ENABLED.name,menu_tray_enabled, true);
 
 
@@ -549,32 +542,32 @@ import javax.swing.SwingUtilities;
              displayTrayEnabled(menu_tray_enabled.getState(), menu_tray_minimize.getState(), true);
            }
        });
-       menu.add(menu_tray_minimize);
+       menuDisplay.add(menu_tray_minimize);
        settings.bindToInput(Setnames.TRAY_ICON_MINIMIZE.name, menu_tray_minimize, true);
-       //Add this menu to the bar
-       menuBar1.add(menu);
+       //Add this menuAutomation to the bar
+       menuBar1.add(menuDisplay);
      }
-     //======== Notifications menu ========
+     //======== Notifications menuAutomation ========
      initTrayIcon();
      {
-       JMenu menu = new JMenu();
-       menu.setText("Notifications");
+       menuNotifications = new JMenu();
+       menuNotifications.setText("Notifications");
        Notification.Def.createAll(notifications, NotificationTrayBaloon.class, settings, tray_icon);
-       //======== Tray Notifications menu ========
+       //======== Tray Notifications menuAutomation ========
        {
          JMenu tray_notifs = new JMenu();
          tray_notifs.setText("Tray bubble");
          notifications.addToJMenu(tray_notifs, NotificationTrayBaloon.class);
          tray_notifs.setEnabled(canTray());
-         menu.add(tray_notifs);
+         menuNotifications.add(tray_notifs);
        }
-       menuBar1.add(menu);
+       menuBar1.add(menuNotifications);
      }
-     //======== Passive automation menu ========
+     //======== Passive automation menuAutomation ========
      //if(false)
      {
-        JMenu menu = new JMenu();
-        menu.setText("Passive Automation");
+        menuAutomation = new JMenu();
+        menuAutomation.setText("Passive Automation");
         JMenuItem disableAll = new JMenuItem("Disable all");
         
         //======== Auto Launch ========
@@ -584,7 +577,7 @@ import javax.swing.SwingUtilities;
             auto_launch.setRobots(robots);
             auto_launch.setAboutLink("https://github.com/Darker/auto-client/wiki/Passive-automation#auto-launch");
             auto_launch.root.setToolTipText("Automatically press launch in patcher.");
-            menu.add(auto_launch.root);
+            menuAutomation.add(auto_launch.root);
           }
           catch(NoSuchRobotException e) {}
         }
@@ -615,7 +608,7 @@ import javax.swing.SwingUtilities;
           auto_queue.root.setToolTipText("Requeue when the game is over.");
  
           //menu.add(auto_login.root);
-          menu.add(auto_queue.root);
+          menuAutomation.add(auto_queue.root);
         }
         //======== Auto login ========
         {
@@ -768,26 +761,30 @@ import javax.swing.SwingUtilities;
           auto_login.root.setToolTipText("Login automatically.");
  
           //menu.add(auto_login.root);
-          menu.add(auto_login.root);
+          menuAutomation.add(auto_login.root);
         }
-        menuBar1.add(menu);
+        //A menuAutomation item with link to help
+        {
+          menuAutomation.add(new URLMenuItem("What's this?", "Link to help page on github", "https://github.com/Darker/auto-client/wiki/Passive-automation"));          
+        }
+        menuBar1.add(menuAutomation);
       }
       setJMenuBar(menuBar1);
 
-      //---- toggleButton1 ----
-      toggleButton1 = new JToggleButton();
-      toggleButton1.setText("Start");
-      toggleButton1.setToolTipText(Text.TOGGLE_BUTTON_TITLE_DISABLED.text);
-      toggleButton1.setEnabled(false);
-      toggleButton1.setFocusable(true);
-      toggleButton1.setFocusPainted(false);
-      toggleButton1.addActionListener(new ActionListener() {
+      //---- buttonStartStop ----
+      buttonStartStop = new JToggleButton();
+      buttonStartStop.setText("Start");
+      buttonStartStop.setToolTipText(Text.TOGGLE_BUTTON_TITLE_DISABLED.text);
+      buttonStartStop.setEnabled(false);
+      buttonStartStop.setFocusable(true);
+      buttonStartStop.setFocusPainted(false);
+      buttonStartStop.addActionListener(new ActionListener() {
           @Override
           public void actionPerformed(ActionEvent e) {
             ToolAction();
           }
       });
-      menuBar1.add(toggleButton1);
+      menuBar1.add(buttonStartStop);
     }
     protected class PasswordFieldVerifier extends SettingsInputVerifier implements SettingsValueChanger {
       private String password;
@@ -830,16 +827,6 @@ import javax.swing.SwingUtilities;
 
     }
     private void initComponents() {
-        // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        // Generated using JFormDesigner Evaluation license - Jakub Mareda
-        
-
-        
-        chatDialog = new Dialog(this);
-        label1 = new JLabel();
-        spinner1 = new JSpinner();
-        button1 = new JButton();
-
         //======== this ========
         setTitle("Application - stopped");
         Container contentPane = getContentPane();
@@ -847,7 +834,7 @@ import javax.swing.SwingUtilities;
         createTabs(contentPane);
 
  
-        //contentPane.add(toggleButton1);
+        //contentPane.add(buttonStartStop);
         //toggleButton1.setBounds(142, 151, 69, 19);
 
         { // compute preferred size
@@ -866,58 +853,7 @@ import javax.swing.SwingUtilities;
         pack();
         setLocationRelativeTo(getOwner());
 
-        //======== chatDialog ========
-        {
-            chatDialog.setTitle("Chat Delay");
-            chatDialog.setResizable(false);
 
-            //---- label1 ----
-            label1.setText("Enter a delay:");
-            label1.setToolTipText("Sets an additional delay before tool types your message. (Seconds)");
-
-            //---- spinner1 ----
-            spinner1.setModel(new SpinnerNumberModel(0.0, 0.0, 5.0, 0.1));
-
-            //---- button1 ----
-            button1.setText("OK");
-            button1.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    ChatOKClicked(e);
-                }
-            });
-
-            /*GroupLayout chatDialogLayout = new GroupLayout(chatDialog);
-            chatDialog.setLayout(chatDialogLayout);
-            chatDialogLayout.setHorizontalGroup(
-                chatDialogLayout.createParallelGroup()
-                    .addGroup(chatDialogLayout.createSequentialGroup()
-                        .addGap(54, 54, 54)
-                        .addComponent(button1)
-                        .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(chatDialogLayout.createSequentialGroup()
-                        .addGap(12, 12, 12)
-                        .addComponent(label1)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(spinner1, GroupLayout.PREFERRED_SIZE, 47, GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())
-            );
-            chatDialogLayout.setVerticalGroup(
-                chatDialogLayout.createParallelGroup()
-                    .addGroup(chatDialogLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(chatDialogLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                            .addComponent(label1)
-                            .addComponent(spinner1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(button1)
-                        .addContainerGap())
-            );
-            chatDialog.pack();
-            chatDialog.setLocationRelativeTo(chatDialog.getOwner());*/
-        }
-        // JFormDesigner - End of component initialization  //GEN-END:initComponents
-        
 
     }
     //http://docs.oracle.com/javase/tutorial/uiswing/examples/components/TabbedPaneDemoProject/src/components/TabbedPaneDemo.java
@@ -1081,21 +1017,19 @@ import javax.swing.SwingUtilities;
     
     
     
-    // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    // Generated using JFormDesigner Evaluation license - Jakub Mareda
+    // GLOBAL GUI ELEMENT VARIABLES
     private JMenuBar menuBar1;
-    private JMenu menu1;
-    private JMenuItem menuItem1;
+    private JMenu menuTools;
+    private JMenu menuDisplay;
+    private JMenu menuAutomation;
+    private JMenu menuNotifications;
+    
 
 
 
     //private JTextField champField;
     //private JTextField textField2;
-    private JToggleButton toggleButton1;
-    private Dialog chatDialog;
-    private JLabel label1;
-    private JSpinner spinner1;
-    private JButton button1;
+    private JToggleButton buttonStartStop;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
     
     //Dialogs
