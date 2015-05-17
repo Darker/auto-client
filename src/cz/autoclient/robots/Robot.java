@@ -244,6 +244,8 @@ public abstract class Robot implements Runnable {
    */
   public final boolean canRun() {
     try {
+      if(errorDisabled)
+        return false;
       if(listener==null)
         return lastCanRun = canRunEx();
       else {

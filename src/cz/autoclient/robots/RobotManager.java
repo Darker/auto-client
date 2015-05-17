@@ -69,7 +69,7 @@ public class RobotManager extends Thread {
             individual_delay = checkInterval;
             //System.out.println("No robots. Waiting for robots...");
             robots.wait();
-            //System.out.println("Finally got some robots!");
+            System.out.println("Finally got some robots!");
           }
           else {
             individual_delay = checkInterval/size;

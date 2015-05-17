@@ -46,6 +46,7 @@ public class AutoLoginBot extends Robot {
    */
   @Override
   protected void go() throws InterruptedException, APIException {
+    System.out.println("Auto login thread started.");
     if(initializing) {
       System.out.println("Initializing phase of auto login.");
       initializing = false;
@@ -138,7 +139,7 @@ public class AutoLoginBot extends Robot {
     //if(initializing)
     //  return false;
     
-    if(!initialized && !initializing) {
+    if(!initialized) {
       //System.out.println("Initializing - run once.");
       initializing = true;
       return true;
