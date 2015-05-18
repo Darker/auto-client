@@ -203,7 +203,8 @@ import javax.swing.SwingUtilities;
 
      setSize(500, 300);
    }
-   
+   //
+   // AUTOMATION INDICATION HERE!
    public void displayToolAction(boolean state) {
      buttonStartStop.setText(state ? "Stop" : "Start");
      buttonStartStop.setSelected(state);
@@ -211,12 +212,31 @@ import javax.swing.SwingUtilities;
      //Enable/disable thread control
      menu_threadcontrol_pretend_accepted.setEnabled(state);
      
+     tray_icon.setImage((state?getIconRunning():getIcon()).getImage());
+     
      if(!state) {
        setTitle("Stopped."); 
      }
    }
    public void displayToolAction() {
      displayToolAction(ac.ToolRunning());
+   }
+   
+   private boolean ToolAction()
+   {
+     boolean toolState = ac.ToolRunning();
+     displayToolAction(!toolState);
+     
+     if (!toolState) {
+       ac.StartTool();
+     } else {
+       ac.StopTool();
+     }
+     return !toolState;
+   }
+
+   private boolean ToolAction(ActionEvent e) {
+     return ToolAction();
    }
    
    public void displayClientAvailable(boolean available) {
@@ -289,22 +309,7 @@ import javax.swing.SwingUtilities;
    }
 
    
-   private boolean ToolAction()
-   {
-     boolean toolState = ac.ToolRunning();
-     displayToolAction(!toolState);
-     
-     if (!toolState) {
-       ac.StartTool();
-     } else {
-       ac.StopTool();
-     }
-     return !toolState;
-   }
 
-   private boolean ToolAction(ActionEvent e) {
-     return ToolAction();
-   }
  
    
    public JToggleButton getToggleButton1()
@@ -318,18 +323,33 @@ import javax.swing.SwingUtilities;
    public ImageResources getIcon() {
      return ImageResources.ICON_NO_COPYRIGHT;
    }
-   
+   public ImageResources getIconRunning() {
+     return ImageResources.ICON_RUNNING;
+   }
+   public ImageResources getTrayIcon() {
+     return ac.ToolRunning()?getIconRunning():getIcon();
+   }
+   //Can't write [C:\MYSELF\programing\java\AutoCall\AutoClient\target\autoclient-2.0-shrunk.jar](Can't read [C:\MYSELF\programing\java\AutoCall\AutoClient\target\autoclient-2.0-jar-with-dependencies.jar](Duplicate zip entry [autoclient-2.0-jar-with-dependencies.jar:cz/autoclient/autoclick/ColorPixel.class]))
    private void initTrayIcon() {
      if(tray_icon!=null)
        return;
      if (SystemTray.isSupported() && settings.getBoolean(Setnames.TRAY_ICON_ENABLED.name, true)) {
-       tray_icon = new TrayIcon(getIcon().getImage());
+       tray_icon = new TrayIcon(getTrayIcon().getImage());
        tray_icon.setImageAutoSize(true);
        tray_icon.addMouseListener(new MouseListener() {
          @Override
          public void mouseClicked( MouseEvent e ) {
-           Gui.this.setVisible(true);
-           Gui.this.setState (Frame.NORMAL);
+           switch(e.getButton()) {
+             case MouseEvent.BUTTON1 : 
+                          Gui.this.setVisible(true);
+                          Gui.this.setState (Frame.NORMAL);
+             break;
+             case MouseEvent.BUTTON2 : 
+               if(Gui.this.pvp_net_window)
+                 Gui.this.ToolAction();
+               
+             
+           }
            //Gui.this.setType(java.awt.Window.Type.NORMAL);
          }
          @Override
