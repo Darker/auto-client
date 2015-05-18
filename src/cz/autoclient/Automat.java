@@ -144,7 +144,7 @@ import java.util.ArrayList;
        }
        if (!isInterrupted())
        {
-         sleep(accepted>0 ? 60L : 600L);
+         sleep(accepted>0 ? 20L : 600L);
          try
          {
            if (accepted>0)
@@ -856,7 +856,8 @@ import java.util.ArrayList;
      return checkPoint(point, tolerance, null);
    }
    private boolean checkPoint(PixelOffset point, int tolerance, String debug) {
-     if(point.color==null)
+     return WindowTools.checkPoint(window, point, tolerance);
+     /*if(point.color==null)
        return false;
      try {
        Rect rect = window.getRect();
@@ -876,7 +877,7 @@ import java.util.ArrayList;
      catch(APIException e) {
        System.err.println("Can't click because no window is available for clicking :("); 
        return false;
-     }
+     }*/
    }
    private boolean checkPoint(ColorPixel point, int tolerance) {
      if(point.color==null)
