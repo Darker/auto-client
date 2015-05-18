@@ -10,6 +10,7 @@
  - **Doesn't move your mouse**
 
 ##[Download](https://github.com/Darker/auto-client/raw/master/release/AutoClient.zip)
+###[Latest unstable release](https://github.com/Darker/auto-client/raw/master/release/AutoClient_unstable.zip)
  
  - [Latest version](https://github.com/Darker/auto-client/raw/master/release/AutoClient.zip)
  - [All versions](https://github.com/Darker/auto-client/tree/master/release)
