@@ -133,7 +133,7 @@ public abstract class GameObjectMap<T extends GameObject>
    * @param <V>
    * @param reader
    * @return 
-   */
+   */ 
   public <V> List<V> enumValues(ValueGetter<T, V> reader) {
     if(cachedValueLists != null) {
       synchronized(cachedValueLists_mutex) {

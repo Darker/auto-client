@@ -7,12 +7,11 @@
 package cz.autoclient.PVP_net;
 
 import cz.autoclient.autoclick.Rect;
-import cz.autoclient.league_of_legends.DataLoader;
 import cz.autoclient.league_of_legends.LoLVersion;
 import java.io.File;
 
 /**
- *
+ * Contains various constant data linked to PVP.net client and League of Legends
  * @author Jakub
  */
 public class ConstData {

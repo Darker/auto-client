@@ -10,7 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Parent thread that contains child robot threads. In a defined interval, child threads
+ * will be checked using {@link Robot#canRun()} and if this returns true, cild will be started using
+ * {@link Robot#start()}.
  * @author Jakub
  */
 public class RobotManager extends Thread {
@@ -28,12 +30,18 @@ public class RobotManager extends Thread {
   public RobotManager() {
     this(800);
   }
-  
+  /**
+   * Start checking and running.
+   */
   @Override
   public final synchronized void start() {
     super.start();
   }
-  
+  /**
+   * Add another robot in the robot list. If no robots were in the list so far,
+   * the list will be notified and the watch thread will start.
+   * @param rur 
+   */
   public void addRobot(Robot rur) {
     synchronized (robots) {
       robots.add(rur);
@@ -43,6 +51,11 @@ public class RobotManager extends Thread {
         robots.notify(); 
     }
   }
+  /**
+   * Removes robot from list. If the robot is running, it will be terminated. 
+   * If this was the last robot, the main thread will pause.
+   * @param rur 
+   */
   public void removeRobot(Robot rur) {
     synchronized (robots) {
       if(rur.isRunning())

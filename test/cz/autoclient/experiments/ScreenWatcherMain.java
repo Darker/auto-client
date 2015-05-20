@@ -46,8 +46,12 @@ public class ScreenWatcherMain {
    public static void main(String[] args) throws Exception
    {
      //TestRectangles();
-     ShowAveragedImage(loadFromPath("../debug/launcher_screens/LOBBY-SPELL_1.png"), new Rect(0,50,50,0));
-     /*TestRectangles();
+     //ShowAveragedImage(loadFromPath("../debug/launcher_screens/LOBBY-SPELL_1.png"), new Rect(0,50,50,0));
+     ScreenWatcherMain.saveToPath(
+         "C:\\MYSELF\\Dokumenty\\PR2\\sem\\integral image\\integral_image.png", 
+         ScreenWatcher.drawIntegralImage(ScreenWatcher.integralImage(loadFromPath("C:\\MYSELF\\Dokumenty\\PR2\\sem\\integral image\\LOBBY-SPELL_1.png")))
+     );
+      /*TestRectangles();
      if(true)
        return;/* */
      //The small image to search for

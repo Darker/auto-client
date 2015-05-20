@@ -17,7 +17,8 @@ import org.apache.logging.log4j.Level;
 
 
 /**
- *
+ * Abstract robot class. This class excepts that you're about to create a robot
+ * that automates a window, however this is not necessary.
  * @author Jakub
  */
 public abstract class Robot implements Runnable {
@@ -239,7 +240,8 @@ public abstract class Robot implements Runnable {
   }
   
   /**
-   * Indicate whether this thread can run. Override canRunEx instead of this method.
+   * Indicate whether this thread can run. Override {@link #canRunEx()} instead of this method. This method catches any errors
+   * that occur within canRunEx and also
    * @return
    */
   public final boolean canRun() {
@@ -264,6 +266,10 @@ public abstract class Robot implements Runnable {
       return false;
     }
   }
+  /** Overridable detection whether the robot can run or not.
+   * 
+   * @return true if the robot shold be launched
+   */
   protected boolean canRunEx() {
     return getWindow()!=null;
   }
