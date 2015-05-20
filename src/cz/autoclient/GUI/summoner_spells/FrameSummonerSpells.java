@@ -11,7 +11,6 @@ import cz.autoclient.settings.Settings;
 import java.awt.Container;
 import java.awt.GridLayout;
 import java.awt.Point;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -24,6 +23,7 @@ import javax.swing.SwingUtilities;
 import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.league_of_legends.SummonerSpell;
 import cz.autoclient.league_of_legends.maps.SummonerSpells;
+import javax.swing.JLabel;
 
 /**
  *
@@ -34,6 +34,8 @@ public class FrameSummonerSpells extends JDialog {
   
   protected final Settings settings;
   protected final ButtonSummonerSpellMaster parent;
+  
+  private JLabel loadingLabel = new JLabel("Loading summoner spells...");
   public FrameSummonerSpells(ButtonSummonerSpellMaster par, Settings set) {
     super(SwingUtilities.getWindowAncestor(par));
     
@@ -45,6 +47,9 @@ public class FrameSummonerSpells extends JDialog {
     //Set some styles
     JPanel contentPane = (JPanel)getContentPane();
     contentPane.setBorder(border);
+    //Temporary loading text
+    contentPane.add(loadingLabel);
+    
     //Will populate the selection of objects in grid layout
     createButtons();
     //Will make the frame as large as the content
@@ -73,49 +78,22 @@ public class FrameSummonerSpells extends JDialog {
   }
   
   private final Object createButtonMutex = new Object();
+  /** Fills the frame with buttons asynchronously.  
+   */
   private void createButtons() {
-    //Get all existing SummonerSpells
-    SummonerSpells spells = ConstData.lolData.getSummonerSpells();
-    int length = spells.size();
-    //cz.autoclient.PVP_net.SummonerSpell[] values = cz.autoclient.PVP_net.SummonerSpell.values();
-   
-    //int length = values.length;
-    //Calculate number of rows and cells for the frame grid
-    //We add 1 to length because there will be allways the NULL button
-    int width = (int)Math.ceil(Math.sqrt(length+1)),
-        height = (int)Math.round(Math.sqrt(length+1));
-    //Layout will automatically distribute spells evenly in the grid
-    GridLayout layout = new GridLayout(height, width, 5, 5);
-    //Get content panel to add buttons in
-    Container contentPane = getContentPane();
-    contentPane.setLayout(layout);
-    //Temporary variable
-    ButtonSummonerSpell b;
-    //Listener for clicks
-    ActionListener list = new buttonOnclick();
-    //Create all the buttons
-    for(SummonerSpell spell : spells) {
-      b = new ButtonSummonerSpell(spell.jsonKey);
-      b.addActionListener(list);
-      b.addMouseListener(ToolTipTimer.INSTANT_TOOLTIP);
-      b.setToolTipText(spell.name);
-      contentPane.add(b);
-    }
-    /*for(int i=0, l=values.length; i<l; i++) {
-      b = new ButtonSummonerSpell(values[i]);
-      b.addActionListener(list);
-      b.addMouseListener(ToolTipTimer.INSTANT_TOOLTIP);
-      b.setToolTipText(values[i].name);
-      contentPane.add(b);
-    }*/
-    b = new ButtonSummonerSpell(null);
-    b.addActionListener(list);
-    b.addMouseListener(ToolTipTimer.INSTANT_TOOLTIP);
-    b.setToolTipText("Do not change spell");
-    contentPane.add(b);
+    new Thread() {
+      @Override
+      public void run() {
+        ButtonSummonerSpell[] buttons = generateButtons(new buttonOnclick());
+        //Calculate number of rows and cells for the frame grid
+        //We add 1 to length because there will be allways the NULL button
+        int width = (int)Math.ceil(Math.sqrt(buttons.length+1)),
+            height = (int)Math.round(Math.sqrt(buttons.length+1));
+        appendButtons(buttons, width, height);
+      }
+    }.start();
   }
-  private static final Object butSumSpell_mutex = new Object();
-  public static ButtonSummonerSpell[] generateButtons(buttonOnclick listener) {
+  private static ButtonSummonerSpell[] generateButtons(buttonOnclick listener) {
     SummonerSpells spells = ConstData.lolData.getSummonerSpells();
     int length = spells.size();
     ButtonSummonerSpell[] spell_buts = new ButtonSummonerSpell[length+1];
@@ -144,6 +122,33 @@ public class FrameSummonerSpells extends JDialog {
     
     return spell_buts;
   }
+  /**
+   * Will create table of buttons in the frame. This operation will happen in swing 
+   * execution thread.
+   * @param width table width (number of columns)
+   * @param height table height (number of rows)
+   */
+  private void appendButtons(final ButtonSummonerSpell[] buttons, final int width, final int height) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        //Layout will automatically distribute spells evenly in the grid
+        GridLayout layout = new GridLayout(height, width, 5, 5);
+        //Get content panel to add buttons in
+        Container contentPane = getContentPane();
+        contentPane.remove(loadingLabel);
+        loadingLabel = null;
+        contentPane.setLayout(layout);
+        //Add the buttons
+        for(ButtonSummonerSpell but:buttons) {
+          contentPane.add(but); 
+        }
+        FrameSummonerSpells.this.pack();
+        //System.out.println("Buttons in FrameSummonerSpells were populated.");
+      }
+    });
+
+  }
   private class buttonOnclick implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -151,4 +156,5 @@ public class FrameSummonerSpells extends JDialog {
       FrameSummonerSpells.this.setVisible(false);
     }
   }
+  
 }
