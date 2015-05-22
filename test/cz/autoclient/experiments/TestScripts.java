@@ -7,7 +7,10 @@
 package cz.autoclient.experiments;
 
 import cz.autoclient.scripting.OneLineScript;
+import cz.autoclient.scripting.ScriptCommand;
+import cz.autoclient.scripting.ScriptEnvironment;
 import cz.autoclient.scripting.ScriptSymbol;
+import cz.autoclient.scripting.exception.IllegalCmdArgumentException;
 
 /**
  *
@@ -44,5 +47,22 @@ public class TestScripts {
      OneLineScript s = OneLineScript.parse(s1);
      s.compile();
      s.run();
+     
+     ScriptCommand.setCommand("ex", CommandException.class);
+     s = OneLineScript.parse("S>echo,Test systemovych promennych.;ex");
+     s.compile();
+     s.setenv("exception", new RuntimeException("Vse je v poradku."));
+     System.out.println("Chyba: "+s.getenv("exception", RuntimeException.class));
+     s.run();
+   }
+   public static class CommandException extends ScriptCommand {
+     @Override
+     public void parseArguments(Iterable<String> args) throws IllegalCmdArgumentException {
+     }
+
+     @Override
+     public boolean execute() {
+       throw environment.get("exception", RuntimeException.class);
+     }
    }
 }

@@ -12,6 +12,8 @@ exclude.txt
 release.bat
 ./run_as_admin.bat
 ./run_with_commandline.bat
+./update_test_file.bat
+./AutoClient.jar
 /release/tmp/*
 *.7z
 /cleanest.cfg
