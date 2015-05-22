@@ -16,7 +16,8 @@ import java.util.ArrayList;
  */
 public class OneLineScript {
   private ArrayList<CommandBuilder> preCompiled;
-  private ArrayList<ScriptCommandCall> compiled;
+  private ArrayList<ScriptCommand> compiled;
+  private ScriptEnvironment environment;
   private OneLineScript(ArrayList<CommandBuilder> preCompiled) {
     this.preCompiled = preCompiled; 
   }
@@ -29,8 +30,9 @@ public class OneLineScript {
     for(CommandBuilder cb : preCompiled) {
       try {
         ScriptCommand c = cb.createCommand();
-        Object[] args = c.parseArguments(cb.args);
-        compiled.add(new ScriptCommandCall(c,args));
+        c.setEnvironment(getEnvironment());
+        c.parseArguments(cb.args);
+        compiled.add(c);
       }
       catch(CommandException e) {
         //Clear the compiled data since it's useless
@@ -43,12 +45,48 @@ public class OneLineScript {
   public void run() {
     if(compiled==null)
       throw new IllegalStateException("Tried to run uncompiled script.");
-    for(ScriptCommandCall cl : compiled) {
+    for(ScriptCommand cl : compiled) {
       cl.execute();
     }
   }
+  /**
+   * Configure environmentironment variable in the inner environmentironment.
+   * @param name
+   * @param value 
+   */
+  public void setenv(String name, Object value) {
+    if(environment==null)
+      environment = new ScriptEnvironment(name, value);
+    else
+      environment.set(name, value);
+  }
+  
+  /**
+   * Fetch inner environmentironment variable value.
+   * @param <T> required variable type
+   * @param name name of variable
+   * @param type type class
+   * @return  
+   */
+  public <T> T getenv(String name, Class<T> type) {
+    if(environment==null)
+      return null;
+    else
+      return environment.get(name, type);
+  }
+
+  public ScriptEnvironment getEnvironment() {
+    return environment!=null?environment:(environment=new ScriptEnvironment());
+  }
+  
+  
   
   public enum Section {START, COMMAND_NAME, COMMAND_ARGS, ESCAPING};
+  public static OneLineScript parseAndCompile(String data) throws ScriptParseException, CommandException {
+    OneLineScript scr = parse(data);
+    scr.compile();
+    return scr;
+  }
   public static OneLineScript parse(String data) throws ScriptParseException {
     ArrayList<ScriptSymbol> expected = new ArrayList();
     ArrayList<CommandBuilder> commands = new ArrayList();
@@ -61,7 +99,7 @@ public class OneLineScript {
 
     Section section = Section.START;
     
-    
+    // Parsing character by character
     for(int i=0, l=data.length(); i<=l; i++) {
        if(i>=l) {
          currentSymbol = ScriptSymbol.END;
