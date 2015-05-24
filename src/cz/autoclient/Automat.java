@@ -27,6 +27,8 @@ import java.awt.image.BufferedImage;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import cz.autoclient.autoclick.ComparablePixel;
+import static cz.autoclient.PVP_net.WindowTools.*;
  
  
  public class Automat
@@ -150,8 +152,8 @@ import java.util.ArrayList;
            if (accepted>0)
            {   
              boolean lobby = false;
-             if(checkPoint(PixelOffset.LobbyChat, 1)
-                && checkPoint(PixelOffset.LobbyChat2, 1)
+             if(checkPoint(window, PixelOffset.LobbyChat)
+                && checkPoint(window, PixelOffset.LobbyChat2)
                 //&& checkPoint(PixelOffset.Blind_SearchChampion, 1)
              )
              {
@@ -160,7 +162,7 @@ import java.util.ArrayList;
                  break;
              }
              //Here detect teambuilder lobby
-             else if(checkPoint(PixelOffset.TeamBuilder_CaptainIcon, 5)) {
+             else if(checkPoint(window, PixelOffset.TeamBuilder_CaptainIcon)) {
                System.out.println("Team builder lobby detected.");
                
                if(!isInterrupted())
@@ -195,7 +197,7 @@ import java.util.ArrayList;
            {
              if (/*pixelCheckS(new Color(255, 255, 255), width * PixelOffset.MatchFound.x, height * PixelOffset.MatchFound.y, 1)*/
                  
-                 checkPoint(PixelOffset.MatchFound, 1)
+                 checkPoint(window, PixelOffset.MatchFound)
                 )
              {
                //SelectItem("accept");
@@ -207,7 +209,7 @@ import java.util.ArrayList;
                tb = false;
                play_button = false;
              }
-             else if(checkPoint(PixelOffset.TeamBuilder_AcceptGroup,25)) {
+             else if(checkPoint(window, PixelOffset.TeamBuilder_AcceptGroup)) {
                click(PixelOffset.TeamBuilder_AcceptGroup);
                //this.gui.getProgressBar1().setValue(60);
                gui.setTitle("Group accepted, waiting for lobby.");
@@ -221,7 +223,7 @@ import java.util.ArrayList;
                accepted = -1;
                this.gui.getProgressBar1().setValue(40);
              }*/
-             else if(checkPoint(PixelOffset.TeamBuilder_CaptainLobby_Invited, 23)) {
+             else if(checkPoint(window, PixelOffset.TeamBuilder_CaptainLobby_Invited)) {
                
                if( teamBuilder_captain_lobby()) {
                  System.out.println("Game started as captain, the job is over.");
@@ -234,14 +236,14 @@ import java.util.ArrayList;
                
              }
              //If this is a lobby with invited players
-             else if(checkPoint(PixelOffset.InviteChat, 1) && checkPoint(PixelOffset.InviteStart, 8)) {
+             else if(checkPoint(window, PixelOffset.InviteChat) && checkPoint(window, PixelOffset.InviteStart)) {
                invite_lobby();
                gui.setTitle("Waiting for match.");
                play_button = false;
                
              }
              //If play button wasn't there and sudenly appeared, the program shall quit
-             else if(checkPoint(PixelOffset.PlayButton_red, 15) && !play_button) {
+             else if(checkPoint(window, PixelOffset.PlayButton_red) && !play_button) {
                System.out.println("The play button is red. Something must've gone wrong.");
                play_button = true;
                tb = false;
@@ -291,7 +293,7 @@ import java.util.ArrayList;
    public boolean normal_lobby() throws InterruptedException, APIException {
      if(settings.getBoolean(Setnames.NOTIF_MENU_BLIND_IN_LOBBY.name, false))
        gui.notification(Notification.Def.BLIND_TEAM_JOINED);
-     
+     sleep(200L);
      System.out.println("In normal lobby.");
      boolean ARAM = false;
      //this.gui.getProgressBar1().setValue(70);
@@ -319,7 +321,10 @@ import java.util.ArrayList;
        window.typeString(settings.getStringEquivalent(Setnames.BLIND_CHAMP_NAME.name));
        sleep(200L);
        click(PixelOffset.LobbyChampionSlot1);
-
+       sleep(10L);
+       click(PixelOffset.LobbyChampionSlot1);
+       sleep(100L);
+       click(PixelOffset.LobbyChampionSlot1);
      }
      
      System.out.println("Setting summoner spells.");
@@ -507,7 +512,7 @@ import java.util.ArrayList;
      if(!settings.getBoolean(Setnames.TEAMBUILDER_ENABLED.name, (boolean)Setnames.TEAMBUILDER_ENABLED.default_val)) {
        gui.setTitle("Team builder - actions are disabled");
        while(true) {
-         if(!checkPoint(PixelOffset.TeamBuilder_CaptainIcon, 11)) {
+         if(!checkPoint(window, PixelOffset.TeamBuilder_CaptainIcon)) {
            System.out.println("The group was disbanded.");
            return false;
          }
@@ -525,28 +530,28 @@ import java.util.ArrayList;
      //Wait for ready button
      System.out.println("Waiting for ready button.");
      while(true) {
-       if(!checkPoint(PixelOffset.TeamBuilder_CaptainIcon, 11)) {
+       if(!checkPoint(window, PixelOffset.TeamBuilder_CaptainIcon)) {
          System.out.println("The group was disbanded.");
          return false;
        }
        sleep(700L);
        //If ready button is available
-       if(checkPoint(PixelOffset.TeamBuilder_Ready_Enabled, 5)) {
+       if(checkPoint(window, PixelOffset.TeamBuilder_Ready_Enabled)) {
          System.out.println("Clicking ready button!");
          WindowTools.click(window, PixelOffset.TeamBuilder_Ready);
        }
        //If ready button is selected
-       else if(checkPoint(PixelOffset.TeamBuilder_CaptainReady, 5) && checkPoint(PixelOffset.PlayButton_SearchingForGame_Approx, 10)) {
+       else if(checkPoint(window, PixelOffset.TeamBuilder_CaptainReady, PixelOffset.PlayButton_SearchingForGame_Approx)==2) {
          System.out.println("Searching for game!");
          gui.setTitle("Waiting for game. (Team builder)");
          //TODO: add a while that waits for game to make really sre a game will be joined
-         while(checkPoint(PixelOffset.PlayButton_SearchingForGame_Approx, 8)) {
+         while(checkPoint(window, PixelOffset.PlayButton_SearchingForGame_Approx)) {
            sleep(500L);
            /*click(PixelOffset.PlayButton_cancel);
            sleep(800L);
            return false;*/
            
-           if(checkPoint(PixelOffset.TeamBuilder_MatchFound, 2) && checkPoint(PixelOffset.TeamBuilder_MatchFound2, 2)) {
+           if(checkPoint(window, PixelOffset.TeamBuilder_MatchFound, PixelOffset.TeamBuilder_MatchFound2) == 2) {
              System.out.println("Match found!");
              return true;
            }
@@ -580,7 +585,7 @@ import java.util.ArrayList;
      byte old_joined = 0;
      //Wait for the slots to be filled
      while(true) {
-       if(!checkPoint(PixelOffset.TeamBuilder_CaptainLobby_Invited, 23)) {
+       if(!checkPoint(window, PixelOffset.TeamBuilder_CaptainLobby_Invited)) {
          System.out.println("Lobby has been canceled.");
          return false;
        }
@@ -590,18 +595,18 @@ import java.util.ArrayList;
        for(int i=0; i<4; i++) {
          slots[i] = TeamBuilderPlayerSlot.Error;
          //Summoner spell - player is in - may need to be accepted
-         if(checkPoint(PixelOffset.TeamBuilder_CaptainLobby_slot_kickPlayer.offset(0, i*offset), 20)) {           
-           if(checkPoint(PixelOffset.TeamBuilder_CaptainLobby_slot_acceptPlayer.offset(0, i*offset), 60)) {
+         if(checkPoint(window, (ComparablePixel)PixelOffset.TeamBuilder_CaptainLobby_slot_kickPlayer.offset(0, i*offset))) {           
+           if(checkPoint(window, PixelOffset.TeamBuilder_CaptainLobby_slot_acceptPlayer.offset(0, i*offset))) {
              click(PixelOffset.TeamBuilder_CaptainLobby_slot_acceptPlayer.offset(0, i*offset));
              slots[i] = TeamBuilderPlayerSlot.Accepted;
              //Time penalty for clicking
              sleep(80L);
            }
            //WARNING - this match can be errorneous if previous match fails to match properly
-           else if(checkPoint(PixelOffset.TeamBuilder_CaptainLobby_slot_greenBorder.offset(0, i*offset), 33)) {
+           else if(checkPoint(window, PixelOffset.TeamBuilder_CaptainLobby_slot_greenBorder.offset(0, i*offset))) {
              slots[i] = TeamBuilderPlayerSlot.Ready;
            }
-           else if(checkPoint(PixelOffset.TeamBuilder_CaptainLobby_slot_blueBorder.offset(0, i*offset), 7)) {
+           else if(checkPoint(window, PixelOffset.TeamBuilder_CaptainLobby_slot_blueBorder.offset(0, i*offset))) {
              slots[i] = TeamBuilderPlayerSlot.Occupied; 
            }
            else {
@@ -633,11 +638,11 @@ import java.util.ArrayList;
            }
          }
          //No summoner spell = no player in lobby at this slot
-         else if(checkPoint(PixelOffset.TeamBuilder_CaptainLobby_slot_summonerSpell.offset(0, i*offset), 12)) {
+         else if(checkPoint(window, PixelOffset.TeamBuilder_CaptainLobby_slot_summonerSpell.offset(0, i*offset))) {
            slots[i] = TeamBuilderPlayerSlot.Empty;
          }
          //Green means the player is now joining
-         else if(checkPoint(PixelOffset.TeamBuilder_CaptainLobby_slot_greenBorder.offset(0, i*offset), 30)){
+         else if(checkPoint(window, PixelOffset.TeamBuilder_CaptainLobby_slot_greenBorder.offset(0, i*offset))){
            slots[i] = TeamBuilderPlayerSlot.Accepted; 
          }
 
@@ -705,9 +710,9 @@ import java.util.ArrayList;
        }
        
        //Test if game is being searched, in which case break this loop
-       while(checkPoint(PixelOffset.PlayButton_SearchingForGame_Approx, 8)) {
+       while(checkPoint(window, PixelOffset.PlayButton_SearchingForGame_Approx)) {
          sleep(500L);
-         if(checkPoint(PixelOffset.TeamBuilder_MatchFound, 2) && checkPoint(PixelOffset.TeamBuilder_MatchFound2, 2)) {
+         if(checkPoint(window, PixelOffset.TeamBuilder_MatchFound, PixelOffset.TeamBuilder_MatchFound2) == 2) {
            System.out.println("Match found!");
            return true;
          }
@@ -726,7 +731,7 @@ import java.util.ArrayList;
      if(!settings.getBoolean(Setnames.INVITE_ENABLED.name, (boolean)Setnames.INVITE_ENABLED.default_val)) {
        System.out.println("Invite lobby automation disabled, waiting.");
        gui.setTitle("Automation disabled (Invite)");
-       while(checkPoint(PixelOffset.InviteChat, 1) && checkPoint(PixelOffset.InviteStart, 8)) {
+       while(checkPoint(window, PixelOffset.InviteChat, PixelOffset.InviteStart) == 2) {
          sleep(1000L);
        }
        return;
@@ -753,7 +758,7 @@ import java.util.ArrayList;
      //Calculate the region where to search the player list
      Rect player_list = ImageFrame.Invite_InvitedPlayerList.rect(window);
      
-     while(checkPoint(PixelOffset.InviteChat, 1) && checkPoint(PixelOffset.InviteStart, 8)) {
+     while(checkPoint(window, PixelOffset.InviteChat, PixelOffset.InviteStart)==2) {
 
        
        //System.out.println("Taking screenshot from window.");
@@ -840,62 +845,4 @@ import java.util.ArrayList;
        System.err.println("Can't click because no window is available for clicking :("); 
      }
    }
-   private boolean checkPoint(PixelOffset point) {
-     if(point.color==null)
-       return false;
-     try {
-       Rect rect = window.getRect();
-       return point.color.equals(window.getColor((int)(rect.width * point.x), (int)(rect.height * point.y)));
-     }
-     catch(APIException e) {
-       System.err.println("Can't click because no window is available for clicking :("); 
-       return false;
-     }
-   }
-   private boolean checkPoint(PixelOffset point, int tolerance) {
-     return checkPoint(point, tolerance, null);
-   }
-   private boolean checkPoint(PixelOffset point, int tolerance, String debug) {
-     return WindowTools.checkPoint(window, point, tolerance);
-     /*if(point.color==null)
-       return false;
-     try {
-       Rect rect = window.getRect();
-       Color a = window.getColor((int)(rect.width * point.x), (int)(rect.height * point.y));
-       Color b = point.color;
-       if(debug!=null) {
-         System.out.println("DEBUG#"+debug+" checkPoint("+point.toSource()+"), "+tolerance+")");
-         System.out.println("   Comparing to: "+a);
-         System.out.println("    R: "+Math.abs(a.getRed() - b.getRed())+" => "+(Math.abs(a.getRed() - b.getRed()) < tolerance));
-         System.out.println("    G: "+Math.abs(a.getGreen() - b.getGreen())+" => "+(Math.abs(a.getGreen() - b.getGreen()) < tolerance));
-         System.out.println("    B: "+Math.abs(a.getBlue() - b.getBlue())+" => "+(Math.abs(a.getBlue() - b.getBlue()) < tolerance));
-       }
-       return (Math.abs(a.getRed() -   b.getRed())   < tolerance) &&
-              (Math.abs(a.getGreen() - b.getGreen()) < tolerance) &&
-              (Math.abs(a.getBlue() -  b.getBlue())  < tolerance);
-     }
-     catch(APIException e) {
-       System.err.println("Can't click because no window is available for clicking :("); 
-       return false;
-     }*/
-   }
-   private boolean checkPoint(ColorPixel point, int tolerance) {
-     if(point.color==null)
-       return false;
-     try {
-       Rect rect = window.getRect();
-       Color a = window.getColor((int)(rect.width * point.x), (int)(rect.height * point.y));
-       Color b = point.color;
-
-       return (Math.abs(a.getRed() -   b.getRed())   < tolerance) &&
-              (Math.abs(a.getGreen() - b.getGreen()) < tolerance) &&
-              (Math.abs(a.getBlue() -  b.getBlue())  < tolerance);
-     }
-     catch(APIException e) {
-       System.err.println("Can't click because no window is available for clicking :("); 
-       return false;
-     }
-   }
-
-   
  }
