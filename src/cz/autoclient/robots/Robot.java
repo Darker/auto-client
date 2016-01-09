@@ -241,7 +241,7 @@ public abstract class Robot implements Runnable {
   
   /**
    * Indicate whether this thread can run. Override {@link #canRunEx()} instead of this method. This method catches any errors
-   * that occur within canRunEx and also
+   * that occur within canRunEx and also - 1 year later I don't really know how to finish this sentence
    * @return
    */
   public final boolean canRun() {
