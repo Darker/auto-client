@@ -416,12 +416,12 @@ public class Settings implements java.io.Serializable {
     assignEncryptorToAllEncryptedSettings();
     
     OutputStream file = new FileOutputStream(path);
-    OutputStream buffer = new BufferedOutputStream(file);
-    ObjectOutput output = new ObjectOutputStream(buffer);
-    System.out.println("Saving settings HashMap - "+settings.size()+" fields.");
-    output.writeObject(settings);
-    
-    buffer.close();
+    ObjectOutput output;
+    try (OutputStream buffer = new BufferedOutputStream(file)) {
+      output = new ObjectOutputStream(buffer);
+      System.out.println("Saving settings HashMap - "+settings.size()+" fields.");
+      output.writeObject(settings);
+    }
     output.close();
   }
   public void saveToFile(String path) throws IOException {
