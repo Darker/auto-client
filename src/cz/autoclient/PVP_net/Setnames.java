@@ -46,6 +46,7 @@ public enum Setnames {
   NOTIF_MENU_TB_PLAYER_JOINED(false),
   
   NOTIF_MENU_BLIND_IN_LOBBY(false),
+  NOTIF_MENU_UPDATE_EXISTS(true),
 
   AM_SAY(),
   AUTO_QUEUE_ENABLED(false),
@@ -56,7 +57,13 @@ public enum Setnames {
   ENCRYPTION_PW(null),
   ENCRYPTION_USE_HWID(true),
   //Automation settings
-  PREVENT_CLIENT_MINIMIZE(false)
+  PREVENT_CLIENT_MINIMIZE(false),
+  
+  START_AS_ADMIN(false),
+  
+  UPDATES_AUTOCHECK(false),
+  UPDATES_AUTODOWNLOAD(false)
+  
   
   
   //PA names
