@@ -1,0 +1,64 @@
+==UPDATE INSTALLER FOR UPDATE .==
+This script will copy new jar file and remove old one. It shouldn't
+take more than 3 seconds.
+If something goes wrong with the update, you will find your old version
+in /update/backup folder. It is also possible to restore old versions 
+from update manager if you don't like the new version.
+
+The /update directory is free for you to delete or modify. Deleting it
+should not cause any problems. The /update/backup folder will be automatically
+deleted 7 days after you're using the new version.
+
+Update info:
+  Jar file: .\x.jar
+____________________________________________
+
+Backing up old jar file:
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>xcopy ".\x.jar" ".\target\backup\" /Q /Y 
+Zkop¡rovan‚ soubory: 1
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>rem echo off>NUL 
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>rem echo. 
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>rem echo Deleting old version of the jar file at .\x.jar 
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>rem echo  this might take a while - waiting until application isn't running. 
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>rem :delete_start 
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>rem echo on>NUL 
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>rem erase ".\x.jar" 
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>rem if exist ".\x.jar" ( 
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>rem     echo ... auto client is still running, waiting... 
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>rem     rem timeout /T 1 /nobreak>NUL 
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>rem     goto delete_start 
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>rem ) else ( 
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>rem     echo Done, time to install new version 
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>rem     goto install_update 
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>rem ) 
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>rem first make an empty file 
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>rem echo test >.\x.jar 
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>xcopy ".\target\x.jar" ".\x.jar" /Q /Y 
+Zkop¡rovan‚ soubory: 1
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>echo Copy result: 0 
+Copy result: 0
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>rem xcopy .\target\* . /Q  
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>pause
+PokraŸujte stisknut¡m libovoln‚ kl vesy... 

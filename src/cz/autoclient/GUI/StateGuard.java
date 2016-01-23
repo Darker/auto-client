@@ -82,7 +82,7 @@ public class StateGuard extends Pauseable {
   private void pvp_net_changed(boolean newState) {
     pvp_net_running = newState;
     //System.out.println("New state: "+newState);
-    gui.displayClientAvailable(newState);
+    gui.displayClientAvailableAsync(newState);
     if(newState) {
       
     }

@@ -74,15 +74,15 @@ public class WindowTools {
      }
    }
    public static int checkPoint(Window window, ComparablePixel... points) throws APIException {
-     return checkPoint(window.screenshot());
+     return checkPoint(window.screenshot(), points);
    }
    public static int checkPoint(BufferedImage img, ComparablePixel... points) throws APIException {
      int matches = 0;
      for(ComparablePixel point:points) {
        if(checkPoint(img, point))
          matches++;
-       else 
-         System.out.println("Point "+point+" failed.");
+       //else 
+       //  System.out.println("Point "+point+" failed.");
      }
      return matches;
    }
@@ -151,9 +151,7 @@ public class WindowTools {
    public static void drawCheckPoint(BufferedImage img, ComparablePixel p, int tolerance) throws APIException {
      Rect preal = p.toRect(img.getWidth(), img.getHeight());
      boolean result = checkPoint(img, p, tolerance);
-     if(result) {
-       System.out.println("Point "+p+" succeeded.");
-     }
+
      DebugDrawing.drawPoint(
         img, 
         preal.left, 

@@ -207,7 +207,7 @@ public class DebugDrawing {
    public static void displayImage(Image image, String title) throws InterruptedException {
      displayImage(image, title, true);
    }
-   static BufferedImage cloneImage(BufferedImage bi) {
+   public static BufferedImage cloneImage(BufferedImage bi) {
      ColorModel cm = bi.getColorModel();
      boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
      WritableRaster raster = bi.copyData(null);

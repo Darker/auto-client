@@ -12,6 +12,7 @@ import cz.autoclient.GUI.passive_automation.PAConfigWindow;
 import cz.autoclient.GUI.passive_automation.PAMenu;
 import cz.autoclient.GUI.summoner_spells.ButtonSummonerSpellMaster;
 import cz.autoclient.GUI.tabs.MultiFieldDef;
+import cz.autoclient.GUI.updates.UpdateMenuItem;
 import cz.autoclient.Main;
 import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.Setnames;
@@ -32,6 +33,10 @@ import cz.autoclient.robots.exceptions.NoSuchRobotException;
 import cz.autoclient.settings.SettingsInputVerifier;
 import cz.autoclient.settings.SettingsValueChanger;
 import cz.autoclient.settings.secure.EncryptedSetting;
+import cz.autoclient.updates.Progress;
+import cz.autoclient.updates.UpdateInfo;
+import cz.autoclient.updates.UpdateInfoListener;
+import cz.autoclient.updates.Updater;
 import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Component;
@@ -55,7 +60,6 @@ import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.ParallelGroup;
 import javax.swing.GroupLayout.SequentialGroup;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
@@ -93,7 +97,7 @@ import javax.swing.SwingUtilities;
    private JCheckBoxMenuItem menu_tray_enabled;
    private JCheckBoxMenuItem menu_tray_minimize;
    
-   
+   UpdateMenuItem updateMenuItem;
    
    //TRAY ICON STUFF
    private TrayIcon tray_icon;
@@ -109,6 +113,7 @@ import javax.swing.SwingUtilities;
     */
    private boolean anoyance_disabled = false;
    private ConfigurationManager champ_config;
+   private Updater updater;
    
    
    public String[] getSelectedMode()
@@ -127,7 +132,6 @@ import javax.swing.SwingUtilities;
      
      inst = this;
      
-     
      //The tray is final so it must be initialised in constructor
      if(SystemTray.isSupported())
        tray = SystemTray.getSystemTray();
@@ -135,44 +139,35 @@ import javax.swing.SwingUtilities;
        tray = null;
      
      robots = new RobotManager(1200);
+         // Create menu and stuff
      initMenu();
      initComponents();
-     
-     
+     //There is many factors that determine whether the icon will be shown
+     // it must be both supported and enabled
+     displayTrayEnabled();
      final Thread finalize = new Thread("Starting GUI threads") {
        @Override
        public void run() {
          setIconImage(getIcon().getImage());
-         //There is many factors that determine whether the icon will be shown
-         // it must be both supported and enabled
-         displayTrayEnabled();
-         
+
+         // Display settings:
+         settings.displaySettingsOnBoundFields();
+         // Start guarding
          guard = new StateGuard(Gui.this.ac, Gui.this);
+         guard.start();
+         // Create robot menu
+         initRobotMenu();
          //Start passive automation
          robots.start();
        }
      };
-     //After creating the GUI, render the settings
-     SwingUtilities.invokeLater(new Runnable()
-     {
-       @Override
-       public void run()
-       {
-        //Finish other gui crap
-        finalize.start();
-        //Display settings:
-        settings.displaySettingsOnBoundFields();
-
-       }
-     });
      //notification(Notification.Def.TB_GAME_CAN_START);
      this.addWindowListener(new WindowAdapter()
      {
         @Override
         public void windowOpened(WindowEvent event)
         {
-          System.out.println("Window opened, starting GUI guard.");
-          guard.start();
+          System.out.println("Window opened.");
         }
         @Override
         public void windowClosing(WindowEvent event)
@@ -200,7 +195,7 @@ import javax.swing.SwingUtilities;
           }
         }
      });
-
+     finalize.start();
      setSize(500, 300);
    }
    //
@@ -240,18 +235,31 @@ import javax.swing.SwingUtilities;
    }
    
    public void displayClientAvailable(boolean available) {
-    buttonStartStop.setEnabled(available);
-    pvp_net_window = available;
-    if(available) {
-      buttonStartStop.setToolTipText(Text.TOGGLE_BUTTON_TITLE_ENABLED.text);
-      displayDllStatus(dll_loaded);
-    }
-    else {
-      buttonStartStop.setToolTipText(Text.TOGGLE_BUTTON_TITLE_DISABLED.text);
-      menu_dll_additions.setEnabled(false);
-    } 
+     if(!SwingUtilities.isEventDispatchThread()) {
+       new Exception("Error: GUI operation outside EDT!").printStackTrace();
+       displayClientAvailableAsync(available);
+       return;
+     }
+     buttonStartStop.setEnabled(available);
+     pvp_net_window = available;
+     if(available) {
+       buttonStartStop.setToolTipText(Text.TOGGLE_BUTTON_TITLE_ENABLED.text);
+       displayDllStatus(dll_loaded);
+     }
+     else {
+       buttonStartStop.setToolTipText(Text.TOGGLE_BUTTON_TITLE_DISABLED.text);
+       menu_dll_additions.setEnabled(false);
+     } 
+   }
+   public void displayClientAvailableAsync(final boolean available) {
+     SwingUtilities.invokeLater(() -> Gui.this.displayClientAvailable(available));
    }
    public void displayTrayEnabled(boolean enabled, boolean minimize, boolean do_not_change_state) {
+     if(!SwingUtilities.isEventDispatchThread()) {
+       new Exception("Error: GUI operation outside EDT!").printStackTrace();
+       displayTrayEnabledAsync(enabled, minimize, do_not_change_state);
+       return;
+     }
      if(tray==null || !SystemTray.isSupported()) {
        enabled = minimize = false;
      }
@@ -264,8 +272,11 @@ import javax.swing.SwingUtilities;
        showTrayIcon(true);
      }
      else {
-       showTrayIcon(false);;
+       showTrayIcon(false);
      }
+   }
+   public void displayTrayEnabledAsync(final boolean enabled, final boolean minimize, final boolean do_not_change_state) {
+     SwingUtilities.invokeLater(() -> displayTrayEnabled(enabled, minimize, do_not_change_state));
    }
    public void displayTrayEnabled(boolean enabled, boolean minimize) {
      displayTrayEnabled(enabled, minimize, false);
@@ -307,10 +318,6 @@ import javax.swing.SwingUtilities;
        }
      }
    }
-
-   
-
- 
    
    public JToggleButton getToggleButton1()
    {
@@ -458,10 +465,45 @@ import javax.swing.SwingUtilities;
        checkBox.setToolTipText("If you accidentally minimize PVP.net window when robot is running it will be restored on background.");
        settings.bindToInput(Setnames.PREVENT_CLIENT_MINIMIZE.name, checkBox, true);
        menuTools.add(checkBox); 
-         
+
        //Update dll aditions status
        displayDllStatus(false);
-       //======== menu2 ========
+       //======== Updates ========
+       {
+         JMenu menu = new JMenu();
+         menu.setText("Updates");
+         
+         checkBox = new JCheckBoxMenuItem("Auto-check for updates");
+         checkBox.setToolTipText("Automatically check for updates over the internet.");
+         settings.bindToInput(Setnames.UPDATES_AUTOCHECK.name, checkBox, true);
+         menu.add(checkBox);
+         
+         checkBox = new JCheckBoxMenuItem("Auto-download");
+         checkBox.setToolTipText("Downloads update if it's found.");
+         settings.bindToInput(Setnames.UPDATES_AUTODOWNLOAD.name, checkBox, true);
+         menu.add(checkBox);
+         
+         updateMenuItem = new UpdateMenuItem();
+         updateMenuItem.setUnknown(Main.VERSION);
+ 
+         updateMenuItem.setText("Initializing.");
+         
+         updateMenuItem.setFocusable(false);
+         updateMenuItem.setFocusPainted(false);
+         updateMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+              System.out.println("Update clicked!");
+              updater.takeNextAction();
+              return;
+              //ToolAction();
+            }
+         });
+         
+         menu.add(updateMenuItem);
+         menuTools.add(menu);
+       }
+       //======== Debug ========
        {
          JMenu menu = new JMenu();
          menu.setText("Debug");
@@ -528,7 +570,7 @@ import javax.swing.SwingUtilities;
        
      }
      menuBar1.add(menuTools);
-     //======== menu2 ========
+     //======== Display========
      {
        menuDisplay = new JMenu();
        menuDisplay.setText("Display");
@@ -589,204 +631,13 @@ import javax.swing.SwingUtilities;
      {
         menuAutomation = new JMenu();
         menuAutomation.setText("Passive Automation");
-        JMenuItem disableAll = new JMenuItem("Disable all");
-        
-        //======== Auto Launch ========
-        {
-          try {
-            PAMenu auto_launch = new PAMenu(ac.findRobot(LaunchBot.class), settings, "Auto launch");
-            auto_launch.setRobots(robots);
-            auto_launch.setAboutLink("https://github.com/Darker/auto-client/wiki/Passive-automation#auto-launch");
-            auto_launch.root.setToolTipText("Automatically press launch in patcher.");
-            menuAutomation.add(auto_launch.root);
-          }
-          catch(NoSuchRobotException e) {}
-        }
-        
-        //======== Auto queue ========
-        {
-          AutoQueueBot rur = new AutoQueueBot(settings);
-          rur.requeued = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-              ToolAction();
-            }
-          };
-          PAMenu auto_queue = new PAMenu(rur, settings, "Auto queue");
-          
-          //Set up setting window
-          PAConfigWindow setwin = auto_queue.createConfigWindow(this);
-         
-          FieldDef field = new FieldDef(
-              "Say after game:",
-              "Optionally, bot can say something when the game is over.",
-              "SAY_AFTER");
-          field.addField(new JTextField());
-          setwin.addLine(field);
-          
-          auto_queue.setRobots(robots);
-          auto_queue.setAboutLink("https://github.com/Darker/auto-client/wiki/Passive-automation#auto-queue");
-          auto_queue.root.setToolTipText("Requeue when the game is over.");
- 
-          //menu.add(auto_login.root);
-          menuAutomation.add(auto_queue.root);
-        }
-        //======== Auto login ========
-        {
-          AutoLoginBot rur = new AutoLoginBot(settings);
+        menuAutomation.setEnabled(false);
+        menuAutomation.setToolTipText("Loading...");
 
-          PAMenu auto_login = new PAMenu(rur, settings, "Auto login");
-          
-          //Set up setting window
-          PAConfigWindow setwin = auto_login.createConfigWindow(this);
-         
-          FieldDef field = new FieldDef(
-              "Password:",
-              "Password to enter.",
-              null);
-          final JPasswordField pw = new JPasswordField();
-          if(settings.exists(Setnames.REMEMBER_PASSWORD.name, EncryptedSetting.class)) {
-            if(settings.getSetting(Setnames.REMEMBER_PASSWORD.name, EncryptedSetting.class).doesHaveValue())
-              pw.setText("****");
-            else
-              pw.setText("");
-             /*try {
-               settings.getEncrypted(Setnames.REMEMBER_PASSWORD.name);
-               pw.setText("****");
-               //System.out.println("PW: "+settings.getEncrypted(Setnames.REMEMBER_PASSWORD.name));
-               //System.out.println("PW: "+((EncryptedSetting)settings.getSetting(Setnames.REMEMBER_PASSWORD.name)).getEncryptedValue().toString());
-             }
-             catch(InvalidPasswordException e) {
-               new Thread() {
-                 @Override
-                 public void run() {
-                   JOptionPane.showMessageDialog(Gui.this, "Your saved password could not be decrypted. It will be deleted now.", "Error",JOptionPane.ERROR_MESSAGE);
-                 }
-               }.start();
-               settings.setSetting(Setnames.REMEMBER_PASSWORD.name, null);
-               pw.setText("");
-             }*/
-             //settings.getEncrypted(Setnames.REMEMBER_PASSWORD.name) instanceof String)
-          }
-          
-          //PasswordFieldVerifier ver = new PasswordFieldVerifier();
-          //settings.bindToInputSecure(Setnames.REMEMBER_PASSWORD.name, pw, ver);
-          /*Timer ble = new Timer(true);
-          ble.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-              ver.value(pw);
-            }
-          }, 5000, 2000);*/
-          
-          field.addField(pw);
-          setwin.addLine(field);
-          field = new FieldDef(
-              "Save password: ",
-              "Click button to encrypt and save the password.",
-              null);
-          JButton button = new JButton("Save");
-          button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-              String PW = new String(pw.getPassword());
-              /*String check = (String)JOptionPane.showInputDialog(
-                    null,
-                    "Enter password again:\n",
-                    "Confirm password",
-                    JOptionPane.PLAIN_MESSAGE,
-                    null,
-                    null,
-                    "");*/
-              boolean state = true; //PW.equals(check);
-              if(!state) {
-                JOptionPane.showMessageDialog(Gui.this, "Passwords didn't match.");
-                pw.setText("");
-              }
-              else {
-                pw.setText("****");
-                settings.setEncrypted(Setnames.REMEMBER_PASSWORD.name, PW);
-                //System.out.println("DECRYPTED: "+settings.getEncrypted(Setnames.REMEMBER_PASSWORD.name));
-                new Thread() {
-                  @Override
-                  public void run() {
-                    JOptionPane.showMessageDialog(Gui.this, "Password saved and encrypted.", "Password saved",JOptionPane.INFORMATION_MESSAGE);
-                  }
-                }.start();
-              }
-            }
-          });
-          field.addField(button);
-          setwin.addLine(field);
-          /*field = new FieldDef(
-              "Master password:",
-              "Password to protect your game password.",
-              null);
-          final JPasswordField pw2 = new JPasswordField();*/
-          /*settings.bindToInputSecure(Setnames.REMEMBER_PASSWORD.name, pw2, new PasswordFieldVerifier() {
-            @Override
-            public Object value(JComponent c) {
-              String v = (String)super.value(c);
-              settings.getEncryptor().setPassword(v);
-              return v;
-            }
-          });*/
-          
-          /*field.addField(pw2);
-          setwin.addLine(field);*/
-          
-          /*field = new FieldDef(
-              "Use master password:",
-              "Prompts for master password to protect your password.",
-              Setnames.ENCRYPTION_USE_PW.name);
-          final JCheckBox use_pw = new JCheckBox();
-          ActionListener updateUsePW = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-              SecureSettings encr = settings.getEncryptor();
-              boolean value = use_pw.isSelected();
-              encr.setUse_password(value);
-              pw2.setEnabled(value);
-            }
-          };
-          use_pw.addActionListener(updateUsePW);
-          //Set inital values
-          boolean value = settings.getBoolean(setwin.settingName(Setnames.ENCRYPTION_USE_PW.name), false);
-          settings.getEncryptor().setUse_password(value);
-          pw2.setEnabled(value);*/
-          
-          //field.addField(use_pw);
-          //setwin.addLine(field);
-          
-          
-          /*field = new FieldDef(
-              "Encrypt with hardware ID:",
-              "Will use unique key of this computer to encrypt the password.",
-              Setnames.ENCRYPTION_USE_HWID.name);
-          final JCheckBox use_hwid = new JCheckBox();
-          ActionListener updateUseHWID = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-              //settings.getEncryptor().setUse_hwid(use_hwid.isSelected());
-            }
-          };
-          use_hwid.addActionListener(updateUseHWID);
-          //settings.getEncryptor().setUse_hwid(settings.getBoolean(Setnames.ENCRYPTION_USE_HWID.name, true));
-          field.addField(use_hwid);
-          setwin.addLine(field);*/
-          
-          setwin.setSize(333, 130);
-          
-          auto_login.setRobots(robots);
-          auto_login.setAboutLink("https://github.com/Darker/auto-client/wiki/Passive-automation#auto-login");
-          auto_login.root.setToolTipText("Login automatically.");
- 
-          //menu.add(auto_login.root);
-          menuAutomation.add(auto_login.root);
-        }
         //A menuAutomation item with link to help
         {
-          menuAutomation.add(new URLMenuItem("What's this?", "Link to help page on github", "https://github.com/Darker/auto-client/wiki/Passive-automation"));          
+          //System.out.println(ImageResources.PA_BOT_ENABLED.path);
+          menuAutomation.add(new URLMenuItem("What's this?", "Link to help page on github", "https://github.com/Darker/auto-client/wiki/Passive-automation", ImageResources.HELP));          
         }
         menuBar1.add(menuAutomation);
       }
@@ -806,6 +657,12 @@ import javax.swing.SwingUtilities;
           }
       });
       menuBar1.add(buttonStartStop);
+      System.out.println("Menu created!");
+    }
+
+   public void setUpdateManager(final Updater updater) {
+     updater.setUpdateListener(new UpdateVisual(this, updateMenuItem, updater));
+     this.updater = updater;
     }
     protected class PasswordFieldVerifier extends SettingsInputVerifier implements SettingsValueChanger {
       private String password;
@@ -846,6 +703,182 @@ import javax.swing.SwingUtilities;
         return verify(input);
       }
 
+    }
+    // This is expected to be called from another thread
+    private void initRobotMenu() {
+      GUIAppendList list = new GUIAppendList();
+      //======== Auto Launch ========
+      {
+        try {
+          PAMenu auto_launch = new PAMenu(ac.findRobot(LaunchBot.class), settings, "Auto launch");
+          auto_launch.setRobots(robots);
+          auto_launch.setAboutLink("https://github.com/Darker/auto-client/wiki/Passive-automation#auto-launch");
+          auto_launch.root.setToolTipText("Automatically press launch in patcher.");
+          list.addAt(menuAutomation, auto_launch.root, 0);
+        }
+        catch(NoSuchRobotException e) {}
+      }
+
+      //======== Auto queue ========
+      {
+        AutoQueueBot rur = new AutoQueueBot(settings);
+        rur.requeued = new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            ToolAction();
+          }
+        };
+        PAMenu auto_queue = new PAMenu(rur, settings, "Auto queue");
+
+        //Set up setting window
+        PAConfigWindow setwin = auto_queue.createConfigWindow(this);
+
+        FieldDef field = new FieldDef(
+            "Say after game:",
+            "Optionally, bot can say something when the game is over.",
+            "SAY_AFTER");
+        field.addField(new JTextField());
+        setwin.addLine(field);
+
+        auto_queue.setRobots(robots);
+        auto_queue.setAboutLink("https://github.com/Darker/auto-client/wiki/Passive-automation#auto-queue");
+        auto_queue.root.setToolTipText("Requeue when the game is over.");
+
+        list.addAt(menuAutomation, auto_queue.root, 0);
+      }
+      //======== Auto login ========
+      {
+        AutoLoginBot rur = new AutoLoginBot(settings);
+
+        PAMenu auto_login = new PAMenu(rur, settings, "Auto login");
+
+        //Set up setting window
+        PAConfigWindow setwin = auto_login.createConfigWindow(this);
+
+        FieldDef field = new FieldDef(
+            "Password:",
+            "Password to enter.",
+            null);
+        final JPasswordField pw = new JPasswordField();
+        if(settings.exists(Setnames.REMEMBER_PASSWORD.name, EncryptedSetting.class)) {
+          if(settings.getSetting(Setnames.REMEMBER_PASSWORD.name, EncryptedSetting.class).doesHaveValue())
+            pw.setText("****");
+          else
+            pw.setText("");
+        }
+
+        field.addField(pw);
+        setwin.addLine(field);
+        field = new FieldDef(
+            "Save password: ",
+            "Click button to encrypt and save the password.",
+            null);
+        JButton button = new JButton("Save");
+        button.addActionListener(new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            String PW = new String(pw.getPassword());
+            /*String check = (String)JOptionPane.showInputDialog(
+                  null,
+                  "Enter password again:\n",
+                  "Confirm password",
+                  JOptionPane.PLAIN_MESSAGE,
+                  null,
+                  null,
+                  "");*/
+            boolean state = true; //PW.equals(check);
+            if(!state) {
+              JOptionPane.showMessageDialog(Gui.this, "Passwords didn't match.");
+              pw.setText("");
+            }
+            else {
+              pw.setText("****");
+              settings.setEncrypted(Setnames.REMEMBER_PASSWORD.name, PW);
+              //System.out.println("DECRYPTED: "+settings.getEncrypted(Setnames.REMEMBER_PASSWORD.name));
+              new Thread() {
+                @Override
+                public void run() {
+                  JOptionPane.showMessageDialog(Gui.this, "Password saved and encrypted.", "Password saved",JOptionPane.INFORMATION_MESSAGE);
+                }
+              }.start();
+            }
+          }
+        });
+        field.addField(button);
+        setwin.addLine(field);
+        /*field = new FieldDef(
+            "Master password:",
+            "Password to protect your game password.",
+            null);
+        final JPasswordField pw2 = new JPasswordField();*/
+        /*settings.bindToInputSecure(Setnames.REMEMBER_PASSWORD.name, pw2, new PasswordFieldVerifier() {
+          @Override
+          public Object value(JComponent c) {
+            String v = (String)super.value(c);
+            settings.getEncryptor().setPassword(v);
+            return v;
+          }
+        });*/
+
+        /*field.addField(pw2);
+        setwin.addLine(field);*/
+
+        /*field = new FieldDef(
+            "Use master password:",
+            "Prompts for master password to protect your password.",
+            Setnames.ENCRYPTION_USE_PW.name);
+        final JCheckBox use_pw = new JCheckBox();
+        ActionListener updateUsePW = new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            SecureSettings encr = settings.getEncryptor();
+            boolean value = use_pw.isSelected();
+            encr.setUse_password(value);
+            pw2.setEnabled(value);
+          }
+        };
+        use_pw.addActionListener(updateUsePW);
+        //Set inital values
+        boolean value = settings.getBoolean(setwin.settingName(Setnames.ENCRYPTION_USE_PW.name), false);
+        settings.getEncryptor().setUse_password(value);
+        pw2.setEnabled(value);*/
+
+        //field.addField(use_pw);
+        //setwin.addLine(field);
+
+
+        /*field = new FieldDef(
+            "Encrypt with hardware ID:",
+            "Will use unique key of this computer to encrypt the password.",
+            Setnames.ENCRYPTION_USE_HWID.name);
+        final JCheckBox use_hwid = new JCheckBox();
+        ActionListener updateUseHWID = new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            //settings.getEncryptor().setUse_hwid(use_hwid.isSelected());
+          }
+        };
+        use_hwid.addActionListener(updateUseHWID);
+        //settings.getEncryptor().setUse_hwid(settings.getBoolean(Setnames.ENCRYPTION_USE_HWID.name, true));
+        field.addField(use_hwid);
+        setwin.addLine(field);*/
+
+        setwin.setSize(333, 130);
+
+        auto_login.setRobots(robots);
+        auto_login.setAboutLink("https://github.com/Darker/auto-client/wiki/Passive-automation#auto-login");
+        auto_login.root.setToolTipText("Login automatically.");
+
+        list.addAt(menuAutomation, auto_login.root, 0);
+      }
+      list.after(new Runnable() {
+        @Override
+        public void run() {
+          Gui.this.menuAutomation.setEnabled(true);
+          Gui.this.menuAutomation.setToolTipText("Tools running in background.");
+        }
+      });
+      list.create();
     }
     private void initComponents() {
         //======== this ========
@@ -907,6 +940,7 @@ import javax.swing.SwingUtilities;
         field.attachToSettings(settings);
         win.addLine(field);
         
+        System.out.println("Creating summoner spells.");
         multifield = new MultiFieldDef("Summoner spells:");
         ButtonSummonerSpellMaster spell1 = new ButtonSummonerSpellMaster(null, settings);
         ButtonSummonerSpellMaster spell2 = new ButtonSummonerSpellMaster(null, settings); 
@@ -914,6 +948,7 @@ import javax.swing.SwingUtilities;
         multifield.addField(spell1, settings, Setnames.BLIND_SUMMONER1);
         multifield.addField(spell2, settings, Setnames.BLIND_SUMMONER2);
         win.addLine(multifield);
+        System.out.println("Creating summoner Masteries.");
         
         field = new FieldDef("Mastery page (0=ignore):", "Index of mastery page to be selected:", Setnames.BLIND_MASTERY.name);
         JSpinner masteries = new JSpinner();
@@ -961,7 +996,8 @@ import javax.swing.SwingUtilities;
         win.addLine(field);
 
         pane.add(win.container);
-        win.close();        
+        win.close();   
+        System.out.println("Inner window created.");
    }
    protected void initChampField(final JComboBox field) {
      SwingUtilities.invokeLater(new Runnable()
@@ -1055,7 +1091,8 @@ import javax.swing.SwingUtilities;
     
     //Dialogs
     public void dialogErrorAsync(String message, String title) {
-        new Thread("AsyncErrorDialog") {
+      Dialogs.dialogErrorAsync(message, title, this);
+        /*new Thread("AsyncErrorDialog") {
           @Override
           public void run() {
             JOptionPane.showMessageDialog(
@@ -1065,13 +1102,13 @@ import javax.swing.SwingUtilities;
                 JOptionPane.ERROR_MESSAGE
             );
           }
-        }.start();
+        }.start();*/
     }
     public void dialogErrorAsync(String message) {
       dialogErrorAsync(message, "Error");
     }
     
-    private void tryRestartAsAdmin(final boolean force) {
+    public void tryRestartAsAdmin(final boolean force) {
       try {
         Gui.this.ac.RestartWithAdminRightsAsync(force);
       }
@@ -1082,9 +1119,10 @@ import javax.swing.SwingUtilities;
         dialogErrorAsync("Cannot read or use the helper VBS file.\n    "+ex);
       } 
     }
-    private void tryRestartAsAdmin() {
+    public void tryRestartAsAdmin() {
       tryRestartAsAdmin(false);
     }
+  
     private final Object dialogElevateMutex = new Object();
     private boolean elevateDialogIgnore = false;
     public void dialogElevateAsync() {
@@ -1098,7 +1136,7 @@ import javax.swing.SwingUtilities;
             int n = JOptionPane.showOptionDialog(Gui.this,
                 "It has been noticed that this program cannot "
                     + "send windows messages to the PVP.net Client. Most often "
-                    + "this happens, \n because PVP.net Client is ran under administrator account.\n\n"
+                    + "this happens,\n because PVP.net Client is ran under administrator account.\n\n"
                     + "It is recommended that you run PVP.net Client under normal account. If "
                     + "you need to run it under administrator account,\n you will have "
                     + "to elevate this application. Read more in FAQ.",

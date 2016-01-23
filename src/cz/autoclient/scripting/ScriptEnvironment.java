@@ -53,6 +53,14 @@ public class ScriptEnvironment {
       }
     }
   }
+  /**
+   * Retrieves a variable by given type. Returns null if the value of that type isn't
+   * available.
+   * @param <T>
+   * @param name variable name
+   * @param type class, for example Object.class
+   * @return null or object of type T
+   */
   public <T> T get(String name, Class<T> type) {
     Object tmp = variables.get(name);
     if(type.isInstance(tmp)) {

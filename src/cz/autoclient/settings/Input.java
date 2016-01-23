@@ -16,6 +16,7 @@ public interface Input {
   /** Retrieve the field associated with this abstract input.
    * @return JComponent field. Use `instanceof` to check for type.
    */
+  @Deprecated
   public JComponent getField();
   /**
    * Will put the best possible representation of the value in the input.

@@ -1,5 +1,8 @@
 package cz.autoclient;
 
+import cz.autoclient.updates.Updater;
+import cz.autoclient.GUI.Dialogs;
+import cz.autoclient.main_automation.Automat;
 import cz.autoclient.GUI.Gui;
 import cz.autoclient.GUI.summoner_spells.ButtonSummonerSpellMaster;
 import cz.autoclient.GUI.summoner_spells.InputSummonerSpell;
@@ -9,8 +12,10 @@ import cz.autoclient.robots.exceptions.NoSuchRobotException;
 import cz.autoclient.settings.InputHandlers;
 import cz.autoclient.settings.Settings;
 import cz.autoclient.settings.input_handlers.*;
+import cz.autoclient.settings.secure.PasswordFailedException;
 import cz.autoclient.settings.secure.SecureSettings;
 import cz.autoclient.settings.secure.UniqueID;
+import cz.autoclient.updates.VersionId;
 import java.awt.Frame;
 import java.beans.Expression;
 import java.io.File;
@@ -23,6 +28,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
@@ -42,6 +49,7 @@ import sirius.constants.IWMConsts;
  {
    //Some application constants
    public static final String SETTINGS_FILE = "data/settings.bin";
+   public static final VersionId VERSION = new VersionId("3.2 Beta");
    public static final File BACKUP_DIR = new File("data/backup/");
    public static boolean debug = true;
    
@@ -49,6 +57,9 @@ import sirius.constants.IWMConsts;
    public Gui gui;
    
    public Settings settings;
+   public Updater updater;
+   
+   public final String[] runAsAdminPaths = new String[]{"run-as-admin.vbs", "release_aditional_files/run-as-admin.vbs", "admin.vbs"};
    
    public final ArrayList<Robot> robots = new ArrayList<>();
    
@@ -56,6 +67,7 @@ import sirius.constants.IWMConsts;
    
    public Main()
    {
+     //updater = new Updater("Darker/auto-client", VERSION, new File("./updates/"));
      //Normal program
      startGUI();
    }
@@ -148,32 +160,46 @@ import sirius.constants.IWMConsts;
          
        }
      }
+     SwingUtilities.invokeLater(new Runnable()
+     {
+       @Override
+       public void run()
+       {
+         gui = new Gui(Main.this, settings);
+         gui.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+         gui.setVisible(true);
+         gui.setUpdateManager(updater);
+         if(settings.getBoolean(Setnames.UPDATES_AUTOCHECK.name, (Boolean)Setnames.UPDATES_AUTOCHECK.default_val))
+           updater.checkForUpdates();
+       }
+     });
+     // If the application is configured to allways start as admin it will restart now
+     // It's slow but it works without creating some other kind of settings
+     if(settings.getBoolean(Setnames.START_AS_ADMIN.name, (boolean)Setnames.START_AS_ADMIN.default_val)) {
+       System.out.println("Starting as admin because of settings.");
+       tryRestartAsAdmin(false);
+       return;
+     }
+     
      //System.out.println("PW: "+settings.getSetting(Setnames.REMEMBER_PASSWORD.name));
      //Fill empty fields with default values
      Setnames.setDefaults(settings);
      //Initialise encryption
      SecureSettings encryptor = settings.getEncryptor();
-     
+     //Constant password.S-1-5-21-3630785732-580163861-2202204989-1004
+     //Constant password.S-1-5-21-3630785732-580163861-2202204989-1004
      /*EncryptedSetting test = new EncryptedSetting(encryptor);
      settings.setSetting(Setnames.REMEMBER_PASSWORD.name, test);
      test.setEncryptedValue(new byte[] {0,56,64,32,44,55,66,99,88,77,88,55,66,33});*/
      
      encryptor.addPassword("Constant password.");
      encryptor.addPassword(UniqueID.WINDOWS_USER_SID);
-     
-     //System.out.println("Encryption password: "+encryptor.getMergedPassword());
-     
-     gui = new Gui(this, settings);
- 
-     SwingUtilities.invokeLater(new Runnable()
-     {
-       @Override
-       public void run()
-       {
-         gui.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-         gui.setVisible(true);
-       }
-     });
+     try {
+       System.out.println("Password key: "+encryptor.getMergedPassword());
+       //System.out.println("Encryption password: "+encryptor.getMergedPassword());
+     } catch (PasswordFailedException ex) {
+       Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+     }
    }
    private <T extends Robot> T createRobot(Class<T> type) throws NoSuchRobotException {
      try {
@@ -233,34 +259,44 @@ import sirius.constants.IWMConsts;
     */
    public void Terminate(final boolean force) {
      //gui is JFrame representing the application window
-     gui.setVisible(false);
-     gui.destroyTray();
-     gui.dispose();
-     gui.robots.interrupt();
-     
-     for(Frame frame : JFrame.getFrames()) {
-       //System.out.println("Frame " + frame.getTitle());
-       if(frame.isDisplayable()) {
-         //System.out.println("  Destroying frame " + frame.getTitle());
-         frame.dispose();
+     SwingUtilities.invokeLater(
+       ()->{
+         if(gui!=null) {
+           gui.setVisible(false);
+           gui.destroyTray();
+           gui.dispose();
+           gui.robots.interrupt();
+         }
+         for(Frame frame : JFrame.getFrames()) {
+           //System.out.println("Frame " + frame.getTitle());
+           if(frame.isDisplayable()) {
+             //System.out.println("  Destroying frame " + frame.getTitle());
+             frame.dispose();
+           }
+         }
        }
-     }
+     );
+
+     
      //Stop tool thread if running
      if(ToolRunning())
        StopTool();
      //Save settings
-     if(settings==null) {
+     if(settings!=null) {
+       try {
+         settings.loadSettingsFromBoundFields();
+         settings.saveToFile(SETTINGS_FILE, false);
+       }
+       catch(IOException e) {
+         System.err.println("Problem saving settings:");
+         e.printStackTrace(System.err);
+       }
+     }
+     else {
        System.out.println("Settings is null!");
-       return;
      }
-     try {
-       settings.loadSettingsFromBoundFields();
-       settings.saveToFile(SETTINGS_FILE, false);
-     }
-     catch(IOException e) {
-       System.err.println("Problem saving settings:");
-       e.printStackTrace(System.err);
-     }
+     if(updater!=null)
+       updater.saveAll();
 
      //Here, no non-deamon threads should be running (daemon thread does not prolong the applicatione execution).
      if(force)
@@ -274,8 +310,11 @@ import sirius.constants.IWMConsts;
      RestartWithAdminRightsAsync(false);
    }
    public void RestartWithAdminRightsAsync(final boolean force) throws FileNotFoundException, IOException {
+     if(!force)
+       Terminate(force);
      StartWithAdminRights();
-     Terminate(force);
+     if(force)
+       Terminate(force);
    }
    private static volatile Boolean isAdmin = null;
    private static final Object isAdmin_mutex = new Object();
@@ -305,6 +344,17 @@ import sirius.constants.IWMConsts;
        }
      }
    }
+   public void tryRestartAsAdmin(final boolean force) {
+      try {
+        RestartWithAdminRightsAsync(force);
+      }
+      catch (FileNotFoundException ex) {
+        Dialogs.dialogErrorAsync(ex.getMessage());
+      }
+      catch (IOException ex) {
+        Dialogs.dialogErrorAsync("Cannot read or use the helper VBS file.\n    "+ex);
+      } 
+    }
    /**
     * Start this very jar file elevated on Windows. It is strongly recommended to close any existing IO
     * before calling this method and avoid writing anything more to files. The new instance of this same
@@ -313,8 +363,6 @@ import sirius.constants.IWMConsts;
     * @throws IOException if there was another failure inboking VBS script
     */
    public void StartWithAdminRights() throws FileNotFoundException, IOException {
-     //The path to the helper script. This scripts takes 1 argument which is a Jar file full path
-     File runAsAdmin = new File("run-as-admin.vbs");;
      //Our 
      String jarPath;
 
@@ -333,17 +381,30 @@ import sirius.constants.IWMConsts;
        Path currentRelativePath = Paths.get("");
        jarPath = "\""+currentRelativePath.toAbsolutePath().toString()+"\\AutoClient.jar\"";
      }
-     //Now we check if the path to vbs script exists, if it does we execute it
-     if(runAsAdmin.exists()) {
-       String command = "cscript \""+runAsAdmin.getAbsolutePath()+"\" "+jarPath;
-       System.out.println("Executing '"+command+"'");
-       //Note that .exec is asynchronous
-       //After it starts, you must terminate your program ASAP, or you'll have 2 instances running
-       Runtime.getRuntime().exec(command);
-       
+     
+     //The path to the helper script. This scripts takes 1 argument which is a Jar file full path
+     File runAsAdmin = null;
+     // Temporary file to check
+     File fileTmp = null;
+     // All possible paths will be checked until existing vbs file is found
+     for(int i=0; i<runAsAdminPaths.length && runAsAdmin==null; i++) {
+         fileTmp = new File(runAsAdminPaths[i]);
+         if(fileTmp.exists()) {
+           runAsAdmin = fileTmp; 
+         }
      }
-     else
-       throw new FileNotFoundException("The VBSScript used for elevation not found at "+runAsAdmin.getAbsolutePath());
+     if(runAsAdmin==null) {
+       throw new FileNotFoundException(
+             "The VBSScript used for elevation not found at "
+             + new File(runAsAdminPaths[0]).getAbsolutePath()
+       );
+     }
+     // If exception was not thrown the program can be launched
+     String command = "cscript \""+runAsAdmin.getAbsolutePath()+"\" "+jarPath;
+     System.out.println("Executing '"+command+"'");
+     //Note that .exec is asynchronous
+     //After it starts, you must terminate your program ASAP, or you'll have 2 instances running
+     Runtime.getRuntime().exec(command);
    }
  }
 

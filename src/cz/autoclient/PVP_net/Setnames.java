@@ -62,7 +62,8 @@ public enum Setnames {
   START_AS_ADMIN(false),
   
   UPDATES_AUTOCHECK(false),
-  UPDATES_AUTODOWNLOAD(false)
+  UPDATES_AUTODOWNLOAD(false),
+  
   
   
   

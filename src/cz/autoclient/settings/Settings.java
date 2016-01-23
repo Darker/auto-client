@@ -285,6 +285,10 @@ public class Settings implements java.io.Serializable {
     boundInputs.put(setting_name, in);
     useVerifier(in, verif);
   }
+  public void bindToInput(final String setting_name, final Input input, final SettingsInputVerifier<Object> verif) {    
+    boundInputs.put(setting_name, input);
+    useVerifier(input, verif);
+  }
   public void bindToInputSecure(final String setting_name, final JComponent input, final SettingsInputVerifier<Object> verif) {    
     //boundInputs.put(setting_name, input);
     Input in;

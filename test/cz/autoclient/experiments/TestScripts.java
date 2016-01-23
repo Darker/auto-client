@@ -6,11 +6,15 @@
 
 package cz.autoclient.experiments;
 
+import cz.autoclient.autoclick.windows.Window;
+import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
+import cz.autoclient.main_automation.scripts.CommandSay;
 import cz.autoclient.scripting.OneLineScript;
 import cz.autoclient.scripting.ScriptCommand;
 import cz.autoclient.scripting.ScriptEnvironment;
 import cz.autoclient.scripting.ScriptSymbol;
 import cz.autoclient.scripting.exception.IllegalCmdArgumentException;
+import java.util.ArrayList;
 
 /**
  *
@@ -39,7 +43,7 @@ public class TestScripts {
      
      /*s1 = "bl,hh;aa,b";
      OneLineScript.parse(s1);*/
-     
+     /*
      s1 = "S>bl,S>;aa,\\,\\d\\\\,;";
      OneLineScript.parse(s1);
      
@@ -53,11 +57,20 @@ public class TestScripts {
      s.compile();
      s.setenv("exception", new RuntimeException("Vse je v poradku."));
      System.out.println("Chyba: "+s.getenv("exception", RuntimeException.class));
-     s.run();
+     s.run();*/
+     
+     // Test skutecnych funkci
+     String s3 = "S>s,Hello world!,5,1000";
+     OneLineScript window_test = OneLineScript.parse(s3);
+     ScriptCommand.setCommand("s", CommandSay.class);
+     Window test = MSWindow.windowFromName("test", false);
+     window_test.compile();
+     window_test.setenv("window", test);
+     window_test.run();
    }
    public static class CommandException extends ScriptCommand {
      @Override
-     public void parseArguments(Iterable<String> args) throws IllegalCmdArgumentException {
+     public void parseArguments(ArrayList<String> args) throws IllegalCmdArgumentException {
      }
 
      @Override

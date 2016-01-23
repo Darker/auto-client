@@ -8,7 +8,6 @@ package cz.autoclient.league_of_legends;
 
 import cz.autoclient.GUI.LazyLoadedRemoteImage;
 import cz.autoclient.league_of_legends.maps.GameObjectMap;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 /**

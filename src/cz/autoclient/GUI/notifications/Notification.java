@@ -71,6 +71,12 @@ public abstract class Notification {
                  Setnames.NOTIF_MENU_BLIND_IN_LOBBY,
                  TrayIcon.MessageType.INFO
     ),
+    UPDATE_AVAILABLE("Update available",
+                 "app.update.exists",
+                 "An update is available. Check Tools->Updates. Configure this notification on Notifications menu.",
+                 Setnames.NOTIF_MENU_UPDATE_EXISTS,
+                 TrayIcon.MessageType.INFO
+    ),
     ;
     Def(String n, String p, String t, Setnames setting, TrayIcon.MessageType type) {
       name = n;  
@@ -136,6 +142,8 @@ public abstract class Notification {
           target.addNotification(instantiate(source, d, set, params));
         }
         catch(NoSuchMethodException e) {
+          System.err.println("createAll failed for "+d.name()); 
+          e.printStackTrace();
           //Nothing, just ignore it.
         }
       }

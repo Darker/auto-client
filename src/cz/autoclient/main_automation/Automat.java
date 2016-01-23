@@ -1,5 +1,6 @@
 package cz.autoclient.main_automation;
 
+import cz.autoclient.GUI.Dialogs;
 import cz.autoclient.GUI.Gui;
 import cz.autoclient.GUI.LazyLoadedImage;
 import cz.autoclient.GUI.notifications.Notification;
@@ -29,6 +30,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import cz.autoclient.autoclick.ComparablePixel;
 import static cz.autoclient.PVP_net.WindowTools.*;
+import cz.autoclient.autoclick.comvis.DebugDrawing;
+import cz.autoclient.main_automation.scripts.CommandDelay;
+import cz.autoclient.main_automation.scripts.CommandSay;
+import cz.autoclient.scripting.OneLineScript;
+import cz.autoclient.scripting.ScriptCommand;
+import cz.autoclient.scripting.exception.CommandException;
+import cz.autoclient.scripting.exception.ScriptParseException;
  
  
  public class Automat
@@ -42,7 +50,10 @@ import static cz.autoclient.PVP_net.WindowTools.*;
    
    private boolean pretendAccepted = false;
    //Logger for thread
-   
+   {
+     ScriptCommand.setCommand("s", CommandSay.class);
+     ScriptCommand.setCommand("d", CommandDelay.class);
+   }
    
    public Automat(Gui acgui, Settings settings)
    {
@@ -301,11 +312,30 @@ import static cz.autoclient.PVP_net.WindowTools.*;
        //sleep(this.gui.getDelay());
        click(PixelOffset.LobbyChat);
        click(PixelOffset.LobbyChat);
-       sleep(10L);
-       click(PixelOffset.LobbyChat);
-       System.out.println("Typping '"+settings.getString(Setnames.BLIND_CALL_TEXT.name)+"' in chat window.");
-       window.typeString(settings.getString(Setnames.BLIND_CALL_TEXT.name));
-       Enter();
+       //Generate message
+       String message = settings.getString(Setnames.BLIND_CALL_TEXT.name);
+       if(message.startsWith("S>")) {
+         System.out.println("Compiling "+message+" for chat messaging.");
+         try {
+           OneLineScript say = OneLineScript.parse(message);
+           say.compile();
+           say.setenv("window", window);
+           click(PixelOffset.LobbyChat);
+           say.run();
+         }
+         catch(ScriptParseException e) {
+           Dialogs.dialogErrorAsync("Your script couldn't be parsed, se error below:<br /><pre>"+e.getMessage()+"</pre>", "Syntax error");
+         }
+         catch(CommandException e) {
+           Dialogs.dialogErrorAsync("One of commands used in the script reported an error:<br /><pre>"+e.getMessage()+"</pre>", "Invalid command");
+         }
+       }
+       else {
+         click(PixelOffset.LobbyChat);
+         System.out.println("Typping '"+settings.getString(Setnames.BLIND_CALL_TEXT.name)+"' in chat window.");
+         window.typeString(settings.getString(Setnames.BLIND_CALL_TEXT.name));
+         Enter();
+       }
        //if(true){ return; }
        //System.out.println(this.gui.chatTextField().getText());
        sleep(200L);
@@ -479,7 +509,8 @@ import static cz.autoclient.PVP_net.WindowTools.*;
          do {
            //Wait 2 seconds, then check if back in main screen
            sleep(2000);
-           if(WindowTools.checkPoint(window, failPoints)>1) {
+
+           if((WindowTools.checkPoint(window, failPoints))>1) {
              System.out.println("NORMAL LOBBY: Game did not start, waiting for another game."); 
              return false;
            }
@@ -488,17 +519,18 @@ import static cz.autoclient.PVP_net.WindowTools.*;
              System.out.println("NORMAL LOBBY: Game started.");
              return true;
            }
-           /*BufferedImage img = window.screenshot();
-           WindowTools.drawCheckPoint(img, points);
-           WindowTools.drawCheckPoint(img, failPoints);
-           DebugDrawing.displayImage(img);*/
+
+
+           //WindowTools.drawCheckPoint(img, points);
+           //WindowTools.drawCheckPoint(screenshot, failPoints);
+           //DebugDrawing.displayImage(screenshot);
            //else if(WindowTools.checkPoint(window, points)>=4) {
            //  System.out.println("NORMAL LOBBY: lobby back here, waiting for game again."); 
              //System.out.println("NORMAL LOBBY: Game did not start, waiting for another game."); 
              //return false;
            //}
          } while(WindowTools.checkPoint(window, points)<4);
-         System.out.println("NORMAL LOBBY: lobby back here, waiting for game again."); 
+         System.out.println("NORMAL LOBBY: lobby back here, looping again."); 
        }
        sleep(800);
      }
