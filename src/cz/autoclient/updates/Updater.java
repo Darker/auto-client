@@ -129,17 +129,22 @@ public class Updater {
       return;
     setCurrentActionAndThenIdleDelayed(Action.CHECKING);
     updates = getUpdates();
-    System.out.println("Checking install step.");
-    /*if(updates.installStep()!=InstallStep.NOT_INSTALLING) {
-      System.out.println("Already installing something.");
-      System.out.println("Skipping update check because an update is in progress, step: "+updates.installStep().name());
-      return;
-    }*/
     System.out.println("Checking for updates...");
     if(updates.shouldCheck(checkInterval))
     {
-      Repo repo = new RtGithub().repos().get(repository);
-      Releases releases = repo.releases();
+      System.out.println("Connecting to GitHub.");
+      Repo repo;
+      Releases releases;
+      try {
+        repo = new RtGithub().repos().get(repository);
+        releases = repo.releases();
+      }
+      catch(Throwable bullshit) {
+        System.out.println("Something failed!");
+        bullshit.printStackTrace();
+        throw bullshit;
+      }
+      System.out.println("Connected...");
       for(Release r: releases.iterate()) {
         try {
           JsonObject data = r.json();
@@ -149,6 +154,7 @@ public class Updater {
           }
           else {
             updates.add(info = new UpdateInfo(data, cacheDir));
+            System.out.println("New update: "+info.version);
           }
         } catch (IOException ex) {
           Logger.getLogger(Updater.class.getName()).log(Level.SEVERE, null, ex);
@@ -177,20 +183,6 @@ public class Updater {
         if(!newest.seen) {
            updateListener.updateAvailable(newest);
         }
-/**
-        newest.downloadFile(new DownloadProcess() {
-          public void process(double current, double max){System.out.println("  "+100*(current/max)+"%");};
-          public void started(){System.out.println("Download started.");};
-          // Stopped with error
-          public void stopped(Throwable error){System.out.println("Download error: "+error);};
-          // Stopped with success
-          public void finished() {
-            saveAll();
-            System.out.println("Download succesful");
-          };
-        });
-        System.out.println("Download succesful.");
-**/
       }
       else {
         System.out.println("Latest update already downloaded and ready to install.");
@@ -209,8 +201,12 @@ public class Updater {
     if(runInExecutorIfNeeded(()->downloadUpdate()))
       return;
     setCurrentActionAndThenIdleDelayed(Action.DOWNLOADING);
-    if(updates.installStepIs(InstallStep.CAN_DOWNLOAD)) {
+    if(getUpdates().installStepIs(InstallStep.CAN_DOWNLOAD)) {
       updates.installInProgress().downloadFile(new UpdaterProgress(this, updateListener.download));
+    }
+    File result = updates.installInProgress().localFile;
+    if(result!=null && result.isFile() && result.length()>0) {
+      updates.installStep(InstallStep.CAN_UNPACK);
     }
   }
   public void installUpdate() {
@@ -249,6 +245,10 @@ public class Updater {
     }
     if(whenDone!=null)
       whenDone.run();
+  }
+  
+  public void waitFor() throws InterruptedException {
+    threadFactory.updateThread.join();
   }
   /**
    * Do the next action required to get an update. That is:
