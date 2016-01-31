@@ -63,85 +63,9 @@ public class UpdateInfo implements java.io.Serializable {
     prerelease = json.getBoolean("prerelease");
   }
 
-  public void unzip() {
-    File destination = new File(localFile.getParentFile(), version.toString());
-    destination.mkdirs();
-    try {
-         ZipFile zipFile = new ZipFile(localFile);
-         zipFile.extractAll(destination.getAbsolutePath());
-    } catch (ZipException e) {
-        e.printStackTrace();
-    }
-  }
+
   public boolean isUnzipped() {
     return new File(localFile.getParentFile(), version.toString()).isDirectory();
-  }
-  /** Replaces all files, then schledules replacement of this jar file. Also creates backup.
-   *  Shut down all other threads before calling this function.
-   */
-  public void install(Progress progress) {
-    progress.started();
-    File updates = localFile.getParentFile();
-    File directory = new File(updates, version.toString());
-    File backup = new File(updates, "backup");
-    
-    File myself;
-    try {myself = new File(UpdateInfo.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());}
-    catch(Exception e) {
-      System.out.println("Some error with getting current jar file path.");
-      e.printStackTrace();
-      progress.stopped(e);
-      return;
-    }
-    File home = myself.getParentFile();
-    /** Part 1: backup **/
-    String[] ignoreList = new String[] {"updates","data","LOLResources"};
-    /*ArrayList<File> originalFiles = listFileChildren(home, new FileFilter() {
-      public boolean accept(File file) {
-        if(file.isDirectory())
-          return false;
-      }
-    });*/
-    progress.status("Getting list of files.");
-    /** Part 2: copy **/
-    ArrayList<File> updateFiles = listFileChildren(directory, new FileFilter() {
-      @Override
-      public boolean accept(File file) {
-        return !file.isDirectory();
-      }
-    });
-    progress.status("Copying files.");
-    
-    int count = updateFiles.size();
-    int processed = 0;
-    for(File f: updateFiles) {
-      progress.process(processed++, count);
-      String relative = relativePath(directory, f);
-      File target = new File(home,relative);
-
-      if(target.exists()) {
-        File backupFile = new File(backup, relative);
-        try {
-          copyFile(target, backupFile);
-        } catch (IOException ex) {
-          Logger.getLogger(UpdateInfo.class.getName()).log(Level.SEVERE, null, ex);
-        }
-      }
-      if(target.compareTo(myself)==0) {
-        System.out.println("Cannot overwrite jar.");
-        // Prepare jar file to be copied
-        ScriptWithParameters script = new BatchScript("update.bat");
-        script.setParameter("AUTO_CLIENT_JAR", myself.getName());
-        
-        continue;
-      }
-      try {
-        copyFile(f, target);
-      } catch (IOException ex) {
-        System.out.println("Copy file "+f+" error: "+ex.getMessage());
-      }
-    }
-    
   }
   
   public final URL downloadLink;
@@ -173,6 +97,7 @@ public class UpdateInfo implements java.io.Serializable {
     if(downloadLink==null)
       throw new RuntimeException("Cannot download update, download link is null.");
     HttpURLConnection httpConnection;
+    System.out.println("Downloading update: "+downloadLink);
     try {
       httpConnection = (HttpURLConnection) (downloadLink.openConnection());
     }
@@ -210,6 +135,110 @@ public class UpdateInfo implements java.io.Serializable {
       localFile.delete();
     }
     process.finished();
+  }
+  public void unzip() {
+    File destination = new File(localFile.getParentFile(), version.toString());
+    destination.mkdirs();
+    try {
+         ZipFile zipFile = new ZipFile(localFile);
+         zipFile.extractAll(destination.getAbsolutePath());
+    } catch (ZipException e) {
+        e.printStackTrace();
+    }
+  }
+  /** Replaces all sourceFileiles, then schledules replacement osourceFile this jar sourceFileile. Also creates backup.
+  Shut down all other threads besourceFileore calling this sourceFileunction.
+   */
+  public void install(Progress progress) {
+    progress.started();
+    File updates = localFile.getParentFile();
+    File updateDirectory = new File(updates, version.toString());
+    File backup = new File(updates, "backup");
+    
+    File myself;
+    try {myself = new File(UpdateInfo.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());}
+    catch(Exception e) {
+      System.out.println("Some error with getting current jar file path.");
+      e.printStackTrace();
+      progress.stopped(e);
+      return;
+    }
+    File home = myself.getParentFile();
+    /** Part 1: backup **/
+    String[] ignoreList = new String[] {"updates","data","LOLResources"};
+    // For now just use regex
+    String ignore = "^(updates|data|LOLResources)(\\\\|/).*?$";
+    
+    /*ArrayList<File> originalFiles = listFileChildren(home, new FileFilter() {
+      public boolean accept(File file) {
+        if(file.isDirectory())
+          return false;
+      }
+    });*/
+    progress.status("Getting list of files.");
+    /** Part 2: copy **/
+    ArrayList<File> updateFiles = listFileChildren(updateDirectory, new FileFilter() {
+      @Override
+      public boolean accept(File file) {
+        return !file.isDirectory();
+      }
+    });
+    progress.status("Copying files.");
+    
+    int count = updateFiles.size();
+    int processed = 0;
+    Process copyScript = null;
+    for(File sourceFile: updateFiles) {
+      progress.process(processed++, count);
+      String relative = relativePath(updateDirectory, sourceFile);
+      if(relative.matches(ignore))
+        continue;
+      
+      File targetFile = new File(home,relative);
+      if(targetFile.exists()) {
+        File backupFile = new File(backup, relative);
+        try {
+          copyFile(targetFile, backupFile);
+        } catch (IOException ex) {
+          Logger.getLogger(UpdateInfo.class.getName()).log(Level.SEVERE, null, ex);
+        }
+      }
+      if(targetFile.compareTo(myself)==0) {
+        System.out.println("Cannot overwrite jar.");
+        // Prepare jar file to be copied
+        ScriptWithParameters script = new BatchScript("update.bat");
+        script.setParameter("AUTO_CLIENT_JAR", myself.getName());
+        script.setParameter("UPDATE_NAME", this.version.toString());
+        File batchFile = new File(updateDirectory, "copy.bat");
+        try {
+          script.saveToFile(batchFile);
+          copyScript = new RunnableScript(batchFile).run();
+        } catch (IOException ex) {
+          batchFile = null;
+          System.out.println("Cannot create or run the batch file.");
+        }
+        continue;
+      }
+      try {
+        copyFile(sourceFile, targetFile);
+      } catch (IOException ex) {
+        System.out.println("Copy file "+sourceFile+" error: "+ex.getMessage());
+      }
+    }
+    if(copyScript!=null && copyScript.isAlive()) {
+      progress.status("Waiting for the copy script.");
+      try {
+        copyScript.waitFor();
+      } catch (InterruptedException ex) {/*do not allow interupts*/}
+    }
+    progress.finished();
+  }
+  /**
+   * Removes any sourceFileiles (except sourceFileor the zip sourceFileile) created by this update. This is 
+ usesourceFileul isourceFile new version is discovered mid-update or the update is canceled.
+   */
+  public void removeGarbage() {
+    
   }
   boolean isValid() {
     return downloadLink!=null; 
@@ -267,10 +296,10 @@ public class UpdateInfo implements java.io.Serializable {
     public static Comparator inst = new Comparator();
   }
   
-  /** Adds all files in directory to given list, also returns the list.
-   * @param parent parent directory
-   * @param f filter that can skip some files, can be null without errors
-   * @param list list to add files into. The list must not be null.
+  /** Adds all sourceFileiles in updateDirectory to given list, also returns the list.
+   * @param parent parent updateDirectory
+   * @param f sourceFileilter that can skip some sourceFileiles, can be null without errors
+   * @param list list to add sourceFileiles into. The list must not be null.
    * @return  **/
   public static ArrayList<File> listFileChildren(File parent, FileFilter f, ArrayList<File> list) {
     File[] files = parent.listFiles();
@@ -283,9 +312,9 @@ public class UpdateInfo implements java.io.Serializable {
     }
     return list;
   }
-  /** Returns list of all child files, recursively.
-   * @param parent parent directory
-   * @param f filter that can skip some files, can be null without errors
+  /** Returns list osourceFile all child sourceFileiles, recursively.
+   * @param parent parent updateDirectory
+   * @param f sourceFileilter that can skip some sourceFileiles, can be null without errors
    * @return  **/
   public static ArrayList<File> listFileChildren(File parent, FileFilter f) {
     return listFileChildren(parent, f, new ArrayList());
@@ -293,7 +322,7 @@ public class UpdateInfo implements java.io.Serializable {
   public static String relativePath(File parent, File child) {
     return parent.toURI().relativize(child.toURI()).getPath(); 
   }
-  /** From: http://stackoverflow.com/a/115086/607407 **/
+  /** From: http://stackoversourceFilelow.com/a/115086/607407 **/
   public static void copyFile(File sourceFile, File destFile) throws IOException {
     System.out.println("copy "+sourceFile.getAbsolutePath()+" "+destFile.getAbsolutePath());
     if(true)

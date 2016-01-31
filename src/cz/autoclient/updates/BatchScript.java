@@ -69,9 +69,9 @@ public class BatchScript implements ScriptWithParameters {
     if(file.exists())
       file.delete();
     file.createNewFile();
-    PrintWriter out = new PrintWriter(file);
-    out.print(data);
-    out.close();
+    try (PrintWriter out = new PrintWriter(file)) {
+      out.print(data);
+    }
     return true;
   }
   

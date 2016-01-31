@@ -6,11 +6,8 @@
 
 package cz.autoclient.updates;
 
-import com.jcabi.github.Coordinates;
-import com.jcabi.github.Release;
-import com.jcabi.github.Releases;
-import com.jcabi.github.Repo;
-import com.jcabi.github.RtGithub;
+import cz.autoclient.github.constructs.BasicRepositoryId;
+import cz.autoclient.github.interfaces.RepositoryId;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -25,7 +22,7 @@ import javax.json.JsonObject;
  * @author Jakub
  */
 public class Updater {
-  private final Coordinates.Simple repository;
+  private final RepositoryId repository;
   public final VersionId version;
   private UpdateCache updates;
  
@@ -66,8 +63,8 @@ public class Updater {
     }
     updateListener.actionChanged(a);
   }
-  
-  public Updater(Coordinates.Simple repository, VersionId version, File cacheDir) {
+ 
+  public Updater(RepositoryId repository, VersionId version, File cacheDir) {
     this.repository = repository;
     this.version = version;
     this.cacheDir = cacheDir;
@@ -75,13 +72,13 @@ public class Updater {
     cacheMainFile = new File(cacheDir, "cache.bin");
   } 
   public Updater(String repository, VersionId version, File cacheDir) {
-    this(new Coordinates.Simple(repository), version, cacheDir);
+    this(new BasicRepositoryId(repository), version, cacheDir);
   }
-  public Updater(Coordinates.Simple repository, String version, File cacheDir) {
+  public Updater(RepositoryId repository, String version, File cacheDir) {
     this(repository, new VersionId(version), cacheDir);
   }
   public Updater(String repository, String version, File cacheDir) {
-    this(new Coordinates.Simple(repository), new VersionId(version), cacheDir);
+    this(new BasicRepositoryId(repository), new VersionId(version), cacheDir);
   }
   synchronized ExecutorService getExecutor() {
     if(executor == null) {
@@ -133,33 +130,23 @@ public class Updater {
     if(updates.shouldCheck(checkInterval))
     {
       System.out.println("Connecting to GitHub.");
-      Repo repo;
-      Releases releases;
+      //GitHubClient client = new GitHubClient();
+      //RepositoryService service = new RepositoryService();
+      //Repository repo;
       try {
-        repo = new RtGithub().repos().get(repository);
-        releases = repo.releases();
-      }
-      catch(Throwable bullshit) {
+        //repo = service.getRepository(repository.getOwner(), repository.getName());
+        //repo.
+      } catch(Throwable bullshit) {
         System.out.println("Something failed!");
         bullshit.printStackTrace();
-        throw bullshit;
-      }
-      System.out.println("Connected...");
-      for(Release r: releases.iterate()) {
         try {
-          JsonObject data = r.json();
-          UpdateInfo info;
-          if((info=updates.findId(data.getInt("id")))!=null) {
-            System.out.println("Update "+info.version+" already exists.");
-          }
-          else {
-            updates.add(info = new UpdateInfo(data, cacheDir));
-            System.out.println("New update: "+info.version);
-          }
-        } catch (IOException ex) {
+          throw bullshit;
+        } catch (Throwable ex) {
           Logger.getLogger(Updater.class.getName()).log(Level.SEVERE, null, ex);
         }
       }
+
+      System.out.println("Connected...");
       updates.checkedRightNow();
     }
     else {

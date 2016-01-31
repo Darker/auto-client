@@ -18,5 +18,4 @@ public interface ScriptWithParameters {
   String getParameter(String name);
   String getRawData();
   boolean saveToFile(File file) throws IOException;
-  
 }

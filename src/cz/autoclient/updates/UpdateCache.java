@@ -48,6 +48,13 @@ public class UpdateCache extends TreeSet<UpdateInfo> implements java.io.Serializ
   public boolean installStepIs(Updater.InstallStep step) {
     return step==installStep;
   }
+  public boolean installStepIs(Updater.InstallStep... steps) {
+    for(Updater.InstallStep step:steps) {
+      if(installStepIs(step))
+        return true;
+    }
+    return false;
+  }
   public void installInProgress(UpdateInfo installInProgress) {
     this.installInProgress = installInProgress;
   }
