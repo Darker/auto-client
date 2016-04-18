@@ -23,3 +23,4 @@ release.bat
 /stop_flashing/wrong_return_value.txt
 *.jar
 !/release/*/*.jar
+/updates/*
