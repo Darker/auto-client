@@ -20,6 +20,7 @@ public abstract class UpdateInfoListener {
   }
   abstract public void updateAvailable(UpdateInfo info);
   abstract public void upToDate(UpdateInfo info);
+  abstract public void upToDate(VersionId id);
   abstract public void actionChanged(Updater.Action a);
   public Progress download;
   public Progress install;
@@ -37,7 +38,11 @@ public abstract class UpdateInfoListener {
     @Override
     public void updateAvailable(UpdateInfo info){};
     @Override
-    public void upToDate(UpdateInfo info){};
+    public void upToDate(UpdateInfo info){
+      upToDate(info.version);
+    };
+    @Override
+    public void upToDate(VersionId id) {}
     
     private static Empty instance;
     public static synchronized Empty getInstance() {
@@ -48,6 +53,8 @@ public abstract class UpdateInfoListener {
 
     @Override
     public void actionChanged(Updater.Action a) {}
+
+
 
 
   }

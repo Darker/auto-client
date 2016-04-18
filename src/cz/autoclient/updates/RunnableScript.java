@@ -20,6 +20,7 @@ public class RunnableScript {
   protected final File file;
   public Process run() throws IOException {
     ProcessBuilder pb = new ProcessBuilder("cmd", "/K "+file.getAbsolutePath()+">update_test.txt");
+    //ProcessBuilder pb = new ProcessBuilder(file.getAbsolutePath(), "");
     Process p = pb.start();
     return p;
   }

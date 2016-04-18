@@ -7,6 +7,8 @@
 package cz.autoclient.updates;
 
 
+import cz.autoclient.github.interfaces.Release;
+import cz.autoclient.github.interfaces.ReleaseFile;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -61,8 +63,28 @@ public class UpdateInfo implements java.io.Serializable {
 
     isNew = true;
     prerelease = json.getBoolean("prerelease");
+    valid = tmp!=null;
   }
+  public UpdateInfo(Release gitReleaseObject, File baseDir) {
+    ReleaseFile file = null;
+    for(ReleaseFile f: gitReleaseObject.downloads()) {
+      if(f.name().endsWith(".zip") && f.size()>1e1) {
+        file = f;
+        break;
+      }
+    }
+    downloadLink = file==null?null:file.downloadUrl();
+    originalSize = file==null?-1:file.size();
+    
+    version = file==null?null:new VersionId(file.parent().tag());
+    id = -1;
+    localFile = file==null?null:new File(baseDir, version.toString()+".zip");
 
+    isNew = true;
+    prerelease = file!=null && file.parent().isPrerelease();
+    
+    valid = file!=null && version!=null;
+  }
 
   public boolean isUnzipped() {
     return new File(localFile.getParentFile(), version.toString()).isDirectory();
@@ -74,6 +96,7 @@ public class UpdateInfo implements java.io.Serializable {
   public final long originalSize;
   public final int id;
   public final boolean prerelease;
+  public final boolean valid;
   // Whether this release was just downloaded
   boolean isNew;
   // Whether this release was presented to the user
@@ -105,9 +128,10 @@ public class UpdateInfo implements java.io.Serializable {
       process.stopped(e);
       return;
     }
-    //long completeFileSize = httpConnection.getContentLength();
+    long completeFileSize = httpConnection.getContentLength();
     localFile.getParentFile().mkdirs();
     java.io.FileOutputStream fos;
+    final int BUFFER_SIZE = 128;
     try {
       fos = new java.io.FileOutputStream(localFile);
     } catch (FileNotFoundException ex) {
@@ -118,14 +142,14 @@ public class UpdateInfo implements java.io.Serializable {
         java.io.BufferedOutputStream bout = new BufferedOutputStream(fos, 1024)
         ) { 
       process.started();
-      byte[] data = new byte[1024];
+      byte[] data = new byte[BUFFER_SIZE];
       long downloadedFileSize = 0;
-      process.process((double)downloadedFileSize, originalSize);
+      process.process((double)downloadedFileSize, completeFileSize);
       int x = 0;
-      while ((x = in.read(data, 0, 1024)) >= 0) {
+      while ((x = in.read(data, 0, BUFFER_SIZE)) >= 0) {
         downloadedFileSize += x;
         bout.write(data, 0, x);
-        process.process((double)downloadedFileSize, originalSize);
+        process.process((double)downloadedFileSize, completeFileSize);
       }
       bout.close();
       validateFile();
@@ -183,9 +207,10 @@ public class UpdateInfo implements java.io.Serializable {
         return !file.isDirectory();
       }
     });
-    progress.status("Copying files.");
+    
     
     int count = updateFiles.size();
+    progress.status("Copying "+count+" files.");
     int processed = 0;
     Process copyScript = null;
     for(File sourceFile: updateFiles) {
@@ -197,7 +222,9 @@ public class UpdateInfo implements java.io.Serializable {
       File targetFile = new File(home,relative);
       if(targetFile.exists()) {
         File backupFile = new File(backup, relative);
+        progress.status("Backup "+targetFile.getAbsolutePath()+" to "+backup.getAbsolutePath());
         try {
+          backup.mkdir();
           copyFile(targetFile, backupFile);
         } catch (IOException ex) {
           Logger.getLogger(UpdateInfo.class.getName()).log(Level.SEVERE, null, ex);
@@ -206,23 +233,25 @@ public class UpdateInfo implements java.io.Serializable {
       if(targetFile.compareTo(myself)==0) {
         System.out.println("Cannot overwrite jar.");
         // Prepare jar file to be copied
-        ScriptWithParameters script = new BatchScript("update.bat");
-        script.setParameter("AUTO_CLIENT_JAR", myself.getName());
-        script.setParameter("UPDATE_NAME", this.version.toString());
-        File batchFile = new File(updateDirectory, "copy.bat");
+        ScriptWithParameters script;
         try {
+          script = BatchScript.fromResource("/update.bat");
+          script.setParameter("AUTO_CLIENT_JAR", myself.getName());
+          script.setParameter("UPDATE_NAME", this.version.toString());
+          script.setParameter("HOME_DIR", home.getAbsolutePath());
+          File batchFile = new File(updateDirectory, "copy.bat");
           script.saveToFile(batchFile);
           copyScript = new RunnableScript(batchFile).run();
         } catch (IOException ex) {
-          batchFile = null;
           System.out.println("Cannot create or run the batch file.");
         }
         continue;
       }
       try {
+        progress.status("Copy "+sourceFile.getAbsolutePath()+" to "+targetFile.getAbsolutePath());
         copyFile(sourceFile, targetFile);
       } catch (IOException ex) {
-        System.out.println("Copy file "+sourceFile+" error: "+ex.getMessage());
+        progress.status("ERROR: "+ex.getMessage()+" file: "+sourceFile.getAbsolutePath());
       }
     }
     if(copyScript!=null && copyScript.isAlive()) {
@@ -287,7 +316,7 @@ public class UpdateInfo implements java.io.Serializable {
     protected Comparator(){}
     @Override
     public int compare(UpdateInfo o1, UpdateInfo o2) {
-      int ret = o1.version.compareTo(o2.version);
+      int ret = o1.version!=null && o2.version!=null?o1.version.compareTo(o2.version):0;
       if(ret==0)
         return o1.id-o2.id;
       else
@@ -325,8 +354,8 @@ public class UpdateInfo implements java.io.Serializable {
   /** From: http://stackoversourceFilelow.com/a/115086/607407 **/
   public static void copyFile(File sourceFile, File destFile) throws IOException {
     System.out.println("copy "+sourceFile.getAbsolutePath()+" "+destFile.getAbsolutePath());
-    if(true)
-      return;
+    //if(true)
+    //  return;
 
     if(!destFile.exists()) {
       destFile.createNewFile();

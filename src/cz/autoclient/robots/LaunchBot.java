@@ -11,12 +11,10 @@ import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
 import cz.autoclient.autoclick.Rect;
+import cz.autoclient.autoclick.exceptions.APIException;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.windows.WindowCallback;
-import cz.autoclient.autoclick.exceptions.APIException;
 import cz.autoclient.autoclick.windows.cache.title.CacheByTitle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -62,17 +60,31 @@ public class LaunchBot extends Robot {
             try {
               w.slowClick(pos.left, pos.top, 80);
               Thread.sleep(100);
-              while(WindowTools.checkPoint(window, PixelOffset.Patcher_Eula_Heading, 10)) {
-                System.out.println("Accepting eula.");
-                w.slowClick(PixelOffset.Patcher_Eula_Button.toRect(win_rect), 80);
-                Thread.sleep(180);
-              }
             }
             catch(InterruptedException e) {
               t.interrupt();
             }
           }
-        });//slowClick(pos.left, pos.top, 80);
+        });
+        while(true) {
+          Thread.sleep(1000);
+          try {
+            win_rect = window.getRect();
+            while(WindowTools.checkPoint(window, PixelOffset.Patcher_Eula_Heading)) {
+              System.out.println("Accepting eula.");
+              final Rect r = win_rect;
+              window.everyChild((final Window w)->{
+                try {w.slowClick(PixelOffset.Patcher_Eula_Button.toRect(r), 80);}
+                catch(InterruptedException e) {t.interrupt();}
+              });
+              Thread.sleep(180);
+            }
+          }
+          catch(APIException e) {
+            break; 
+          }
+        }
+//slowClick(pos.left, pos.top, 80);
 
         //System.out.println("  - Clicked");
 

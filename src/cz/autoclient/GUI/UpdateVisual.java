@@ -25,8 +25,12 @@ public class UpdateVisual extends UpdateInfoListener {
   private final Updater updater;
   public UpdateVisual(final Gui gui, final UpdateMenuItem m, final Updater updater) {
     super(null, Progress.Empty.getInstance());
+    if(updater == null)
+      throw new IllegalArgumentException("Updater is null!");
     this.updater = updater;
     this.gui = gui;
+    if(m == null)
+      throw new IllegalArgumentException("The update menu item is null!");
     this.item = m;
     download = new Progress() {
                @Override
@@ -48,6 +52,34 @@ public class UpdateVisual extends UpdateInfoListener {
                @Override
                public void resumed() {}
      };
+    install = new Progress() {
+      @Override
+      public void process(double current, double max) {
+        System.out.println("Installing: "+(current/max)*100+"%");
+      }
+      @Override
+      public void status(String status) {
+        System.out.println(status);
+      }
+      @Override
+      public void started() {
+        System.out.println("Install started.");
+      }
+      @Override
+      public void stopped(Throwable error) {
+        System.out.println("Install failed.");
+        error.printStackTrace();
+      }
+      @Override
+      public void finished() {
+        System.out.println("Install succesful asking for restart.");
+        gui.restart(false);
+      }
+      @Override
+      public void paused() {}
+      @Override
+      public void resumed() {}
+    };
     updater.checkCurrentState(()->{displayCurrentStatus();});
   }
   @Override
@@ -80,6 +112,8 @@ public class UpdateVisual extends UpdateInfoListener {
         case CAN_COPY_FILES: 
           SwingUtilities.invokeLater(()->item.setDownloaded(inProgress().version));
         break;
+        default:
+          System.out.println("Error: invalid install step: "+updater.getUpdates().installStep().name());
       }
     }
   }
@@ -87,6 +121,7 @@ public class UpdateVisual extends UpdateInfoListener {
   public void upToDate(UpdateInfo info) {
     upToDate(info.version);
   }
+  @Override
   public void upToDate(VersionId version) {
     upToDate = true;
     SwingUtilities.invokeLater(()->item.setUpToDate(version));

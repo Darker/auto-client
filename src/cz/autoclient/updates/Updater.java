@@ -7,15 +7,17 @@
 package cz.autoclient.updates;
 
 import cz.autoclient.github.constructs.BasicRepositoryId;
+import cz.autoclient.github.html.GitHubHtml;
+import cz.autoclient.github.interfaces.GitHub;
+import cz.autoclient.github.interfaces.Release;
+import cz.autoclient.github.interfaces.Releases;
+import cz.autoclient.github.interfaces.Repository;
 import cz.autoclient.github.interfaces.RepositoryId;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.json.JsonObject;
 
 /**
  *
@@ -29,9 +31,12 @@ public class Updater {
   private File cacheDir;
   private File cacheMainFile;
   UpdateInfoListener updateListener = UpdateInfoListener.Empty.getInstance();
-  public int checkInterval = 24*60*60*1000;
+  public final int checkInterval = 24*60*60*1000;
   private ExecutorService executor;
   private final UpdaterThreadFactory threadFactory = new UpdaterThreadFactory();
+  
+  // remember that update files have just been copied
+  private boolean justInstalled = false;
   
   public static enum InstallStep {
     NOT_INSTALLING,
@@ -58,7 +63,7 @@ public class Updater {
     if(Thread.currentThread() != threadFactory.updateThread) 
       throw new RuntimeException("Calling setCurrentAction from wrong thread!");
     synchronized(currentAction) {
-      System.out.println("Update action: "+currentAction+"->"+a.name());
+      dbgmsg("Update action: "+currentAction+"->"+a.name());
       currentAction = a; 
     }
     updateListener.actionChanged(a);
@@ -92,23 +97,27 @@ public class Updater {
         synchronized(cacheMainFile) {
           try {
             updates = UpdateCache.loadFromFile(cacheMainFile);
-            //System.out.println("Updates loaded from file.");
+            //dbgmsg("Updates loaded from file.");
             //new Exception("ble").printStackTrace();
           }
           catch(Exception e) {
-            System.out.println("UpdateCache deserialization failed:");
+            dbgmsg("UpdateCache deserialization failed:");
             e.printStackTrace();
             updates = new UpdateCache(); 
           }
         }
       } 
       else {
-        System.out.println("UpdateCache not in a file.");
+        dbgmsg("UpdateCache not in a file.");
         updates = new UpdateCache(); 
       }
     }
     return updates;
   }
+  public static void dbgmsg(String msg) {
+    System.out.println("[UPDATES] " + msg);
+  }
+  
   public void setUpdateListener(UpdateInfoListener i) {
     updateListener = i;
   }
@@ -116,7 +125,7 @@ public class Updater {
     try {
       updates.saveToFile(cacheMainFile);
     } catch (IOException ex) {
-      System.out.println("Failed to save cache: "+ex.getMessage());
+      dbgmsg("Failed to save cache: "+ex.getMessage());
       ex.printStackTrace();
     }
   }
@@ -126,62 +135,73 @@ public class Updater {
       return;
     setCurrentActionAndThenIdleDelayed(Action.CHECKING);
     updates = getUpdates();
-    System.out.println("Checking for updates...");
+    dbgmsg("Checking for updates...");
     if(updates.shouldCheck(checkInterval))
     {
-      System.out.println("Connecting to GitHub.");
-      //GitHubClient client = new GitHubClient();
-      //RepositoryService service = new RepositoryService();
-      //Repository repo;
-      try {
-        //repo = service.getRepository(repository.getOwner(), repository.getName());
-        //repo.
-      } catch(Throwable bullshit) {
-        System.out.println("Something failed!");
-        bullshit.printStackTrace();
-        try {
-          throw bullshit;
-        } catch (Throwable ex) {
-          Logger.getLogger(Updater.class.getName()).log(Level.SEVERE, null, ex);
+      dbgmsg("Connecting to GitHub.");
+      GitHub git = new GitHubHtml();
+      Repository repo = git.getRepository(repository);
+      Releases releases = repo.releases();
+      dbgmsg("Downloading releases from "+repo.getURL()+"...");
+      if(releases.fetch()) {
+        dbgmsg("Downloaded.");
+        for(Release r: releases) {
+          VersionId id = new VersionId(r.tag());
+          if(updates.findVersion(id)==null) {
+            dbgmsg("Adding release: "+r.tag());
+            UpdateInfo info = new UpdateInfo(r, cacheDir);
+            if(info.valid)
+              updates.add(info);
+            else
+              dbgmsg("  Release skipped because it doesn't have expected download file.");
+          }
+          else {
+            dbgmsg("Release already exists: "+r.tag());
+          }
         }
       }
-
-      System.out.println("Connected...");
+      else {
+        dbgmsg("Cannot fetch releases.");
+      }
+      dbgmsg("Connected...");
       updates.checkedRightNow();
     }
     else {
-      System.out.println("No need to check for updates, everything is cached."); 
+      dbgmsg("No need to check for updates, everything is cached."); 
     }
-    System.out.println("Available releases: "+updates.size());
+    dbgmsg("Available releases: "+updates.size());
     UpdateInfo newest = null;
     for(UpdateInfo info : updates) {
-      System.out.println("  "+info.basicInfo());
-      System.out.println("     - this is "+(info.version.compareTo(version)>0?"newer":"older")+" compared to the current version.");
+      dbgmsg("  "+info.basicInfo());
+      dbgmsg("     - this is "+(info.version.compareTo(version)>0?"newer":"older")+" compared to the current version.");
       if(info.version.compareTo(version)>0 && (newest==null ||newest.version.compareTo(info.version)<0)) {
         newest = info;
       }
     }
     if(newest!=null) {
       updates.installInProgress(newest);
-      System.out.println("Latest release that can be installed: "+newest.version);
+      dbgmsg("Latest release that can be installed: "+newest.version);
       if(!newest.validateFile()) {
-        System.out.println("Update can be downloaded.");
+        dbgmsg("Update can be downloaded.");
         updates.installStep(InstallStep.CAN_DOWNLOAD);
         if(!newest.seen) {
            updateListener.updateAvailable(newest);
         }
       }
       else {
-        System.out.println("Latest update already downloaded and ready to install.");
+        dbgmsg("Latest update already downloaded and ready to install.");
         updates.installStep(InstallStep.CAN_UNPACK);
         updateListener.download.finished();
         /*newest.unzip();
         newest.install(new Progress.Empty() {
           public void status(String s) {
-            System.out.println("Progress status: "+s);
+            dbgmsg("Progress status: "+s);
           }
         });*/
       }
+    }
+    else {
+      updateListener.upToDate(version);
     }
   }
   public void downloadUpdate() {
@@ -208,19 +228,25 @@ public class Updater {
       updates.installInProgress().install(updateListener.install);
     }
   }
+  public void terminateAfterAction() {
+    getExecutor().submit(()->terminate());
+  }
+  private void terminate() {
+    getExecutor().shutdown();
+  }
   public void checkCurrentState(final Runnable whenDone) {
     if(runInExecutorIfNeeded(()->checkCurrentState(whenDone)))
       return;
-    //System.out.println("Latest release that can be installed: "+info.version);
+    //dbgmsg("Latest release that can be installed: "+info.version);
     getUpdates();
     if(updates.installStep()!=InstallStep.NOT_INSTALLING) {
       UpdateInfo info = updates.installInProgress();
       if(!info.validateFile()) {
-        System.out.println("checkCurrentState: Update can be downloaded.");
+        dbgmsg("checkCurrentState: Update can be downloaded.");
         updates.installStep(InstallStep.CAN_DOWNLOAD);
       }
       else {
-        System.out.println("checkCurrentState: Latest update already downloaded.");
+        dbgmsg("checkCurrentState: Latest update already downloaded.");
         if(!info.isUnzipped())
           updates.installStep(InstallStep.CAN_UNPACK);
         else
@@ -228,7 +254,7 @@ public class Updater {
       }
     }
     else {
-      System.out.println("checkCurrentState: Not installing, unknown state."); 
+      dbgmsg("checkCurrentState: Not installing, unknown state."); 
     }
     if(whenDone!=null)
       whenDone.run();
@@ -276,7 +302,7 @@ public class Updater {
         runnable.run();
       }
       catch(Exception e) {
-        System.out.println("Exception during updates: "+e.getMessage());
+        dbgmsg("Exception during updates: "+e.getMessage());
         e.printStackTrace();
       }
     }
@@ -293,7 +319,7 @@ public class Updater {
   protected boolean runInExecutorIfNeeded(Runnable callback) {
     if(Thread.currentThread() != threadFactory.updateThread) {
       getExecutor().submit(new CatchRunnableErrors(callback));
-      System.out.println("Deferred callback to event queue.");
+      //dbgmsg("Deferred callback to event queue.");
       return true;
     }
     return false;

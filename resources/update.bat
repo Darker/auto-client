@@ -11,8 +11,7 @@ set NEW_AUTO_CLIENT_JAR_PATH=%UPDATE_PATH%\%AUTO_CLIENT_JAR%
 set DEBUG_MODE=no
 rem ==END OF VARDEF==
 if "%DEBUG_MODE%" == "yes" (
-  echo DEBUG_MODE_SUCCESS>debugmode.txt
-  goto exit
+  echo Running in debug mode.
 )
 
 
@@ -35,6 +34,7 @@ echo.
 echo Backing up old jar file:
 echo on>NUL
 xcopy "%AUTO_CLIENT_JAR_PATH%" "%BACKUP_DIR%\" /Q /Y
+echo off>NUL
 rem echo off>NUL
 rem echo.
 rem echo Deleting old version of the jar file at %AUTO_CLIENT_JAR_PATH%
@@ -54,10 +54,14 @@ rem )
 :install_update
 rem first make an empty file
 rem echo test >%AUTO_CLIENT_JAR_PATH%
+echo on>NUL
 xcopy "%NEW_AUTO_CLIENT_JAR_PATH%" "%AUTO_CLIENT_JAR_PATH%" /Q /Y
+echo off>NUL
 echo Copy result: %errorlevel%
 rem xcopy %UPDATE_PATH%\* %HOME_DIR% /Q 
 :run_jar
-pause
-
+if "%DEBUG_MODE%" == "yes" (
+  pause
+)
 :exit
+exit

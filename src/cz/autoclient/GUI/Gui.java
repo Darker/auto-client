@@ -173,9 +173,6 @@ import javax.swing.SwingUtilities;
         public void windowClosing(WindowEvent event)
         {
           System.out.println("Window is closing!");
-          //Stop updating GUI
-          if(guard!=null)
-            guard.interrupt();
           //Terminate the program
           ac.TerminateAsync();
         }
@@ -197,6 +194,16 @@ import javax.swing.SwingUtilities;
      });
      finalize.start();
      setSize(500, 300);
+   }
+   // Called from Main.java to ensure threads and shit are
+   // destroyed, killed, disintegrated etc...
+   public void teardown() {
+     //Stop updating GUI
+     if(guard!=null)
+       guard.interrupt();
+     destroyTray();
+     dispose();
+     robots.interrupt();
    }
    //
    // AUTOMATION INDICATION HERE!
@@ -494,9 +501,11 @@ import javax.swing.SwingUtilities;
             @Override
             public void actionPerformed(ActionEvent e) {
               System.out.println("Update clicked!");
-              updater.takeNextAction();
+              if(updater.getUpdates().installStepIs(Updater.InstallStep.CAN_COPY_FILES, Updater.InstallStep.CAN_UNPACK))
+                ac.UpdateAndRestart();
+              else
+                updater.takeNextAction();
               return;
-              //ToolAction();
             }
          });
          
@@ -1122,6 +1131,8 @@ import javax.swing.SwingUtilities;
     public void tryRestartAsAdmin() {
       tryRestartAsAdmin(false);
     }
+    
+
   
     private final Object dialogElevateMutex = new Object();
     private boolean elevateDialogIgnore = false;
@@ -1154,6 +1165,9 @@ import javax.swing.SwingUtilities;
             }
           }
         }.start();
+    }
+    public void restart(boolean force) {
+      ac.RestartAsync(force);
     }
  }
 

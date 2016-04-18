@@ -6,6 +6,7 @@ import cz.autoclient.main_automation.Automat;
 import cz.autoclient.GUI.Gui;
 import cz.autoclient.GUI.summoner_spells.ButtonSummonerSpellMaster;
 import cz.autoclient.GUI.summoner_spells.InputSummonerSpell;
+import cz.autoclient.GUI.updates.UpdateProgressWindow;
 import cz.autoclient.PVP_net.Setnames;
 import cz.autoclient.robots.Robot;
 import cz.autoclient.robots.exceptions.NoSuchRobotException;
@@ -43,13 +44,16 @@ import org.apache.logging.log4j.LogManager;
 import sirius.constants.IMKConsts;
 import sirius.constants.IWMConsts;
  
- 
+ // Call templates
+// S>s,top,3,400;d,2000;s,Hello everyone\, I go top :)
+// S>s,top,3,400;d,2000;s,Hello everyone\, I go top :)
+// S>s,top,3,400;d,2000;s,Hello everyone\, I go top :)
  public class Main
    implements IWMConsts, IMKConsts
  {
    //Some application constants
    public static final String SETTINGS_FILE = "data/settings.bin";
-   public static final VersionId VERSION = new VersionId("3.2 Beta");
+   public static final VersionId VERSION = new VersionId("3.2-beta");
    public static final File BACKUP_DIR = new File("data/backup/");
    public static boolean debug = true;
    
@@ -67,7 +71,7 @@ import sirius.constants.IWMConsts;
    
    public Main()
    {
-     //updater = new Updater("Darker/auto-client", VERSION, new File("./updates/"));
+     updater = new Updater("Darker/auto-client", VERSION, new File("./updates/"));
      //Normal program
      startGUI();
    }
@@ -148,7 +152,7 @@ import sirius.constants.IWMConsts;
                message.append(" for backup and default settings will now be used.");
              }
              else {
-               message.append("Additionally, an following error has occured when attempting to backup corrupted file:\n    ");
+               message.append("Additionally, a following error has occured when attempting to backup corrupted file:\n    ");
                message.append(path);  
                message.append("\nWe're sorry, all your settings are lost :(");
              }
@@ -168,9 +172,11 @@ import sirius.constants.IWMConsts;
          gui = new Gui(Main.this, settings);
          gui.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
          gui.setVisible(true);
-         gui.setUpdateManager(updater);
-         if(settings.getBoolean(Setnames.UPDATES_AUTOCHECK.name, (Boolean)Setnames.UPDATES_AUTOCHECK.default_val))
-           updater.checkForUpdates();
+         if(updater!=null) {
+           gui.setUpdateManager(updater);
+           if(settings.getBoolean(Setnames.UPDATES_AUTOCHECK.name, (Boolean)Setnames.UPDATES_AUTOCHECK.default_val))
+             updater.checkForUpdates();
+         }
        }
      });
      // If the application is configured to allways start as admin it will restart now
@@ -257,31 +263,19 @@ import sirius.constants.IWMConsts;
     * Terminates the whole program while saving settings.
    * @param force if true, terminates the program using System.exit(0)
     */
-   public void Terminate(final boolean force) {
-     //gui is JFrame representing the application window
-     SwingUtilities.invokeLater(
-       ()->{
-         if(gui!=null) {
-           gui.setVisible(false);
-           gui.destroyTray();
-           gui.dispose();
-           gui.robots.interrupt();
-         }
-         for(Frame frame : JFrame.getFrames()) {
-           //System.out.println("Frame " + frame.getTitle());
-           if(frame.isDisplayable()) {
-             //System.out.println("  Destroying frame " + frame.getTitle());
-             frame.dispose();
-           }
-         }
-       }
-     );
-
-     
+   public void Terminate(final boolean force, final boolean saveSettings) {
+     destroyGui();
      //Stop tool thread if running
      if(ToolRunning())
        StopTool();
      //Save settings
+     if(saveSettings)
+       saveSettings();
+     //Here, no non-deamon threads should be running (daemon thread does not prolong the applicatione execution).
+     if(force)
+       System.exit(0);
+   }
+   public void saveSettings() {
      if(settings!=null) {
        try {
          settings.loadSettingsFromBoundFields();
@@ -297,13 +291,106 @@ import sirius.constants.IWMConsts;
      }
      if(updater!=null)
        updater.saveAll();
-
-     //Here, no non-deamon threads should be running (daemon thread does not prolong the applicatione execution).
-     if(force)
-       System.exit(0);
+   }
+   public void destroyGui() {
+     //gui is JFrame representing the application window
+     SwingUtilities.invokeLater(
+       ()->{
+         if(gui!=null) {
+           gui.setVisible(false);
+           gui.teardown();
+           gui = null;
+         }
+         for(Frame frame : JFrame.getFrames()) {
+           //System.out.println("Frame " + frame.getTitle());
+           if(frame.isDisplayable()) {
+             //System.out.println("  Destroying frame " + frame.getTitle());
+             frame.dispose();
+           }
+         }
+       }
+     );
+   }
+   public void InstallUpdate() {
+     if(updater!=null) {
+       if(updater.getUpdates().installStepIs(Updater.InstallStep.CAN_COPY_FILES, Updater.InstallStep.CAN_UNPACK)) {
+         updater.installUpdate();
+         updater.terminateAfterAction();
+         System.out.println("Installing updates, will terminate after that.");
+       }
+       else
+         throw new IllegalStateException("Tried to install update but this is no time to install.");
+     }
+     else 
+       throw new IllegalStateException("Tried to install update but updates are disabled.");
    }
    public void Terminate() {
-     Terminate(false); 
+     Terminate(false, true); 
+   }
+    public void Terminate(boolean force) {
+     Terminate(force, true); 
+   }
+   public void Restart(boolean force, boolean saveSettings) {
+     if(saveSettings)
+       saveSettings();
+      //Stop tool thread if running
+     if(ToolRunning())
+       StopTool();
+     try {
+       Runtime.getRuntime().exec("javaw -jar \""+getSelfPath()+"\" >restart.log");
+     } catch (FileNotFoundException ex) {
+       System.out.println("Cannot find the jar file.");
+     } catch (IOException ex) {
+       System.out.println("Cannot execute the command.");
+     }
+     Terminate(force);
+   }
+   public void Restart(boolean force) {
+     Restart(force, true);
+   }
+   public void Restart() {
+     Restart(false, true);
+   }
+   public Thread RestartAsync(final boolean force, final boolean saveSettings) {
+     Thread t = new Thread("Restart AutoClient") {
+       @Override
+       public void run() {
+         Main.this.Restart(force, saveSettings);
+       }
+     };
+     t.start();
+     return t;
+   }
+   public Thread RestartAsync(boolean force) {
+     return RestartAsync(force, true);
+   }
+   public Thread RestartAsync() {
+     return RestartAsync(false, true);
+   }
+   public void UpdateAndRestart() {
+     Thread restartThread = new Thread("UpdateAndRestart") {
+       @Override
+       public void run() {
+         destroyGui();
+         saveSettings();
+         UpdateProgressWindow wnd = new UpdateProgressWindow(updater, ()->{
+           destroyGui();
+           //Stop tool thread if running
+           if(ToolRunning())
+             StopTool();
+           try {
+             Runtime.getRuntime().exec("javaw -jar \""+getSelfPath()+"\" >restart.log");
+           } catch (FileNotFoundException ex) {
+             System.out.println("Cannot find the jar file.");
+           } catch (IOException ex) {
+             System.out.println("Cannot execute the command.");
+           }
+         });
+         updater.setUpdateListener(wnd);
+         InstallUpdate();
+       }
+     };
+     restartThread.start();
    }
    
    public void RestartWithAdminRightsAsync() throws FileNotFoundException, IOException {
@@ -363,25 +450,8 @@ import sirius.constants.IWMConsts;
     * @throws IOException if there was another failure inboking VBS script
     */
    public void StartWithAdminRights() throws FileNotFoundException, IOException {
-     //Our 
-     String jarPath;
 
-     //System.out.println("Current relative path is: " + s);
-     
-     try {
-       jarPath = "\""+new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getAbsolutePath()+"\"";
-     } catch (URISyntaxException ex) {
-       throw new FileNotFoundException("Could not fetch the path to the current jar file. Got this URISyntax exception:"+ex);
-     }
-     //If the jar path was created but doesn't contain .jar, we're (most likely) not running from jar
-     //typically this happens when running the program from IDE
-     //These 4 lines just serve as a fallback in testing, should be deleted in production
-     //code and replaced with another FileNotFoundException
-     if(!jarPath.contains(".jar")) {
-       Path currentRelativePath = Paths.get("");
-       jarPath = "\""+currentRelativePath.toAbsolutePath().toString()+"\\AutoClient.jar\"";
-     }
-     
+     String jarPath = getSelfPath();
      //The path to the helper script. This scripts takes 1 argument which is a Jar file full path
      File runAsAdmin = null;
      // Temporary file to check
@@ -405,6 +475,28 @@ import sirius.constants.IWMConsts;
      //Note that .exec is asynchronous
      //After it starts, you must terminate your program ASAP, or you'll have 2 instances running
      Runtime.getRuntime().exec(command);
+   }
+   
+   public static String getSelfPath() throws FileNotFoundException {
+     //Our 
+     String jarPath;
+
+     //System.out.println("Current relative path is: " + s);
+     
+     try {
+       jarPath = "\""+new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getAbsolutePath()+"\"";
+     } catch (URISyntaxException ex) {
+       throw new FileNotFoundException("Could not fetch the path to the current jar file. Got this URISyntax exception:"+ex);
+     }
+     //If the jar path was created but doesn't contain .jar, we're (most likely) not running from jar
+     //typically this happens when running the program from IDE
+     //These 4 lines just serve as a fallback in testing, should be deleted in production
+     //code and replaced with another FileNotFoundException
+     if(!jarPath.contains(".jar")) {
+       Path currentRelativePath = Paths.get("");
+       jarPath = "\""+currentRelativePath.toAbsolutePath().toString()+"\\AutoClient.jar\"";
+     }
+     return jarPath;
    }
  }
 

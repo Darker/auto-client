@@ -221,6 +221,7 @@ public abstract class Robot implements Runnable {
       if(listener!=null)
         listener.terminated(e);
       glg().debug("Robot thread {0} terminated with error: "+e.getMessage(), t.getName());
+      e.printStackTrace();
       continueOnError(e, ExecutionPhase.RUN);
       //System.out.println("Robot thread "+t.getName()+" terminated with error:\n     "+e);
     }

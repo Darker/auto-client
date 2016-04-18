@@ -23,7 +23,7 @@ public class BatchScript implements ScriptWithParameters {
   //HashMap<String, String> params = new HashMap();
   String data;
   // match for name is ([\\w]+)
-  String basicPattern = "(^|\\n)set %NAME%=([^\\n]*)(?=\\n.*?rem ==END OF VARDEF==)";
+  String basicPattern = "(^|\r?\n)set %NAME%=([^\n]*)(?=\r?\n.*?rem ==END OF VARDEF==)";
   public BatchScript(String data) {
     this.data = data;
     
@@ -39,9 +39,9 @@ public class BatchScript implements ScriptWithParameters {
   public void setParameter(String name, String value) {
     Matcher matcher = parameterMatcher(name);
     if(matcher.find())
-      data = matcher.replaceFirst("$1set "+name+"="+value);
+      data = matcher.replaceFirst("$1set "+name+"="+value.replace("\\", "\\\\"));
     else
-      data = data.replaceFirst("(rem ==END OF VARDEF==)", "set "+name+"="+value+"\n$1");
+      data = data.replaceFirst("(rem ==END OF VARDEF==)", "set "+name+"="+value+"\r\n$1");
       //throw new IllegalArgumentException("fdsigmf");
   }
 
@@ -70,7 +70,8 @@ public class BatchScript implements ScriptWithParameters {
       file.delete();
     file.createNewFile();
     try (PrintWriter out = new PrintWriter(file)) {
-      out.print(data);
+      String data_crlf = data.replaceAll("(?<!\\r)\\n", "\r\n");
+      out.print(data_crlf);
     }
     return true;
   }

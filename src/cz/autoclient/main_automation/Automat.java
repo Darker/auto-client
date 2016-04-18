@@ -157,7 +157,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
        }
        if (!isInterrupted())
        {
-         sleep(accepted>0 ? 20L : 600L);
+         sleep(accepted>0 ? 10L : 600L);
          try
          {
            if (accepted>0)
