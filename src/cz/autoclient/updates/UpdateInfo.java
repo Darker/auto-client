@@ -110,10 +110,10 @@ public class UpdateInfo implements java.io.Serializable {
   public boolean validateFile() {
     if(!isDownloaded())
       return false;
-    if(localFile.length()!=originalSize) {
-      localFile.delete();
-      return false;
-    }
+    //if(localFile.length()!=originalSize) {
+    //  localFile.delete();
+    //  return false;
+    //}
     return true;
   }
   void downloadFile(Progress process) {
@@ -129,6 +129,7 @@ public class UpdateInfo implements java.io.Serializable {
       return;
     }
     long completeFileSize = httpConnection.getContentLength();
+    System.out.println("File size: "+completeFileSize);
     localFile.getParentFile().mkdirs();
     java.io.FileOutputStream fos;
     final int BUFFER_SIZE = 128;
@@ -148,13 +149,16 @@ public class UpdateInfo implements java.io.Serializable {
       int x = 0;
       while ((x = in.read(data, 0, BUFFER_SIZE)) >= 0) {
         downloadedFileSize += x;
+        //System.out.println("Downloaded bytes: "+downloadedFileSize);
         bout.write(data, 0, x);
-        process.process((double)downloadedFileSize, completeFileSize);
+        process.process(downloadedFileSize, completeFileSize);
       }
       bout.close();
       validateFile();
     }
     catch(Exception e) {
+      System.out.println(e.getMessage());
+      e.printStackTrace(System.out);
       process.stopped(e);
       localFile.delete();
     }

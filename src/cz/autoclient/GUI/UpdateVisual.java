@@ -35,7 +35,7 @@ public class UpdateVisual extends UpdateInfoListener {
     download = new Progress() {
                @Override
                public void process(double current, double max) {
-                 SwingUtilities.invokeLater(()->m.setDownloadProgress(inProgress().version, (current/max)*100));
+                 SwingUtilities.invokeLater(()->m.setDownloadProgress(inProgress().version, (current/max)));
                }
                @Override
                public void status(String status) {}
@@ -46,6 +46,7 @@ public class UpdateVisual extends UpdateInfoListener {
                @Override
                public void finished() {
                  item.setDownloaded(inProgress().version);
+                 gui.notification(Notification.Def.UPDATE_DOWNLOADED);
                }
                @Override
                public void paused() {}

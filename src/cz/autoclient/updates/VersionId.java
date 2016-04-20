@@ -13,11 +13,12 @@ package cz.autoclient.updates;
  */
 public class VersionId implements java.io.Serializable {
   private static final long serialVersionUID = 666;
-  final int[] numbers;
-  final String affix;
-  final boolean isBeta;
+  public final int[] numbers;
+  public final String affix;
+  public final boolean isBeta;
   public VersionId(String id) {
     id = id.replaceFirst("^[^0-9]+", "");
+    id = id.replaceFirst("[\r\n\t]", "");
     affix = id.replaceFirst("^[0-9\\.]+[\\s-]*", "");
     isBeta = affix.toLowerCase().equals("beta");
     

@@ -26,16 +26,17 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.2</version>
+        <version>3.5.1</version>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
+          <compilerArgument>-proc:none</compilerArgument>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.2-beta-4</version>
+        <version>2.6</version>
         <configuration>
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
@@ -58,7 +59,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.5</version>
+        <version>2.6</version>
         <configuration>
           <archive>
             <manifest>
@@ -70,36 +71,7 @@
           <outputDirectory>${project.build.directory}/</outputDirectory>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>cobertura-maven-plugin</artifactId>
-        <version>2.6</version>
-        <configuration>
-          <skip>true</skip>
-          <formats>
-            <format>html</format>		
-            <format>xml</format>
-          </formats>
-          <outputDirectory>${project.build.directory}/surefire-reports/cobertura</outputDirectory>		
-          <instrumentation>
-            <ignoreTrivial>true</ignoreTrivial>			
-            <ignores>
-              <ignore>org.slf4j.Logger.*</ignore>		
-            </ignores>
-            <excludes>	
-            </excludes>
-          </instrumentation>
-        </configuration>
-        <executions>
-  
-          <execution>
-            <phase>package</phase>			
-            <goals>
-              <goal>cobertura</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
+     
     </plugins>
 
   </build>

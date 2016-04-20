@@ -23,12 +23,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -53,7 +55,7 @@ import sirius.constants.IWMConsts;
  {
    //Some application constants
    public static final String SETTINGS_FILE = "data/settings.bin";
-   public static final VersionId VERSION = new VersionId("3.2-beta");
+   private VersionId VERSION = new VersionId("0.0-error");
    public static final File BACKUP_DIR = new File("data/backup/");
    public static boolean debug = true;
    
@@ -71,9 +73,20 @@ import sirius.constants.IWMConsts;
    
    public Main()
    {
-     updater = new Updater("Darker/auto-client", VERSION, new File("./updates/"));
+     updater = new Updater("Darker/auto-client", getVersion(), new File("./updates/"));
+     
+     System.out.println("Running auto client "+getVersion());
      //Normal program
      startGUI();
+   }
+   
+   public final VersionId getVersion() {
+     if(VERSION.affix.equals("error")) {
+       InputStream in = Main.class.getResourceAsStream("/version");
+       Scanner sc = new Scanner(in, "UTF-8");
+       VERSION = new VersionId(sc.useDelimiter("\\A").next());
+     }
+     return VERSION;
    }
 
    
@@ -201,7 +214,8 @@ import sirius.constants.IWMConsts;
      encryptor.addPassword("Constant password.");
      encryptor.addPassword(UniqueID.WINDOWS_USER_SID);
      try {
-       System.out.println("Password key: "+encryptor.getMergedPassword());
+       encryptor.getMergedPassword();
+       //System.out.println("Password key: "+encryptor.getMergedPassword());
        //System.out.println("Encryption password: "+encryptor.getMergedPassword());
      } catch (PasswordFailedException ex) {
        Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);

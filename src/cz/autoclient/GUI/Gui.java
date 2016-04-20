@@ -491,7 +491,7 @@ import javax.swing.SwingUtilities;
          menu.add(checkBox);
          
          updateMenuItem = new UpdateMenuItem();
-         updateMenuItem.setUnknown(Main.VERSION);
+         updateMenuItem.setUnknown(ac.getVersion());
  
          updateMenuItem.setText("Initializing.");
          

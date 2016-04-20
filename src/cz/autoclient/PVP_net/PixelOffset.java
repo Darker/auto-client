@@ -28,11 +28,11 @@ public enum PixelOffset implements ComparablePixel {
     
     /** MAIN SCREEN **/
     //PlayButton_red_old(0.5282632272641906D, 0.05335365853658536D, new Color(216, 38, 20, 1)),
-    PlayButton_red (0.48352019925535544D, 0.06457398901151389D, new Color(139, 18, 13, 1), 15),
+    PlayButton_red (0.5277226353206357D, 0.053811657509594914D, new Color(213, 36, 20, 1), 15),
     //The small cross button to stop searching for game
     PlayButton_cancel(0.5587665322620996D, 0.06253177233521276D, new Color(205, 165, 102, 1), 10),
     PlayButton_SearchingForGame_Approx (0.42531457289624774D, 0.06710726787193565D, new Color(255, 255, 255, 1), 10),
-    StoreButton (0.7179852949059728D, 0.05839416058394161D, new Color(200, 178, 136, 1), 10),
+    StoreButton (0.7179852949059728D, 0.05839416058394161D, new Color(189, 97, 0, 1), 10),
     /** GAME SELECTION **/
     //The button you can press after game mode has been selected
     Play_Solo(0.5306054028901105D, 0.8869954957698297D, new Color(200, 81, 0, 1)),
@@ -40,6 +40,7 @@ public enum PixelOffset implements ComparablePixel {
     /** BLIND PICK LOBBY**/
     LobbyChat(0.495117D, 0.91875D, new Color(255, 255, 255, 1), 1),
     LobbyChat2(0.5387487383572218D, 0.9184036396562681D, new Color(255, 255, 255, 1)),
+    LobbyChatBlueTopFrame(0.5190743326122113D, 0.7101857639525893D,new Color(28, 51, 81, 1),5),
     //Quit button for lobby (not allways available)s
     LobbyQuit(0.11646860979241919D, 0.9207317073170731D),
     LobbyChampionSlot1(0.25182702572064036D, 0.26219512195121947D),

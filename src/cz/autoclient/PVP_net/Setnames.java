@@ -47,7 +47,7 @@ public enum Setnames {
   
   NOTIF_MENU_BLIND_IN_LOBBY(false),
   NOTIF_MENU_UPDATE_EXISTS(true),
-
+  NOTIF_MENU_UPDATE_DOWNLOADED(true),
   AM_SAY(),
   AUTO_QUEUE_ENABLED(false),
   

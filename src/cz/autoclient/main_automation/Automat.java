@@ -146,10 +146,11 @@ import cz.autoclient.scripting.exception.ScriptParseException;
      //If the play button is there, do not do anything
      boolean play_button = true;
      
-     gui.setTitle("Waiting for match.");
      
+     gui.setTitle("Waiting for match.");
      for (;;)
      {
+       
        time = System.currentTimeMillis()/1000L;
        if(pretendAccepted == true) {
          pretendAccepted = false;
@@ -164,13 +165,17 @@ import cz.autoclient.scripting.exception.ScriptParseException;
            {   
              boolean lobby = false;
              if(checkPoint(window, PixelOffset.LobbyChat)
-                && checkPoint(window, PixelOffset.LobbyChat2)
+                && checkPoint(window, PixelOffset.LobbyChat2) &&
+                 checkPoint(window, PixelOffset.LobbyChatBlueTopFrame)
                 //&& checkPoint(PixelOffset.Blind_SearchChampion, 1)
+                 
              )
              {
                System.out.println("Lobby detected. Picking champion and lane.");
                if(normal_lobby())
                  break;
+               else
+                 continue;
              }
              //Here detect teambuilder lobby
              else if(checkPoint(window, PixelOffset.TeamBuilder_CaptainIcon)) {
@@ -509,8 +514,9 @@ import cz.autoclient.scripting.exception.ScriptParseException;
          do {
            //Wait 2 seconds, then check if back in main screen
            sleep(2000);
-
-           if((WindowTools.checkPoint(window, failPoints))>1) {
+           
+           BufferedImage img = window.screenshot();
+           if((WindowTools.checkPoint(img, failPoints))>1) {
              System.out.println("NORMAL LOBBY: Game did not start, waiting for another game."); 
              return false;
            }
@@ -519,11 +525,12 @@ import cz.autoclient.scripting.exception.ScriptParseException;
              System.out.println("NORMAL LOBBY: Game started.");
              return true;
            }
+           
 
-
-           //WindowTools.drawCheckPoint(img, points);
+           WindowTools.drawCheckPoint(img, points);
+           WindowTools.drawCheckPoint(img, failPoints);
            //WindowTools.drawCheckPoint(screenshot, failPoints);
-           //DebugDrawing.displayImage(screenshot);
+           DebugDrawing.displayImage(img);
            //else if(WindowTools.checkPoint(window, points)>=4) {
            //  System.out.println("NORMAL LOBBY: lobby back here, waiting for game again."); 
              //System.out.println("NORMAL LOBBY: Game did not start, waiting for another game."); 

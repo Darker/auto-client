@@ -77,6 +77,12 @@ public abstract class Notification {
                  Setnames.NOTIF_MENU_UPDATE_EXISTS,
                  TrayIcon.MessageType.INFO
     ),
+    UPDATE_DOWNLOADED("Update downloaded",
+                 "app.update.downloaded",
+                 "An update is ready to install. Check Tools->Updates.",
+                 Setnames.NOTIF_MENU_UPDATE_DOWNLOADED,
+                 TrayIcon.MessageType.INFO
+    ),
     ;
     Def(String n, String p, String t, Setnames setting, TrayIcon.MessageType type) {
       name = n;  
