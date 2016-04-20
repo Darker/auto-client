@@ -76,6 +76,7 @@ public class UpdateMenuItem extends JMenuItem {
     }
     setText("Click to download: "+version);
     setBackground(Color.ORANGE);
+    this.revalidate();
     downloadProgress = 0;
   }
   public void setDownloadProgress(VersionId version, double progress) {

@@ -1,6 +1,7 @@
 /dist/
 /build/*
 /target/*
+/nbproject/private/*
 *.exe
 /data/*
 /LOLResources/*
@@ -12,7 +13,6 @@
 ./run_with_commandline.bat
 ./update_test_file.bat
 ./AutoClient.jar
-/release/*
 *.7z
 /cleanest.cfg
 /proguard/
@@ -20,5 +20,5 @@
 /release/last_release/data/settings.bin
 /stop_flashing/wrong_return_value.txt
 *.jar
-!/release/*/*.jar
+/release/*
 /updates/*

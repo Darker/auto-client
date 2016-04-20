@@ -14,13 +14,14 @@ import cz.autoclient.updates.VersionId;
  */
 public class TestVersionId {
   public static final String A = "v1.2.3.4";
-  public static final String A2 = " v 1.2.3.4 ";
+  public static final String A2 = " v 1.2.3.4\n ";
   
   public static final String B = "v1.2.5";
   
   public static final String Abeta = "v1.2.3.4beta";
-  public static final String Abeta2 = " v 1.2.3.4  beta";
+  public static final String Abeta2 = " v 1.2.3.4  beta\n";
   public static final String Abeta3 = "v1.2.3.4-beta";
+
 
   public static final VersionId A_ = new VersionId(A);
   public static final VersionId A2_ = new VersionId(A2);

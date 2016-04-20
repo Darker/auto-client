@@ -173,8 +173,9 @@ public class Updater {
     UpdateInfo newest = null;
     for(UpdateInfo info : updates) {
       dbgmsg("  "+info.basicInfo());
-      dbgmsg("     - this is "+(info.version.compareTo(version)>0?"newer":"older")+" compared to the current version.");
-      if(info.version.compareTo(version)>0 && (newest==null ||newest.version.compareTo(info.version)<0)) {
+      boolean newer = info.version.compareTo(version)>0;
+      dbgmsg("     - this is "+(newer?"newer":"older")+" compared to the current version.");
+      if(newer && (newest==null || newest.version.compareTo(info.version)<0)) {
         newest = info;
       }
     }
@@ -202,6 +203,7 @@ public class Updater {
     }
     else {
       updateListener.upToDate(version);
+      updates.installStep(InstallStep.NOT_INSTALLING);
     }
   }
   public void downloadUpdate() {
