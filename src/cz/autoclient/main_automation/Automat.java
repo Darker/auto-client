@@ -503,7 +503,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
      PixelOffset[] failPoints = new PixelOffset[] {
        PixelOffset.StoreButton,
        PixelOffset.PlayButton_red,
-       PixelOffset.PlayButton_SearchingForGame_Approx,
+       PixelOffset.PlayButton_SearchingCorner,
        PixelOffset.PlayButton_cancel
      };
      while(true) {
