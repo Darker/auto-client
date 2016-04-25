@@ -525,12 +525,17 @@ import cz.autoclient.scripting.exception.ScriptParseException;
              System.out.println("NORMAL LOBBY: Game started.");
              return true;
            }
+           else {
+             System.out.println("NORMAL LOBBY: Waiting...");
+           }
+             
+             
            
 
-           //WindowTools.drawCheckPoint(img, points);
-           //WindowTools.drawCheckPoint(img, failPoints);
+           WindowTools.drawCheckPoint(img, points);
+           WindowTools.drawCheckPoint(img, failPoints);
            //WindowTools.drawCheckPoint(screenshot, failPoints);
-           //DebugDrawing.displayImage(img);
+           DebugDrawing.displayImage(img);
            //else if(WindowTools.checkPoint(window, points)>=4) {
            //  System.out.println("NORMAL LOBBY: lobby back here, waiting for game again."); 
              //System.out.println("NORMAL LOBBY: Game did not start, waiting for another game."); 
