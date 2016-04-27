@@ -7,12 +7,9 @@
 package cz.autoclient.main_automation.scripts;
 
 import cz.autoclient.autoclick.windows.Window;
-import cz.autoclient.main_automation.Automat;
 import cz.autoclient.scripting.ScriptCommand;
 import cz.autoclient.scripting.exception.IllegalCmdArgumentException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *

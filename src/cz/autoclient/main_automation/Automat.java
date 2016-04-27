@@ -54,6 +54,12 @@ import cz.autoclient.scripting.exception.ScriptParseException;
      ScriptCommand.setCommand("s", CommandSay.class);
      ScriptCommand.setCommand("d", CommandDelay.class);
    }
+   public static void dbgmsg(final String data) {
+      System.out.println("[MAIN BOT] "+data);
+   }
+   public static void errmsg(final String data) {
+      System.err.println("[MAIN BOT] Error: "+data);
+   }
    
    public Automat(Gui acgui, Settings settings)
    {
@@ -65,15 +71,15 @@ import cz.autoclient.scripting.exception.ScriptParseException;
    @Override
    public void run()
    {
-     System.out.println("Automation started!");
+     dbgmsg("Automation started!");
      //Get PVP.net window
      window = MSWindow.windowFromName(ConstData.window_title_part, false);
      if(window==null) {
-       System.err.println("No PVP.net window found!");
+       errmsg("No PVP.net window found!");
        end();
        return;
      }
-     System.out.println("PVP.net window available.");
+     dbgmsg("PVP.net window available.");
      //long cID = this.window.FindWindow("PVP");
      //this.gui.getProgressBar1().setValue(0);
      //First check if we have access to the window
@@ -93,11 +99,11 @@ import cz.autoclient.scripting.exception.ScriptParseException;
      }
      catch (InterruptedException e)
      {
-       System.out.println(e);
+       dbgmsg(e.getMessage());
        end();
      }
      catch (APIException e) {
-       System.out.println("The Window API has failed:" +e);
+       dbgmsg("The Window API has failed:" +e);
        end();
      }
      end();
@@ -171,7 +177,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
                  
              )
              {
-               System.out.println("Lobby detected. Picking champion and lane.");
+               dbgmsg("Lobby detected. Picking champion and lane.");
                if(normal_lobby())
                  break;
                else
@@ -179,7 +185,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
              }
              //Here detect teambuilder lobby
              else if(checkPoint(window, PixelOffset.TeamBuilder_CaptainIcon)) {
-               System.out.println("Team builder lobby detected.");
+               dbgmsg("Team builder lobby detected.");
                
                if(!isInterrupted())
                  //Function returns true if it sucessfully matched you into game
@@ -198,12 +204,12 @@ import cz.autoclient.scripting.exception.ScriptParseException;
                PixelOffset point = PixelOffset.TeamBuilder_CaptainIcon;
                Color a = window.getColor((int)(rect.width * point.x), (int)(rect.height * point.y));
              
-               System.out.println("new Color("+a.getRed()+", "+a.getGreen()+", "+a.getBlue()+", 1)");
+               dbgmsg("new Color("+a.getRed()+", "+a.getGreen()+", "+a.getBlue()+", 1)");
                sleep(600L);
              }*/
              
              if(time-accepted>12) {
-               System.out.println("Match was declined.");
+               dbgmsg("Match was declined.");
                gui.setTitle("Waiting for match.");
                accepted = -1;
                tb = false;
@@ -229,7 +235,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
                click(PixelOffset.TeamBuilder_AcceptGroup);
                //this.gui.getProgressBar1().setValue(60);
                gui.setTitle("Group accepted, waiting for lobby.");
-               System.out.println("Group accepted, waiting for lobby.");
+               dbgmsg("Group accepted, waiting for lobby.");
                accepted = time;
                tb = true;
                play_button = false;
@@ -242,12 +248,12 @@ import cz.autoclient.scripting.exception.ScriptParseException;
              else if(checkPoint(window, PixelOffset.TeamBuilder_CaptainLobby_Invited)) {
                
                if( teamBuilder_captain_lobby()) {
-                 System.out.println("Game started as captain, the job is over.");
+                 dbgmsg("Game started as captain, the job is over.");
                  end();
                  break;
                }
                else {
-                 System.out.println("Lobby failed, waiting for another game.");
+                 dbgmsg("Lobby failed, waiting for another game.");
                }
                
              }
@@ -260,7 +266,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
              }
              //If play button wasn't there and sudenly appeared, the program shall quit
              else if(checkPoint(window, PixelOffset.PlayButton_red) && !play_button) {
-               System.out.println("The play button is red. Something must've gone wrong.");
+               dbgmsg("The play button is red. Something must've gone wrong.");
                play_button = true;
                tb = false;
                gui.setTitle("Waiting for match.");
@@ -275,7 +281,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
                cCol = window.getColor((int)(width * PixelOffset.PlayButton.x), (int)(height * PixelOffset.PlayButton.y));
                if ((cCol.getRed() > 70) && (cCol.getGreen() < 10) && (cCol.getBlue() < 5) && (!isInterrupted()))
                {
-                 System.out.println("The play button is red. Something must've gone wrong. Aborting.");
+                 dbgmsg("The play button is red. Something must've gone wrong. Aborting.");
                  interrupt();
                  break;
                }
@@ -294,13 +300,13 @@ import cz.autoclient.scripting.exception.ScriptParseException;
 
      if (!isInterrupted())
      {
-       System.out.println("All done :)");
+       dbgmsg("All done :)");
        
        interrupt();
      }
      else
      {
-       System.out.println("Match handling interrupted.");
+       dbgmsg("Match handling interrupted.");
      }
    }
    public synchronized void simulateAccepted() {
@@ -310,7 +316,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
      if(settings.getBoolean(Setnames.NOTIF_MENU_BLIND_IN_LOBBY.name, false))
        gui.notification(Notification.Def.BLIND_TEAM_JOINED);
      sleep(200L);
-     System.out.println("In normal lobby.");
+     dbgmsg("In normal lobby.");
      //boolean ARAM = false;
      //this.gui.getProgressBar1().setValue(70);
      if(settings.getStringEquivalent(Setnames.BLIND_CALL_TEXT.name).length()>0) {
@@ -320,7 +326,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
        //Generate message
        String message = settings.getString(Setnames.BLIND_CALL_TEXT.name);
        if(message.startsWith("S>")) {
-         System.out.println("Compiling "+message+" for chat messaging.");
+         dbgmsg("Compiling "+message+" for chat messaging.");
          try {
            OneLineScript say = OneLineScript.parse(message);
            say.compile();
@@ -337,16 +343,16 @@ import cz.autoclient.scripting.exception.ScriptParseException;
        }
        else {
          click(PixelOffset.LobbyChat);
-         System.out.println("Typping '"+settings.getString(Setnames.BLIND_CALL_TEXT.name)+"' in chat window.");
+         dbgmsg("Typping '"+settings.getString(Setnames.BLIND_CALL_TEXT.name)+"' in chat window.");
          window.typeString(settings.getString(Setnames.BLIND_CALL_TEXT.name));
          Enter();
        }
        //if(true){ return; }
-       //System.out.println(this.gui.chatTextField().getText());
+       //dbgmsg(this.gui.chatTextField().getText());
        sleep(200L);
      }
      else
-       System.out.println("No chat message to type, skipping this step.");
+       dbgmsg("No chat message to type, skipping this step.");
      //this.gui.getProgressBar1().setValue(85);
 
      if (settings.getStringEquivalent(Setnames.BLIND_CHAMP_NAME.name).length() > 1)
@@ -363,7 +369,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
        click(PixelOffset.LobbyChampionSlot1);
      }
      
-     System.out.println("Setting summoner spells.");
+     dbgmsg("Setting summoner spells.");
      
      
      //Set summoner spells
@@ -386,7 +392,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
      for(int i=0; i<2; i++) {
        SummonerSpell s = ConstData.lolData.getSummonerSpells().get(spells[i]);
        if(s==null) {
-         System.out.println("  Spell #"+(i+1)+" is null."); 
+         dbgmsg("  Spell #"+(i+1)+" is null."); 
          continue;
        }
        // First check if the same spell is already selected
@@ -409,7 +415,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
          
          // Now we determine whether it's the RIGHT spell.
          if(isSelected) {
-           System.out.println("  Spell #"+(i+1)+" already selected."); 
+           dbgmsg("  Spell #"+(i+1)+" already selected."); 
            continue; 
          }
        }
@@ -437,7 +443,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
           Rect pos = ScreenWatcher.findByAvgColor(icon, screenshot, 0.001f, true, null);
 
           if(pos!=null) {
-            /*System.out.println("Original result: "+pos);
+            /*dbgmsg("Original result: "+pos);
             screenshot = window.screenshot();
             DebugDrawing.drawResult(screenshot, cropRect, Color.RED);
             DebugDrawing.displayImage(screenshot, "Non-normalized");
@@ -448,8 +454,8 @@ import cz.autoclient.scripting.exception.ScriptParseException;
             //Add the normalized top/left coordinates of the search rectangle we used
             Rect cropNormalized = ConstData.normalize(cropRect, winRect);
             pos = pos.move(cropNormalized.left, cropNormalized.top);
-            /*System.out.println("Search region: "+cropNormalized);
-            System.out.println("Moved result: "+pos);
+            /*dbgmsg("Search region: "+cropNormalized);
+            dbgmsg("Moved result: "+pos);
             DebugDrawing.drawResult(screenshot, cropNormalized, Color.RED);
             DebugDrawing.drawResult(screenshot, pos, Color.GREEN);
             DebugDrawing.displayImage(screenshot, "Normalized");*/
@@ -458,10 +464,10 @@ import cz.autoclient.scripting.exception.ScriptParseException;
 
 
 
-  //             System.out.println("Crop rect: "+cropRect+" and normalized: "+cropNormalized);
+  //             dbgmsg("Crop rect: "+cropRect+" and normalized: "+cropNormalized);
   //             screenshot = window.screenshot();
   //             DebugDrawing.drawResult(screenshot, pos, Color.RED, Color.YELLOW);
-  //             System.out.println("Moved result: "+pos);
+  //             dbgmsg("Moved result: "+pos);
   //             DebugDrawing.displayImage(screenshot, "Moved result");
 
             //De normalize the rectangle (don't forget we rescaled the screenshot prior to 
@@ -471,7 +477,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
 
             /*screenshot = window.screenshot();
             DebugDrawing.drawResult(screenshot, pos, Color.RED, Color.YELLOW);
-            System.out.println("Rescaled result: "+pos);
+            dbgmsg("Rescaled result: "+pos);
             DebugDrawing.displayImage(screenshot, "Rescaled result");
 
             //Show some debug
@@ -483,27 +489,27 @@ import cz.autoclient.scripting.exception.ScriptParseException;
             /*DebugDrawing.drawPoint(screenshot, pos.left, pos.top, 5, Color.YELLOW);
             DebugDrawing.displayImage(screenshot);*/
             //Click in the middle of the found rectangle
-            System.out.println("  Spell #"+(i+1)+" CLICKING: "+pos);
+            dbgmsg("  Spell #"+(i+1)+" CLICKING: "+pos);
             window.mouseDown(pos.left, pos.top);
             sleep(30L);
             window.mouseUp(pos.left, pos.top);
             sleep(400L);
           }
           else {
-            System.out.println("  Spell #"+(i+1)+" not seen on screen.");
+            dbgmsg("  Spell #"+(i+1)+" not seen on screen.");
             //DebugDrawing.displayImage(screenshot);
             click(PixelOffset.Blind_SumSpell_CloseDialog);
             sleep(80L);
           }
         }
         else {
-          System.out.println("  Spell #"+(i+1)+" image corrupted.");
+          dbgmsg("  Spell #"+(i+1)+" image corrupted.");
         }
      }
      //Set masteries:
      int mastery = settings.getInt(Setnames.BLIND_MASTERY.name, 0);
      if(mastery>0) {
-       System.out.println("  Setting mastery to mastery #"+mastery); 
+       dbgmsg("  Setting mastery to mastery #"+mastery); 
        click(PixelOffset.Masteries_Edit);
        sleep(100);
        click(PixelOffset.Masteries_Big_First.offset(PixelOffset.Masteries_Big_Spaces.x*(mastery-1), 0));
@@ -517,7 +523,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
        sleep(700);
        click(PixelOffset.Blind_Runes_Dropdown_First.offset(0, PixelOffset.Blind_Runes_Dropdown_Spaces.y*(rune-1)));
      }
-     System.out.println("NORMAL LOBBY: Waiting for a game to start.");
+     dbgmsg("NORMAL LOBBY: Waiting for a game to start.");
      gui.setTitle("In normal lobby, waiting for a game to start.");
      //Wait and return false if lobby ends unexpectedly
      PixelOffset[] points = new PixelOffset[] {
@@ -538,7 +544,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
      };
      while(true) {
        if(WindowTools.checkPoint(window, points)<3) {
-         System.out.println("NORMAL LOBBY: lobby gone, waiting for the game.");
+         dbgmsg("NORMAL LOBBY: lobby gone, waiting for the game.");
          //Internal loop will wait until lobby reappears or game starts
          //or main screen reappears
          do {
@@ -547,16 +553,16 @@ import cz.autoclient.scripting.exception.ScriptParseException;
            
            BufferedImage img = window.screenshot();
            if((WindowTools.checkPoint(img, failPoints))>1) {
-             System.out.println("NORMAL LOBBY: Game did not start, waiting for another game."); 
+             dbgmsg("NORMAL LOBBY: Game did not start, waiting for another game."); 
              return false;
            }
            //Check if the game is running, return true if it does
            else if(CacheByTitle.initalInst.getWindow(ConstData.game_window_title)!=null) {
-             System.out.println("NORMAL LOBBY: Game started.");
+             dbgmsg("NORMAL LOBBY: Game started.");
              return true;
            }
            else {
-             System.out.println("NORMAL LOBBY: Waiting...");
+             dbgmsg("NORMAL LOBBY: Waiting...");
            }
              
              
@@ -567,12 +573,12 @@ import cz.autoclient.scripting.exception.ScriptParseException;
            //WindowTools.drawCheckPoint(screenshot, failPoints);
            DebugDrawing.displayImage(img);
            //else if(WindowTools.checkPoint(window, points)>=4) {
-           //  System.out.println("NORMAL LOBBY: lobby back here, waiting for game again."); 
-             //System.out.println("NORMAL LOBBY: Game did not start, waiting for another game."); 
+           //  dbgmsg("NORMAL LOBBY: lobby back here, waiting for game again."); 
+             //dbgmsg("NORMAL LOBBY: Game did not start, waiting for another game."); 
              //return false;
            //}
          } while(WindowTools.checkPoint(window, points)<4);
-         System.out.println("NORMAL LOBBY: lobby back here, looping again."); 
+         dbgmsg("NORMAL LOBBY: lobby back here, looping again."); 
        }
        sleep(800);
      }
@@ -581,13 +587,13 @@ import cz.autoclient.scripting.exception.ScriptParseException;
    
    public boolean teamBuilder_lobby() throws InterruptedException {
      gui.notification(Notification.Def.TB_GROUP_JOINED);
-     System.out.println("In team builder lobby now.");
+     dbgmsg("In team builder lobby now.");
      //Check if the teambuilder is enabled
      if(!settings.getBoolean(Setnames.TEAMBUILDER_ENABLED.name, (boolean)Setnames.TEAMBUILDER_ENABLED.default_val)) {
        gui.setTitle("Team builder - actions are disabled");
        while(true) {
          if(!checkPoint(window, PixelOffset.TeamBuilder_CaptainIcon)) {
-           System.out.println("The group was disbanded.");
+           dbgmsg("The group was disbanded.");
            return false;
          }
          sleep(1000L);
@@ -602,21 +608,21 @@ import cz.autoclient.scripting.exception.ScriptParseException;
      }
      sleep(50L);*/
      //Wait for ready button
-     System.out.println("Waiting for ready button.");
+     dbgmsg("Waiting for ready button.");
      while(true) {
        if(!checkPoint(window, PixelOffset.TeamBuilder_CaptainIcon)) {
-         System.out.println("The group was disbanded.");
+         dbgmsg("The group was disbanded.");
          return false;
        }
        sleep(700L);
        //If ready button is available
        if(checkPoint(window, PixelOffset.TeamBuilder_Ready_Enabled)) {
-         System.out.println("Clicking ready button!");
+         dbgmsg("Clicking ready button!");
          WindowTools.click(window, PixelOffset.TeamBuilder_Ready);
        }
        //If ready button is selected
        else if(checkPoint(window, PixelOffset.TeamBuilder_CaptainReady, PixelOffset.PlayButton_SearchingForGame_Approx)==2) {
-         System.out.println("Searching for game!");
+         dbgmsg("Searching for game!");
          gui.setTitle("Waiting for game. (Team builder)");
          //TODO: add a while that waits for game to make really sre a game will be joined
          while(checkPoint(window, PixelOffset.PlayButton_SearchingForGame_Approx)) {
@@ -626,14 +632,14 @@ import cz.autoclient.scripting.exception.ScriptParseException;
            return false;*/
            
            if(checkPoint(window, PixelOffset.TeamBuilder_MatchFound, PixelOffset.TeamBuilder_MatchFound2) == 2) {
-             System.out.println("Match found!");
+             dbgmsg("Match found!");
              return true;
            }
          }
-         System.out.println("Game cancelled!");
+         dbgmsg("Game cancelled!");
        }
        else {
-         //System.out.println("   ... still waiting.");
+         //dbgmsg("   ... still waiting.");
        }
      }
      /*if(true)
@@ -641,7 +647,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
      //click(PixelOffset.TeamBuilder_FindAnotherGroup);
    }
    public boolean teamBuilder_captain_lobby() throws InterruptedException {
-     System.out.println("In team builder lobby as captain now.");
+     dbgmsg("In team builder lobby as captain now.");
      gui.setTitle("Waiting for players. (Team builder)");
      //Player slots - initally 4 empty ones
      TeamBuilderPlayerSlot slots[] = {TeamBuilderPlayerSlot.Empty, TeamBuilderPlayerSlot.Empty, TeamBuilderPlayerSlot.Empty, TeamBuilderPlayerSlot.Empty};
@@ -660,7 +666,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
      //Wait for the slots to be filled
      while(true) {
        if(!checkPoint(window, PixelOffset.TeamBuilder_CaptainLobby_Invited)) {
-         System.out.println("Lobby has been canceled.");
+         dbgmsg("Lobby has been canceled.");
          return false;
        }
        sleep(1500L);
@@ -685,7 +691,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
            }
            else {
              slots[i] = TeamBuilderPlayerSlot.ErrorPlayer; 
-             System.out.println("Matching problems. Slot #"+(i+1));
+             dbgmsg("Matching problems. Slot #"+(i+1));
              
              ColorPixel[] points = {
                PixelOffset.TeamBuilder_CaptainLobby_slot_acceptPlayer.offset(0, i*offset),
@@ -699,11 +705,11 @@ import cz.autoclient.scripting.exception.ScriptParseException;
              };
              for(byte ii=0; ii<points.length; ii++) {
                ColorPixel point = points[ii];
-               System.out.println("    "+point.toString(names[ii]));
+               dbgmsg("    "+point.toString(names[ii]));
                try {
                  Rect rect = window.getRect();
                  Color a = window.getColor((int)(rect.width * point.x), (int)(rect.height * point.y));
-                 System.out.println("     - Real color: "+ColorPixel.ColorToSource(a));
+                 dbgmsg("     - Real color: "+ColorPixel.ColorToSource(a));
                }
                catch(APIException e) {
 
@@ -722,15 +728,15 @@ import cz.autoclient.scripting.exception.ScriptParseException;
 
          
          /*if(slots[i] == TeamBuilderPlayerSlot.Error) {
-           System.out.println("Matching problems. Slot #"+(i+1));
-           System.out.println("    "+PixelOffset.TeamBuilder_CaptainLobby_slot_acceptPlayer.offset(0, i*offset).toString("TeamBuilder_CaptainLobby_slot_acceptPlayer"));
+           dbgmsg("Matching problems. Slot #"+(i+1));
+           dbgmsg("    "+PixelOffset.TeamBuilder_CaptainLobby_slot_acceptPlayer.offset(0, i*offset).toString("TeamBuilder_CaptainLobby_slot_acceptPlayer"));
 
          }*/
        }
        //Now check player status and react to it
        byte ready = 0;
        byte joined = 0;
-       System.out.println("Current slot status:");
+       dbgmsg("Current slot status:");
        for(int i=0; i<4; i++) {
          if(slots[i].isJoined) {
            joined++; 
@@ -738,18 +744,18 @@ import cz.autoclient.scripting.exception.ScriptParseException;
          if(slots[i]==TeamBuilderPlayerSlot.Ready) {
            ready++; 
          }
-         System.out.println("  "+(i+1)+" - "+slots[i]);
+         dbgmsg("  "+(i+1)+" - "+slots[i]);
          //React to individual changes
          //Greet new players here
          if(!oldslots[i].isJoined && slots[i].isJoined) {
            if(!settings.getStringEquivalent("tb_cap_greet").isEmpty())
              teamBuilder_say(settings.getStringEquivalent("tb_cap_greet"));
-           System.out.println("    A new player appeared in slot #"+(i+1));
-           //System.out.println("Matchpoint: "+PixelOffset.TeamBuilder_CaptainLobby_slot_kickPlayer.offset(0, i*offset).toSource());
+           dbgmsg("    A new player appeared in slot #"+(i+1));
+           //dbgmsg("Matchpoint: "+PixelOffset.TeamBuilder_CaptainLobby_slot_kickPlayer.offset(0, i*offset).toSource());
          }
          if(oldslots[i]!=TeamBuilderPlayerSlot.Accepted && slots[i]==TeamBuilderPlayerSlot.Accepted) {
-           System.out.println("    A new player accepted #"+(i+1));
-           //System.out.println("Matchpoint: "+PixelOffset.TeamBuilder_CaptainLobby_slot_kickPlayer.offset(0, i*offset).toSource());
+           dbgmsg("    A new player accepted #"+(i+1));
+           //dbgmsg("Matchpoint: "+PixelOffset.TeamBuilder_CaptainLobby_slot_kickPlayer.offset(0, i*offset).toSource());
          }
 
          //Update old slots to new slots here (it's probably shitty to update it before reading is finished)
@@ -763,7 +769,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
          if(!gameReadyNotified)
            gui.notification(Notification.Def.TB_GAME_CAN_START);
          if(settings.getBoolean(Setnames.TEAMBUILDER_AUTOSTART_ENABLED.name, false)) {
-           System.out.println("Clicking play button!");
+           dbgmsg("Clicking play button!");
            click(PixelOffset.TeamBuilder_Ready);
          }
          //Wait for screen update
@@ -787,7 +793,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
        while(checkPoint(window, PixelOffset.PlayButton_SearchingForGame_Approx)) {
          sleep(500L);
          if(checkPoint(window, PixelOffset.TeamBuilder_MatchFound, PixelOffset.TeamBuilder_MatchFound2) == 2) {
-           System.out.println("Match found!");
+           dbgmsg("Match found!");
            return true;
          }
        }
@@ -803,7 +809,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
    public void invite_lobby() throws APIException, InterruptedException {
      //Handle disabled invite lobby
      if(!settings.getBoolean(Setnames.INVITE_ENABLED.name, (boolean)Setnames.INVITE_ENABLED.default_val)) {
-       System.out.println("Invite lobby automation disabled, waiting.");
+       dbgmsg("Invite lobby automation disabled, waiting.");
        gui.setTitle("Automation disabled (Invite)");
        while(checkPoint(window, PixelOffset.InviteChat, PixelOffset.InviteStart) == 2) {
          sleep(1000L);
@@ -813,7 +819,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
      
      
      
-     System.out.println("Inviting players now. ");
+     dbgmsg("Inviting players now. ");
      gui.setTitle("Waiting for players. (Invite)");
      double[][][] integral_image;
      double[] accepted, pending;
@@ -822,7 +828,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
        pending = Images.INVITE_PENDING.getColorSum();
      }
      catch(IOException e) {
-       System.err.println("Can't find required image! Invite lobby can't be automated!"); 
+       errmsg("Can't find required image! Invite lobby can't be automated!"); 
        settings.setSetting(Setnames.INVITE_ENABLED.name, false);
        return;
      }
@@ -835,11 +841,11 @@ import cz.autoclient.scripting.exception.ScriptParseException;
      while(checkPoint(window, PixelOffset.InviteChat, PixelOffset.InviteStart)==2) {
 
        
-       //System.out.println("Taking screenshot from window.");
+       //dbgmsg("Taking screenshot from window.");
        BufferedImage screenshot = window.screenshotCrop(player_list);
        integral_image = ScreenWatcher.integralImage(screenshot);
-       //System.out.println("Analysing the screenshot.");
-       System.out.println("  Invited players: ");
+       //dbgmsg("Analysing the screenshot.");
+       dbgmsg("  Invited players: ");
        
 
        pending_all = ScreenWatcher.findByAvgColor_isolated_matches(
@@ -848,7 +854,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
                     Images.INVITE_PENDING.getWidth(),
                     Images.INVITE_PENDING.getHeight(),
                     0.003f);
-       System.out.println("    Pending: "+pending_all.size());
+       dbgmsg("    Pending: "+pending_all.size());
        
        accepted_all = ScreenWatcher.findByAvgColor_isolated_matches(
                     accepted.clone(),
@@ -857,7 +863,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
                     Images.INVITE_ACCEPTED_SMALL.getHeight(),
                     //This is maximum safe tolerance before "Owner" gets matched too
                     0.0012f);
-       System.out.println("    Accepted: "+accepted_all.size());
+       dbgmsg("    Accepted: "+accepted_all.size());
        
        
        /*DebugDrawing.drawPointOrRect(screenshot, Color.yellow, pending_all);
@@ -865,16 +871,16 @@ import cz.autoclient.scripting.exception.ScriptParseException;
        DebugDrawing.displayImage(screenshot);*/
        //Only start if all players accepted or declined and at least one accepted
        if(accepted_all.size()>0 && pending_all.isEmpty()) {
-         System.out.println("All players have been invited and are in lobby. Time to start!");
+         dbgmsg("All players have been invited and are in lobby. Time to start!");
          gui.setTitle("Waiting for match.");
          click(PixelOffset.InviteStart);
          return;
        }
-       //System.out.println("Next test in 2 seconds.");
+       //dbgmsg("Next test in 2 seconds.");
        sleep(2000L);
-       //System.out.println("Timeout over, next test?");
+       //dbgmsg("Timeout over, next test?");
      }
-     System.out.println("Lobby has exit spontaneously.");
+     dbgmsg("Lobby has exit spontaneously.");
    }
    private void teamBuilder_say(String message) throws InterruptedException {
      click(PixelOffset.TeamBuilder_Chat);
@@ -894,7 +900,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
        window.click((int)(rect.width * pos.x), (int)(rect.height * pos.y));
      }
      catch(APIException e) {
-       System.err.println("Can't click because no window is available for clicking :("); 
+       errmsg("Can't click because no window is available for clicking :("); 
      }
    }
    private void click(ColorPixel pos) {
@@ -903,7 +909,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
        window.click((int)(rect.width * pos.x), (int)(rect.height * pos.y));
      }
      catch(APIException e) {
-       System.err.println("Can't click because no window is available for clicking :("); 
+       errmsg("Can't click because no window is available for clicking :("); 
      }
    }
    /**
@@ -916,7 +922,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
        window.click((int)(rect.width * pos.left), (int)(rect.height * pos.top));
      }
      catch(APIException e) {
-       System.err.println("Can't click because no window is available for clicking :("); 
+       errmsg("Can't click because no window is available for clicking :("); 
      }
    }
  }

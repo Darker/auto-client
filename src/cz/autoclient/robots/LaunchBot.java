@@ -66,8 +66,8 @@ public class LaunchBot extends Robot {
             }
           }
         });
-        while(true) {
-          Thread.sleep(1000);
+        while(!t.isInterrupted()) {
+          Thread.sleep(1200);
           try {
             win_rect = window.getRect();
             while(WindowTools.checkPoint(window, PixelOffset.Patcher_Eula_Heading)) {
@@ -77,10 +77,11 @@ public class LaunchBot extends Robot {
                 try {w.slowClick(PixelOffset.Patcher_Eula_Button.toRect(r), 80);}
                 catch(InterruptedException e) {t.interrupt();}
               });
-              Thread.sleep(180);
+              Thread.sleep(300);
             }
           }
           catch(APIException e) {
+            System.out.println("[AUTO-LAUNCH] Window is gone.");
             break; 
           }
         }
