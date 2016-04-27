@@ -84,8 +84,11 @@ public class VersionId implements java.io.Serializable {
         s.append('.');
       s.append(numbers[i]);
     }
-    s.append("-");
-    s.append(affix);
+    // If there is affix
+    if(affix.length()>0) {
+      s.append("-");
+      s.append(affix);
+    }
     return s.toString();
   }
   
