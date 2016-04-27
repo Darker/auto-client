@@ -31,7 +31,9 @@ public enum PixelOffset implements ComparablePixel {
     PlayButton_red (0.5277226353206357D, 0.053811657509594914D, new Color(213, 36, 20, 1), 15),
     //The small cross button to stop searching for game
     PlayButton_cancel(0.5603940011080168D, 0.06611146494035947D, new Color(202, 160, 98, 1), 24),
-    // No longer used because the text is now aligned in the middle so it moves
+    /**
+     * @deprecated No longer used because the text is now aligned in the middle so it moves
+     */
     @Deprecated
     PlayButton_SearchingForGame_Approx (0.42531457289624774D, 0.06710726787193565D, new Color(255, 255, 255, 1), 10),
     // Top right corner of the box with searching game indicator
