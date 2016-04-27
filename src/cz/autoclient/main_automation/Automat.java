@@ -564,8 +564,6 @@ import cz.autoclient.scripting.exception.ScriptParseException;
            else {
              dbgmsg("NORMAL LOBBY: Waiting...");
            }
-             
-             
            
 
            //WindowTools.drawCheckPoint(img, points);

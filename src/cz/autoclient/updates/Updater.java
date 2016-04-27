@@ -39,7 +39,8 @@ public class Updater {
   private File cacheDir;
   private File cacheMainFile;
   UpdateInfoListener updateListener = UpdateInfoListener.Empty.getInstance();
-  public final int checkInterval = 24*60*60*1000;
+  // This is minimum interval, not interval how often does updater check
+  public final int checkInterval = 5000;//24*60*60*1000;
   private ExecutorService executor;
   private final UpdaterThreadFactory threadFactory = new UpdaterThreadFactory();
   
