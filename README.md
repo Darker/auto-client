@@ -20,7 +20,7 @@ For detailed information, [please refer to wiki](https://github.com/Darker/auto-
 rather post some technical info and SEO meaningless texts.
 
 ## Help
-You can get help on [wiki](https://github.com/Darker/auto-client/wiki) or on my youtube channel.
+You can get help on [wiki](https://github.com/Darker/auto-client/wiki) or on my youtube channel. There is now also [Facebook page](https://www.facebook.com/autoclient/).
 
 ## [Videos and tutorials](https://www.youtube.com/channel/UCKBWfX3cbOy9xeBKPGwsx-g/videos)
 
