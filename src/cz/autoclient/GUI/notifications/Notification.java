@@ -30,11 +30,16 @@ public abstract class Notification {
     settings = sets;
     definition = def;
     
-    menu_item = new JCheckBoxMenuItem();
-    settings.bindToInput(definition.setting.name, menu_item);
-    menu_item.setState(settings.getBoolean(definition.setting.name, (boolean)definition.setting.default_val));
-    menu_item.setText(definition.name);
-    menu_item.setToolTipText(definition.text);
+    if(def.visible) {
+      menu_item = new JCheckBoxMenuItem();
+      settings.bindToInput(definition.setting.name, menu_item);
+      menu_item.setState(settings.getBoolean(definition.setting.name, (boolean)definition.setting.default_val));
+      menu_item.setText(definition.name);
+      menu_item.setToolTipText(definition.text);
+    }
+    else {
+      menu_item = null; 
+    }
   }
   /**
    * Creates a notification based on implementation. Can use the definition and operate on it.
@@ -51,19 +56,22 @@ public abstract class Notification {
                  "tb.solo.group_joined",
                  "Teambuilder group was joined, waiting for ready button.",
                  Setnames.NOTIF_MENU_TB_GROUP_JOINED,
-                 TrayIcon.MessageType.INFO
+                 TrayIcon.MessageType.INFO,
+                 false
     ),
     TB_GAME_CAN_START("TB: Game can start",
                  "tb.captain.game_can_start",
                  "Everybody is ready. It's time to start the game!",
                  Setnames.NOTIF_MENU_TB_READY_TO_START,
-                 TrayIcon.MessageType.INFO
+                 TrayIcon.MessageType.INFO,
+                 false
     ),
     TB_PLAYER_JOINED("TB: A player joined the group",
                  "tb.captain.player_joined",
                  "A player has joined your group, you might want to check him out.",
                  Setnames.NOTIF_MENU_TB_PLAYER_JOINED,
-                 TrayIcon.MessageType.INFO
+                 TrayIcon.MessageType.INFO,
+                 false
     ),
     BLIND_TEAM_JOINED("In lobby",
                  "blind.lobby.joined",
@@ -84,18 +92,23 @@ public abstract class Notification {
                  TrayIcon.MessageType.INFO
     ),
     ;
-    Def(String n, String p, String t, Setnames setting, TrayIcon.MessageType type) {
+    Def(String n, String p, String t, Setnames setting, TrayIcon.MessageType type, boolean visible) {
       name = n;  
       text = t;
       path = p;
       this.setting = setting;
       this.type = type;
+      this.visible = visible;
+    }
+    Def(String n, String p, String t, Setnames setting, TrayIcon.MessageType type) {
+      this(n,p,t,setting,type, true);
     }
     public final String name;
     public final String text;
     public final String path;
     public final Setnames setting;
     public final TrayIcon.MessageType type;
+    public final boolean visible;
     
     public Notification createInstance(Class<? extends Notification> source, Settings set, Object... params) throws NoSuchMethodException
     {

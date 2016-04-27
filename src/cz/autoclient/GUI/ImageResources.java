@@ -36,6 +36,8 @@ public enum ImageResources {
   PA_BOT_DISABLED_ERROR("stopped_error.png"),
   INTERNET("link.png"),
   HELP("help.png"),
+  GITHUB("github.png"),
+  FACEBOOK("fb.png"),
   ;
   
   //So according to [this guy](http://stackoverflow.com/a/17007533/607407) I

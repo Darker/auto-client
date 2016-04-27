@@ -37,7 +37,28 @@ public class Dialogs {
     public static void dialogErrorAsync(final String message, final String title) {
       dialogErrorAsync(message, title, null);
     }
-    
+    public static void dialogInfoAsync(final String message, final String title, final Component parentComponent) {
+        new Thread("AsyncErrorDialog") {
+          @Override
+          public void run() {
+            JOptionPane.showMessageDialog(
+                parentComponent,
+                makeTextPane(message),
+                title,
+                JOptionPane.INFORMATION_MESSAGE
+            );
+          }
+        }.start();
+    }
+    public static void dialogInfoAsync(final String message) {
+      dialogInfoAsync(message, "Error", null);
+    }
+    public static void dialogInfoAsync(final String message, final Component parentComponent) {
+      dialogInfoAsync(message, "Error", parentComponent);
+    }
+    public static void dialogInfoAsync(final String message, final String title) {
+      dialogInfoAsync(message, title, null);
+    }
     public static JTextPane makeTextPane(String text) {
       JTextPane f = new JTextPane();
       f.setContentType("text/html"); // let the text pane know this is what you want

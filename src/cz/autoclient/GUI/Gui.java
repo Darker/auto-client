@@ -646,9 +646,49 @@ import javax.swing.SwingUtilities;
         //A menuAutomation item with link to help
         {
           //System.out.println(ImageResources.PA_BOT_ENABLED.path);
-          menuAutomation.add(new URLMenuItem("What's this?", "Link to help page on github", "https://github.com/Darker/auto-client/wiki/Passive-automation", ImageResources.HELP));          
+          menuAutomation.add(new URLMenuItem(
+                      "What's this?",
+                      "Link to help page on github",
+                      "https://github.com/Darker/auto-client/wiki/Passive-automation",
+                      ImageResources.HELP)
+          );          
         }
         menuBar1.add(menuAutomation);
+      }
+      //======== Help menu ========
+      {
+        JMenu help = new JMenu();
+        help.setText("Help");
+        help.add(new URLMenuItem(
+                      "Report issue (GitHub)",
+                      "Requires GitHub acount",
+                      "https://github.com/Darker/auto-client/issues/new",
+                      ImageResources.GITHUB)
+        );
+        
+        help.add(new URLMenuItem(
+                      "Facebook",
+                      "You can contact me there",
+                      "https://www.facebook.com/autoclient/",
+                      ImageResources.FACEBOOK)
+        );
+        
+        JMenuItem item = new JMenuItem();
+        item.setText("About & Contact");
+        item.addActionListener((ActionEvent e)->{
+           Dialogs.dialogInfoAsync(
+                 "Version: <tt>"+ac.getVersion()+"</tt><br />"
+               + "e-mail: <a href=\"mailto: autoclient@hmamail.com\">"
+               + "autoclient@hmamail.com</a><br />"
+               + "<a href=\"https://www.facebook.com/autoclient/\">facebook/autoclient"
+               + "</a><br />"
+               ,
+               
+               "About", rootPane);
+        });
+        help.add(item);
+
+        menuBar1.add(help);
       }
       setJMenuBar(menuBar1);
 
@@ -973,7 +1013,7 @@ import javax.swing.SwingUtilities;
         field.attachToSettings(settings);
         win.addLine(field);
 
-        
+        /*
         win.newTab("Team builder", "All teambuilder automation");
         
         field = new FieldDef("Enabled:", "Enable or disable this function.", Setnames.TEAMBUILDER_ENABLED.name);
@@ -995,7 +1035,7 @@ import javax.swing.SwingUtilities;
         field.addField(new JTextField());
         field.attachToSettings(settings);
         win.addLine(field);
-        
+        */
         
         win.newTab("Invite friends", "Start automatically when everybody accepts.");
         
@@ -1101,17 +1141,6 @@ import javax.swing.SwingUtilities;
     //Dialogs
     public void dialogErrorAsync(String message, String title) {
       Dialogs.dialogErrorAsync(message, title, this);
-        /*new Thread("AsyncErrorDialog") {
-          @Override
-          public void run() {
-            JOptionPane.showMessageDialog(
-                Gui.this,
-                message,
-                title,
-                JOptionPane.ERROR_MESSAGE
-            );
-          }
-        }.start();*/
     }
     public void dialogErrorAsync(String message) {
       dialogErrorAsync(message, "Error");
