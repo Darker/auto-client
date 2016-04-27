@@ -568,10 +568,10 @@ import cz.autoclient.scripting.exception.ScriptParseException;
              
            
 
-           WindowTools.drawCheckPoint(img, points);
-           WindowTools.drawCheckPoint(img, failPoints);
+           //WindowTools.drawCheckPoint(img, points);
+           //WindowTools.drawCheckPoint(img, failPoints);
            //WindowTools.drawCheckPoint(screenshot, failPoints);
-           DebugDrawing.displayImage(img);
+           //DebugDrawing.displayImage(img);
            //else if(WindowTools.checkPoint(window, points)>=4) {
            //  dbgmsg("NORMAL LOBBY: lobby back here, waiting for game again."); 
              //dbgmsg("NORMAL LOBBY: Game did not start, waiting for another game."); 
