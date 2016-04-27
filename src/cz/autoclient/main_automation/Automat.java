@@ -353,6 +353,7 @@ import cz.autoclient.scripting.exception.ScriptParseException;
      {
        click(PixelOffset.Blind_SearchChampion);
        sleep(20L);
+    
        window.typeString(settings.getStringEquivalent(Setnames.BLIND_CHAMP_NAME.name));
        sleep(200L);
        click(PixelOffset.LobbyChampionSlot1);
@@ -377,98 +378,127 @@ import cz.autoclient.scripting.exception.ScriptParseException;
      Rect winRect = window.getRect();
      double winSizeCoef = ConstData.sizeCoeficientInverted(winRect);
      Rect cropRect = null;
+     // Get the screenshot of selected spells first
+     BufferedImage selected_spells = ScreenWatcher.resampleImage(
+        window.screenshotCrop(ImageFrame.NormalLobby_SummonerSpells.rect(window)),
+        winSizeCoef,winSizeCoef);
+     
      for(int i=0; i<2; i++) {
        SummonerSpell s = ConstData.lolData.getSummonerSpells().get(spells[i]);
-       if(s!=null) {
-         //Crop the icon - the GUI disorts the icon borders so I ignore them
-         BufferedImage icon = LazyLoadedImage.crop(s.img.getScaledDiscardOriginal(48, 48), 5);
-         if(icon!=null) {
-           click(i==0?PixelOffset.Blind_SumSpell1:PixelOffset.Blind_SumSpell2);
-           //Wait till the launcher screen redraws
-           sleep(500L);
-           
-           //Calculate crop rectangle 
-           if(cropRect==null)
-             cropRect = ImageFrame.NormalLobby_SummonerSpellPopup.rect(window);
-           //Use base resolution window - the icons are saved in base resolution too
-           /*BufferedImage screenshot = ScreenWatcher.resampleImageTo(
-                  window.screenshot(),
-                  ConstData.smallestSize.width, ConstData.smallestSize.height);*/
-           
-           BufferedImage screenshot = ScreenWatcher.resampleImage(
-                  window.screenshotCrop(cropRect),
-                  winSizeCoef,winSizeCoef);
-           //double[][][] integral_image = ScreenWatcher.integralImage(screenshot);
-           //Some CV
-           Rect pos = ScreenWatcher.findByAvgColor(icon, screenshot, 0.001f, true, null);
-        
-           if(pos!=null) {
-             /*System.out.println("Original result: "+pos);
-             screenshot = window.screenshot();
-             DebugDrawing.drawResult(screenshot, cropRect, Color.RED);
-             DebugDrawing.displayImage(screenshot, "Non-normalized");
-             
-             screenshot = ScreenWatcher.resampleImageTo(
-                  window.screenshot(),
-                  ConstData.smallestSize.width, ConstData.smallestSize.height);*/
-             //Add the normalized top/left coordinates of the search rectangle we used
-             Rect cropNormalized = ConstData.normalize(cropRect, winRect);
-             pos = pos.move(cropNormalized.left, cropNormalized.top);
-             /*System.out.println("Search region: "+cropNormalized);
-             System.out.println("Moved result: "+pos);
-             DebugDrawing.drawResult(screenshot, cropNormalized, Color.RED);
-             DebugDrawing.drawResult(screenshot, pos, Color.GREEN);
-             DebugDrawing.displayImage(screenshot, "Normalized");*/
-             
-             
-
-             
-             
-//             System.out.println("Crop rect: "+cropRect+" and normalized: "+cropNormalized);
-//             screenshot = window.screenshot();
-//             DebugDrawing.drawResult(screenshot, pos, Color.RED, Color.YELLOW);
-//             System.out.println("Moved result: "+pos);
-//             DebugDrawing.displayImage(screenshot, "Moved result");
-             
-             //De normalize the rectangle (don't forget we rescaled the screenshot prior to 
-             // searching the summoner spell)
-             
-             pos = ConstData.deNormalize(pos, winRect);
-             
-             /*screenshot = window.screenshot();
-             DebugDrawing.drawResult(screenshot, pos, Color.RED, Color.YELLOW);
-             System.out.println("Rescaled result: "+pos);
-             DebugDrawing.displayImage(screenshot, "Rescaled result");
-
-             //Show some debug
-             screenshot = window.screenshot();
-             DebugDrawing.drawResult(screenshot, pos, Color.RED);*/
-             // Click in middle of button rather than the corner
-             pos = pos.middle();
-             
-             /*DebugDrawing.drawPoint(screenshot, pos.left, pos.top, 5, Color.YELLOW);
-             DebugDrawing.displayImage(screenshot);*/
-             //Click in the middle of the found rectangle
-             System.out.println("  Spell #"+(i+1)+" CLICKING: "+pos);
-             window.mouseDown(pos.left, pos.top);
-             sleep(30L);
-             window.mouseUp(pos.left, pos.top);
-             sleep(400L);
-           }
-           else {
-             System.out.println("  Spell #"+(i+1)+" not seen on screen.");
-             //DebugDrawing.displayImage(screenshot);
-             click(PixelOffset.Blind_SumSpell_CloseDialog);
-             sleep(80L);
-           }
-         }
-         else {
-           System.out.println("  Spell #"+(i+1)+" image corrupted.");
-         }
-       }
-       else {
+       if(s==null) {
          System.out.println("  Spell #"+(i+1)+" is null."); 
+         continue;
        }
+       // First check if the same spell is already selected
+       BufferedImage small_icon = LazyLoadedImage.crop(s.img.getScaledDiscardOriginal(38, 38), 5);
+       //DebugDrawing.displayImage(s.img.getScaledDiscardOriginal(38, 38), "Spell #"+(i+1));
+       //DebugDrawing.displayImage(small_icon, "Spell #"+(i+1));  
+       
+       Rect selected_spell = ScreenWatcher.findByAvgColor(small_icon, selected_spells, 0.001f, true, null);
+       // Spll found selected
+       if(selected_spell!=null) {
+         Rect middle = selected_spell.middle();
+         float halfLength = selected_spells.getWidth()/2;
+         boolean isSelected = 
+             selected_spell.left()<halfLength && i==0 
+             || selected_spell.left()>halfLength && i==1;
+         
+         //BufferedImage test = DebugDrawing.cloneImage(selected_spells);
+         //DebugDrawing.drawResult(test, selected_spell, isSelected?Color.GREEN:Color.RED);
+         //DebugDrawing.displayImage(test, "Spell #"+(i+1)+" icon "+small_icon.getWidth()+"x"+small_icon.getHeight());
+         
+         // Now we determine whether it's the RIGHT spell.
+         if(isSelected) {
+           System.out.println("  Spell #"+(i+1)+" already selected."); 
+           continue; 
+         }
+       }
+       
+        //Crop the icon - the GUI disorts the icon borders so I ignore them
+        BufferedImage icon = LazyLoadedImage.crop(s.img.getScaledDiscardOriginal(48, 48), 5);
+        if(icon!=null) {
+          click(i==0?PixelOffset.Blind_SumSpell1:PixelOffset.Blind_SumSpell2);
+          //Wait till the launcher screen redraws
+          sleep(500L);
+
+          //Calculate crop rectangle 
+          if(cropRect==null)
+            cropRect = ImageFrame.NormalLobby_SummonerSpellPopup.rect(window);
+          //Use base resolution window - the icons are saved in base resolution too
+          /*BufferedImage screenshot = ScreenWatcher.resampleImageTo(
+                 window.screenshot(),
+                 ConstData.smallestSize.width, ConstData.smallestSize.height);*/
+
+          BufferedImage screenshot = ScreenWatcher.resampleImage(
+                 window.screenshotCrop(cropRect),
+                 winSizeCoef,winSizeCoef);
+          //double[][][] integral_image = ScreenWatcher.integralImage(screenshot);
+          //Some CV
+          Rect pos = ScreenWatcher.findByAvgColor(icon, screenshot, 0.001f, true, null);
+
+          if(pos!=null) {
+            /*System.out.println("Original result: "+pos);
+            screenshot = window.screenshot();
+            DebugDrawing.drawResult(screenshot, cropRect, Color.RED);
+            DebugDrawing.displayImage(screenshot, "Non-normalized");
+
+            screenshot = ScreenWatcher.resampleImageTo(
+                 window.screenshot(),
+                 ConstData.smallestSize.width, ConstData.smallestSize.height);*/
+            //Add the normalized top/left coordinates of the search rectangle we used
+            Rect cropNormalized = ConstData.normalize(cropRect, winRect);
+            pos = pos.move(cropNormalized.left, cropNormalized.top);
+            /*System.out.println("Search region: "+cropNormalized);
+            System.out.println("Moved result: "+pos);
+            DebugDrawing.drawResult(screenshot, cropNormalized, Color.RED);
+            DebugDrawing.drawResult(screenshot, pos, Color.GREEN);
+            DebugDrawing.displayImage(screenshot, "Normalized");*/
+
+
+
+
+
+  //             System.out.println("Crop rect: "+cropRect+" and normalized: "+cropNormalized);
+  //             screenshot = window.screenshot();
+  //             DebugDrawing.drawResult(screenshot, pos, Color.RED, Color.YELLOW);
+  //             System.out.println("Moved result: "+pos);
+  //             DebugDrawing.displayImage(screenshot, "Moved result");
+
+            //De normalize the rectangle (don't forget we rescaled the screenshot prior to 
+            // searching the summoner spell)
+
+            pos = ConstData.deNormalize(pos, winRect);
+
+            /*screenshot = window.screenshot();
+            DebugDrawing.drawResult(screenshot, pos, Color.RED, Color.YELLOW);
+            System.out.println("Rescaled result: "+pos);
+            DebugDrawing.displayImage(screenshot, "Rescaled result");
+
+            //Show some debug
+            screenshot = window.screenshot();
+            DebugDrawing.drawResult(screenshot, pos, Color.RED);*/
+            // Click in middle of button rather than the corner
+            pos = pos.middle();
+
+            /*DebugDrawing.drawPoint(screenshot, pos.left, pos.top, 5, Color.YELLOW);
+            DebugDrawing.displayImage(screenshot);*/
+            //Click in the middle of the found rectangle
+            System.out.println("  Spell #"+(i+1)+" CLICKING: "+pos);
+            window.mouseDown(pos.left, pos.top);
+            sleep(30L);
+            window.mouseUp(pos.left, pos.top);
+            sleep(400L);
+          }
+          else {
+            System.out.println("  Spell #"+(i+1)+" not seen on screen.");
+            //DebugDrawing.displayImage(screenshot);
+            click(PixelOffset.Blind_SumSpell_CloseDialog);
+            sleep(80L);
+          }
+        }
+        else {
+          System.out.println("  Spell #"+(i+1)+" image corrupted.");
+        }
      }
      //Set masteries:
      int mastery = settings.getInt(Setnames.BLIND_MASTERY.name, 0);
