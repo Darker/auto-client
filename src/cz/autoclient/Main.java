@@ -95,7 +95,6 @@ import sirius.constants.IWMConsts;
    }
    public void StopTool()
    {
-    
      if ((ac != null) && (ac.isAlive()) && (!ac.isInterrupted()))
      {
        System.out.println("Stopping tool..");
@@ -190,6 +189,7 @@ import sirius.constants.IWMConsts;
            if(settings.getBoolean(Setnames.UPDATES_AUTOCHECK.name, (Boolean)Setnames.UPDATES_AUTOCHECK.default_val))
              updater.checkForUpdates();
          }
+         //Dialogs.dialogInfoOnceAsync("Hello :)", "First fun", gui, "DIALOG_FIRST_RUN", settings, true);
        }
      });
      // If the application is configured to allways start as admin it will restart now

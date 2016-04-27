@@ -490,6 +490,11 @@ import javax.swing.SwingUtilities;
          settings.bindToInput(Setnames.UPDATES_AUTODOWNLOAD.name, checkBox, true);
          menu.add(checkBox);
          
+         checkBox = new JCheckBoxMenuItem("Ignore beta versions");
+         checkBox.setToolTipText("Prereleases and beta version will be ignored");
+         settings.bindToInput(Setnames.UPDATES_IGNORE_BETAS.name, checkBox, true);
+         menu.add(checkBox);
+         
          updateMenuItem = new UpdateMenuItem();
          updateMenuItem.setUnknown(ac.getVersion());
  

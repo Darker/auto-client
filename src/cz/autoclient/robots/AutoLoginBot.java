@@ -113,6 +113,10 @@ public class AutoLoginBot extends Robot {
       brokenPassword(e);
       return;      
     }
+    catch(InterruptedException e) {
+      System.out.println("[AUTO-LOGIN] Killed by interrupt.");
+      return;
+    }
   }
   /**
    * Called internally when password cannot be decrypted.
