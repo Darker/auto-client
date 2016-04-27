@@ -63,7 +63,7 @@ public enum Setnames {
   
   UPDATES_AUTOCHECK(true),
   UPDATES_AUTODOWNLOAD(false),
-  UPDATES_IGNORE_BETAS(false),
+  UPDATES_IGNORE_BETAS(true),
   
   
   

@@ -186,6 +186,7 @@ import sirius.constants.IWMConsts;
          gui.setVisible(true);
          if(updater!=null) {
            gui.setUpdateManager(updater);
+           updater.setSettings(settings);
            if(settings.getBoolean(Setnames.UPDATES_AUTOCHECK.name, (Boolean)Setnames.UPDATES_AUTOCHECK.default_val))
              updater.checkForUpdates();
          }

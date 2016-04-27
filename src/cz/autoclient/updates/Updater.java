@@ -6,6 +6,7 @@
 
 package cz.autoclient.updates;
 
+import cz.autoclient.PVP_net.Setnames;
 import cz.autoclient.github.constructs.BasicRepositoryId;
 import cz.autoclient.github.html.GitHubHtml;
 import cz.autoclient.github.interfaces.GitHub;
@@ -13,6 +14,7 @@ import cz.autoclient.github.interfaces.Release;
 import cz.autoclient.github.interfaces.Releases;
 import cz.autoclient.github.interfaces.Repository;
 import cz.autoclient.github.interfaces.RepositoryId;
+import cz.autoclient.settings.Settings;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -27,6 +29,12 @@ public class Updater {
   private final RepositoryId repository;
   public final VersionId version;
   private UpdateCache updates;
+  
+  protected Settings settings;
+
+  public void setSettings(Settings settings) {
+    this.settings = settings;
+  }
  
   private File cacheDir;
   private File cacheMainFile;
@@ -136,6 +144,14 @@ public class Updater {
     setCurrentActionAndThenIdleDelayed(Action.CHECKING);
     updates = getUpdates();
     dbgmsg("Checking for updates...");
+    
+    boolean ignoreBetas = true;
+    if(settings!=null)
+      ignoreBetas = settings.getBoolean(
+          Setnames.UPDATES_IGNORE_BETAS.name, 
+          (Boolean)Setnames.UPDATES_IGNORE_BETAS.default_val);
+    
+    
     if(updates.shouldCheck(checkInterval))
     {
       dbgmsg("Connecting to GitHub.");
@@ -147,13 +163,19 @@ public class Updater {
         dbgmsg("Downloaded.");
         for(Release r: releases) {
           VersionId id = new VersionId(r.tag());
+          // Check if beta
+          if(ignoreBetas && (id.isBeta || r.isPrerelease())) {
+            dbgmsg("Ignoring "+id+" because it's beta or prerelease."); 
+            continue;
+          }
+          
           if(updates.findVersion(id)==null) {
             dbgmsg("Adding release: "+r.tag());
             UpdateInfo info = new UpdateInfo(r, cacheDir);
             if(info.valid)
               updates.add(info);
             else
-              dbgmsg("  Release skipped because it doesn't have expected download file.");
+              dbgmsg("  Release "+id+" skipped because it doesn't have expected download file.");
           }
           else {
             dbgmsg("Release already exists: "+r.tag());

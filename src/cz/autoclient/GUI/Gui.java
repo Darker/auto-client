@@ -97,6 +97,8 @@ import javax.swing.SwingUtilities;
    private JCheckBoxMenuItem menu_tray_enabled;
    private JCheckBoxMenuItem menu_tray_minimize;
    
+   private JMenu updateMenu = null;
+   
    UpdateMenuItem updateMenuItem;
    
    //TRAY ICON STUFF
@@ -477,23 +479,35 @@ import javax.swing.SwingUtilities;
        displayDllStatus(false);
        //======== Updates ========
        {
-         JMenu menu = new JMenu();
-         menu.setText("Updates");
+         updateMenu = new JMenu();
+         updateMenu.setText("Updates");
+         updateMenu.setEnabled(updater!=null);
          
          checkBox = new JCheckBoxMenuItem("Auto-check for updates");
          checkBox.setToolTipText("Automatically check for updates over the internet.");
          settings.bindToInput(Setnames.UPDATES_AUTOCHECK.name, checkBox, true);
-         menu.add(checkBox);
+         updateMenu.add(checkBox);
          
          checkBox = new JCheckBoxMenuItem("Auto-download");
          checkBox.setToolTipText("Downloads update if it's found.");
          settings.bindToInput(Setnames.UPDATES_AUTODOWNLOAD.name, checkBox, true);
-         menu.add(checkBox);
+         updateMenu.add(checkBox);
          
          checkBox = new JCheckBoxMenuItem("Ignore beta versions");
          checkBox.setToolTipText("Prereleases and beta version will be ignored");
          settings.bindToInput(Setnames.UPDATES_IGNORE_BETAS.name, checkBox, true);
-         menu.add(checkBox);
+         updateMenu.add(checkBox);
+         
+         updateMenu.add(new URLMenuItem(
+                      "Download new version manually",
+                      "Download from github releases",
+                      "https://github.com/Darker/auto-client/releases")
+         );
+         updateMenu.add(new URLMenuItem(
+                      "Help",
+                      "About updates",
+                      "https://github.com/Darker/auto-client/wiki/Updates")
+         );
          
          updateMenuItem = new UpdateMenuItem();
          updateMenuItem.setUnknown(ac.getVersion());
@@ -514,8 +528,8 @@ import javax.swing.SwingUtilities;
             }
          });
          
-         menu.add(updateMenuItem);
-         menuTools.add(menu);
+         updateMenu.add(updateMenuItem);
+         menuTools.add(updateMenu);
        }
        //======== Debug ========
        {
@@ -717,6 +731,11 @@ import javax.swing.SwingUtilities;
    public void setUpdateManager(final Updater updater) {
      updater.setUpdateListener(new UpdateVisual(this, updateMenuItem, updater));
      this.updater = updater;
+     SwingUtilities.invokeLater(()->{
+       if(updateMenu!=null)
+         updateMenu.setEnabled(true);
+     });
+     
     }
     protected class PasswordFieldVerifier extends SettingsInputVerifier implements SettingsValueChanger {
       private String password;
