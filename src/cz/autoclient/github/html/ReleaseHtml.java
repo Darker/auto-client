@@ -39,7 +39,8 @@ public class ReleaseHtml implements Release {
     this.url = url_or_null_java_is_retarded(parent.getURL(), "releases/tag/v1.4.0"); 
     this.rootElm = elm;
     // The release label
-    Element label = elm.select("span.release-label").get(0);
+    Element label = null;
+    try {label = elm.select("span.release-label").get(0);} catch(Throwable e){}
     this.isPre = label!=null && label.hasClass("prerelease");
     this.isLatest = label!=null && label.hasClass("latest");
     
