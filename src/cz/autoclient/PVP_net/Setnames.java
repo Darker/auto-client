@@ -39,15 +39,8 @@ public enum Setnames {
   BLIND_MASTERY("masterypg", 0),
   BLIND_RUNE("runepg", 0),
   /**NOTFICATONS**/
-  NOTIF_MENU_TB_GROUP_JOINED(false),
-  
-  //Notify when everybody is ready and the game can start (or was started, if auto start is enabled)
-  NOTIF_MENU_TB_READY_TO_START(true),
-  NOTIF_MENU_TB_PLAYER_JOINED(false),
-  
-  NOTIF_MENU_BLIND_IN_LOBBY(false),
-  NOTIF_MENU_UPDATE_EXISTS(true),
-  NOTIF_MENU_UPDATE_DOWNLOADED(true),
+  NOTIF_APP_UPDATE_EXISTS_TRAYBALOON(true),
+
   AM_SAY(),
   AUTO_QUEUE_ENABLED(false),
   

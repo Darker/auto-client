@@ -6,6 +6,7 @@ import cz.autoclient.GUI.champion.ConfigurationManager;
 import cz.autoclient.GUI.tabs.TabbedWindow;
 import cz.autoclient.GUI.tabs.FieldDef;
 import cz.autoclient.GUI.notifications.Notification;
+import cz.autoclient.GUI.notifications.NotificationSound;
 import cz.autoclient.GUI.notifications.NotificationTrayBaloon;
 import cz.autoclient.GUI.notifications.Notifications;
 import cz.autoclient.GUI.passive_automation.PAConfigWindow;
@@ -638,19 +639,28 @@ import javax.swing.SwingUtilities;
        //Add this menuAutomation to the bar
        menuBar1.add(menuDisplay);
      }
-     //======== Notifications menuAutomation ========
+     //======== Notifications ========
      initTrayIcon();
      {
        menuNotifications = new JMenu();
        menuNotifications.setText("Notifications");
        Notification.Def.createAll(notifications, NotificationTrayBaloon.class, settings, tray_icon);
-       //======== Tray Notifications menuAutomation ========
+       //======== Tray Notifications ========
        {
          JMenu tray_notifs = new JMenu();
          tray_notifs.setText("Tray bubble");
          notifications.addToJMenu(tray_notifs, NotificationTrayBaloon.class);
          tray_notifs.setEnabled(canTray());
          menuNotifications.add(tray_notifs);
+       }
+       //======== Sound Notifications ========
+       Notification.Def.createAll(notifications, NotificationSound.class, settings);
+       {
+         JMenu tray_notifs = new JMenu();
+         tray_notifs.setText("Sound");
+         notifications.addToJMenu(tray_notifs, NotificationSound.class);
+         if(tray_notifs.getItemCount()>0)
+           menuNotifications.add(tray_notifs);
        }
        menuBar1.add(menuNotifications);
      }
@@ -697,7 +707,7 @@ import javax.swing.SwingUtilities;
         item.addActionListener((ActionEvent e)->{
            Dialogs.dialogInfoAsync(
                  "Version: <tt>"+ac.getVersion()+"</tt><br />"
-               + "e-mail: <a href=\"mailto: autoclient@hmamail.com\">"
+               + "e-mail: <a href=\"mailto:autoclient@hmamail.com\">"
                + "autoclient@hmamail.com</a><br />"
                + "<a href=\"https://www.facebook.com/autoclient/\">facebook/autoclient"
                + "</a><br />"

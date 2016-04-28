@@ -41,7 +41,8 @@ public class Notifications {
     for (Notification.Def name : names) {
       notifs = notifications.get(name);
       for(Notification notif : notifs) {
-        notif.notification();
+        if(notif.isEnabled())
+          notif.notification();
       }
     }    
   }

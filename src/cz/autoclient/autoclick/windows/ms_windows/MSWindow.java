@@ -566,6 +566,7 @@ public class MSWindow extends Common implements Window  {
        if (!result) {
          continue;
        }
+       System.out.println("Found window: "+text);
        //And if we gained one, put it in our array
        WindowID[0] = handle;
        //Returning false ends the enumeration
