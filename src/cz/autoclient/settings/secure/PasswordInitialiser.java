@@ -11,12 +11,22 @@ package cz.autoclient.settings.secure;
  * @author Jakub
  */
 public interface PasswordInitialiser {
-  public String getPassword();
+  public String getPassword() throws PasswordFailedException;
   public default boolean equals(PasswordInitialiser p) {
-    return p!=null && (p==this || p.getPassword().equals(this.getPassword()));
+    try {
+        return p!=null && (p==this || p.getPassword().equals(this.getPassword()));
+    }
+    catch(PasswordFailedException e) {
+      return false; 
+    }
   }
   public default boolean equals(String p) {
-    return p!=null && (p.equals(this.getPassword()));
+    try {
+      return p!=null && (p.equals(this.getPassword()));
+    }
+    catch(PasswordFailedException e) {
+      return false; 
+    }
   }
   
   public static class StringPasswordInitialiser implements PasswordInitialiser {
@@ -27,10 +37,6 @@ public interface PasswordInitialiser {
     @Override
     public String getPassword() {
       return password;
-    }
-    @Override
-    public boolean equals(PasswordInitialiser p) {
-      return p!=null && (p==this || p.getPassword().equals(this.getPassword()));
     }
     @Override
     public int hashCode() {

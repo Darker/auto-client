@@ -74,23 +74,18 @@ public class WindowTools {
      }
    }
    public static int checkPoint(Window window, ComparablePixel... points) throws APIException {
+     return checkPoint(window.screenshot(), points);
+   }
+   public static int checkPoint(BufferedImage img, ComparablePixel... points) throws APIException {
      int matches = 0;
-     if(points.length<3) {
-       for(ComparablePixel point:points) {
-         if(checkPoint(window, point))
-           matches++;
-       }
-     }
-     else {
-       BufferedImage img = window.screenshot();
-       for(ComparablePixel point:points) {
-         if(checkPoint(img, point, point.getTolerance()))
-           matches++;
-       }      
+     for(ComparablePixel point:points) {
+       if(checkPoint(img, point))
+         matches++;
+       //else 
+       //  System.out.println("Point "+point+" failed.");
      }
      return matches;
    }
-   
    public static boolean checkPoint(Window window, ComparablePixel point, int tolerance) throws APIException {
      return checkPoint(window, point, tolerance, null);
    }
@@ -155,12 +150,14 @@ public class WindowTools {
    }
    public static void drawCheckPoint(BufferedImage img, ComparablePixel p, int tolerance) throws APIException {
      Rect preal = p.toRect(img.getWidth(), img.getHeight());
+     boolean result = checkPoint(img, p, tolerance);
+
      DebugDrawing.drawPoint(
         img, 
         preal.left, 
         preal.top, 
         5,
-        checkPoint(img, p, tolerance)?java.awt.Color.GREEN:java.awt.Color.RED,
+        result?java.awt.Color.GREEN:java.awt.Color.RED,
         (p instanceof Enum)?((Enum)p).name() : null
      );
    }
@@ -190,6 +187,4 @@ public class WindowTools {
        return;
      say(w, text, field.toRect(w.getRect()));
    }
-
-
 }

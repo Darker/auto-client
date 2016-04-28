@@ -28,11 +28,17 @@ public enum PixelOffset implements ComparablePixel {
     
     /** MAIN SCREEN **/
     //PlayButton_red_old(0.5282632272641906D, 0.05335365853658536D, new Color(216, 38, 20, 1)),
-    PlayButton_red (0.48352019925535544D, 0.06457398901151389D, new Color(139, 18, 13, 1), 15),
+    PlayButton_red (0.5277226353206357D, 0.053811657509594914D, new Color(213, 36, 20, 1), 15),
     //The small cross button to stop searching for game
-    PlayButton_cancel(0.5587665322620996D, 0.06253177233521276D, new Color(205, 165, 102, 1), 10),
+    PlayButton_cancel(0.5603940011080168D, 0.06611146494035947D, new Color(202, 160, 98, 1), 24),
+    /**
+     * @deprecated No longer used because the text is now aligned in the middle so it moves
+     */
+    @Deprecated
     PlayButton_SearchingForGame_Approx (0.42531457289624774D, 0.06710726787193565D, new Color(255, 255, 255, 1), 10),
-    StoreButton (0.7179852949059728D, 0.05839416058394161D, new Color(200, 178, 136, 1), 10),
+    // Top right corner of the box with searching game indicator
+    PlayButton_SearchingCorner (0.5700032263395995D, 0.009224855573073414D, new Color(0, 64, 77, 1), 5),
+    StoreButton (0.7179852949059728D, 0.05839416058394161D, new Color(189, 97, 0, 1), 10),
     /** GAME SELECTION **/
     //The button you can press after game mode has been selected
     Play_Solo(0.5306054028901105D, 0.8869954957698297D, new Color(200, 81, 0, 1)),
@@ -40,6 +46,7 @@ public enum PixelOffset implements ComparablePixel {
     /** BLIND PICK LOBBY**/
     LobbyChat(0.495117D, 0.91875D, new Color(255, 255, 255, 1), 1),
     LobbyChat2(0.5387487383572218D, 0.9184036396562681D, new Color(255, 255, 255, 1)),
+    LobbyChatBlueTopFrame(0.5190743326122113D, 0.7101857639525893D,new Color(28, 51, 81, 1),5),
     //Quit button for lobby (not allways available)s
     LobbyQuit(0.11646860979241919D, 0.9207317073170731D),
     LobbyChampionSlot1(0.25182702572064036D, 0.26219512195121947D),
@@ -49,12 +56,12 @@ public enum PixelOffset implements ComparablePixel {
     LobbyHoverchampSeparator (0.49889495962588765D, 0.8362587901179259D, new Color(204, 204, 204, 1)),
     LobbyHoverchampTop (0.4844811217785136D, 0.739397806600655D,new Color(49, 49, 49, 1)),
     //Orange text "Spells"
-    LobbySummonerSpellsHeader(0.4441223758058664D, 0.590262641502635D, new Color(251, 150, 1, 1),50),
+    //LobbySummonerSpellsHeader(0.4441223758058664D, 0.590262641502635D, new Color(251, 150, 1, 1),50),
     //Green checkmark seen above the rune selectbox
-    LobbyRunesCheckmark (0.36532672890688844D, 0.625624587866083D,new Color(0, 135, 55, 1),10),
+    LobbyRunesCheckmark (0.3441864333974065D, 0.6302370156526198D,new Color(0, 135, 55, 1),10),
 
     //Button for editing masteries in lobby
-    Masteries_Edit(0.40952916497216874D, 0.659577173474749D, new Color(188, 201, 215, 1),10),
+    Masteries_Edit(0.38550610189321205D, 0.6609865342295311D, new Color(34, 75, 125, 1),10),
     //The first mastery tab offset
     Masteries_Big_First (0.29229661714686006D, 0.22546405904893319D),
     //Spaces between mastery tabs
@@ -62,13 +69,13 @@ public enum PixelOffset implements ComparablePixel {
     //Close button for the mastery editor
     Masteries_Big_Close (0.9092088770144683D, 0.2199774437191499D),
     //Summoner spell icons
-    Blind_SumSpell1 (0.4979340371027294D, 0.6088404678228453D),
+    Blind_SumSpell1 (0.46045805869955697D, 0.6502242027276122D),
     
-    Blind_SumSpell2 (0.5421364731680097D, 0.6117873045064729D),
+    Blind_SumSpell2 (0.5046604947648372D, 0.6532991545853033D),
     //Fortunatelly, this one works for both spell 1 and spell 2 dialogs
-    Blind_SumSpell_CloseDialog (0.650720718284894D, 0.20448429853646063D),
+    Blind_SumSpell_CloseDialog (0.6228539651133043D, 0.2520179371566098D),
     //Open dropdown menu with runes
-    Blind_Runes_Dropdown (0.3163196802258168D, 0.6194746841507007D),
+    Blind_Runes_Dropdown (0.35860027124478056D, 0.6240871119372374D),
     //First item in the rune dropdown menu
     Blind_Runes_Dropdown_First (0.25385971622052933D, 0.6502242027276122D),
     Blind_Runes_Dropdown_Spaces (0D, 0.0275D),
@@ -113,12 +120,13 @@ public enum PixelOffset implements ComparablePixel {
     //Patcher's orange launch button
     Patcher_Launch (0.49697311457957116D, 0.06457398901151389D,new Color(138, 41, 8, 1)),
     Patcher_SetServer (0.9572550031723815D, 0.08763612794419742D),
-    Patcher_Eula_Button (0.3230461378879247D, 0.8685457846236829D),
-    Patcher_Eula_Heading (0.5046604947648373D, 0.08148622422881516D, new Color(24, 117, 143, 1)),
+    Patcher_Eula_Button (0.36244396133741363D, 0.8454836456909994D),
+    Patcher_Eula_Heading (0.5046604947648373D, 0.08148622422881516D, new Color(24, 117, 143, 1),5),
+    Patcher_Eula_BlackBottom (0.4993459613385627D, 0.8505740227715557D, new Color(0, 0, 0, 1), 2),
     
-    Login_UsernameField (0.30478860994791757D, 0.3982062655710023D, new Color(242, 243, 243, 1)),
-    Login_PasswordField (0.10107303503836476D, 0.47648942276806283D, new Color(242, 243, 243, 1)),
-    Login_ButtonDisabled (0.28557015948475223D, 0.5254193957017744D, new Color(140, 140, 140, 1))
+    Login_UsernameField (0.30478860994791757D, 0.3982062655710023D, new Color(242, 243, 243, 1), 4),
+    Login_PasswordField (0.10107303503836476D, 0.47648942276806283D, new Color(242, 243, 243, 1), 4),
+    Login_ButtonDisabled (0.28557015948475223D, 0.5254193957017744D, new Color(140, 140, 140, 1), 5)
     ;
     
     

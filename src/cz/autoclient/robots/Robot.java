@@ -221,6 +221,7 @@ public abstract class Robot implements Runnable {
       if(listener!=null)
         listener.terminated(e);
       glg().debug("Robot thread {0} terminated with error: "+e.getMessage(), t.getName());
+      e.printStackTrace();
       continueOnError(e, ExecutionPhase.RUN);
       //System.out.println("Robot thread "+t.getName()+" terminated with error:\n     "+e);
     }
@@ -241,7 +242,7 @@ public abstract class Robot implements Runnable {
   
   /**
    * Indicate whether this thread can run. Override {@link #canRunEx()} instead of this method. This method catches any errors
-   * that occur within canRunEx and also
+   * that occur within canRunEx and also - 1 year later I don't really know how to finish this sentence
    * @return
    */
   public final boolean canRun() {

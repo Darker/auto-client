@@ -18,6 +18,7 @@ import cz.autoclient.robots.helpers.ValueChangeToWatcher;
 import cz.autoclient.settings.Settings;
 import cz.autoclient.settings.secure.EncryptedSetting;
 import cz.autoclient.settings.secure.InvalidPasswordException;
+import cz.autoclient.settings.secure.PasswordFailedException;
 import java.awt.image.BufferedImage;
 
 /**
@@ -50,7 +51,14 @@ public class AutoLoginBot extends Robot {
     if(initializing) {
       System.out.println("Initializing phase of auto login.");
       initializing = false;
-      settings.getEncryptor().init();
+      try {
+         settings.getEncryptor().init();
+      }
+      catch(PasswordFailedException e) {
+        Gui.inst.dialogErrorAsync("Cannot generate key to decrypt your saved password: "+e.getMessage());
+        disableDueToException(e);
+        return;
+      }
       if(!settings.exists(Setnames.REMEMBER_PASSWORD.name, EncryptedSetting.class)) {
         Gui.inst.dialogErrorAsync("Setup a password before enabling this function.");
         disableDueToException(new RobotNotConfiguredException("Login password is not set."));
@@ -68,17 +76,24 @@ public class AutoLoginBot extends Robot {
         return;
       }
     }
-    System.out.println("Start waiting for login screen at "+window.getTitle());
+    //System.out.println("Start waiting for login screen at "+window.getTitle());
     PVPAppeared.resetChanged();
     try {
       //Increment as the bot is running, terminate bot at certain value
       int duration = 0;
-      while(!Thread.interrupted() && duration++<15) {
+      while(!Thread.interrupted() && duration++<20) {
         BufferedImage img = window.screenshot();
+        PixelOffset[] points = new PixelOffset[] {
+          PixelOffset.Login_ButtonDisabled,
+          PixelOffset.Login_PasswordField,
+          PixelOffset.Login_UsernameField
+        };
+        /*BufferedImage debugClone = DebugDrawing.cloneImage(img);
+        WindowTools.drawCheckPoint(debugClone, points);
+        int results = 0;
+        DebugDrawing.displayImage(debugClone, "Hello", true);*/
         
-        if(WindowTools.checkPoint(img, PixelOffset.Login_ButtonDisabled, 5) && 
-           WindowTools.checkPoint(img, PixelOffset.Login_PasswordField, 2) && 
-           WindowTools.checkPoint(img, PixelOffset.Login_UsernameField, 2)) {
+        if(WindowTools.checkPoint(img, points)>=3) {
           Rect size = window.getRect();
           
           WindowTools.say(window,
@@ -90,18 +105,17 @@ public class AutoLoginBot extends Robot {
           window.click(PixelOffset.Login_ButtonDisabled.toRect(size));
           break;
         }
-
-        /*WindowTools.drawCheckPoint(img, PixelOffset.Login_ButtonDisabled, 5);
-        WindowTools.drawCheckPoint(img, PixelOffset.Login_PasswordField, 2);
-        WindowTools.drawCheckPoint(img, PixelOffset.Login_UsernameField, 2); 
-        DebugDrawing.displayImage(img);*/
         //System.out.println("  - Going to sleep.");
-        Thread.sleep(1000);
+        Thread.sleep(2000);
       }
     }
     catch(InvalidPasswordException e) {
       brokenPassword(e);
       return;      
+    }
+    catch(InterruptedException e) {
+      System.out.println("[AUTO-LOGIN] Killed by interrupt.");
+      return;
     }
   }
   /**

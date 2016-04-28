@@ -13,6 +13,8 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.SwingUtilities;
 
 /**
  * Enum of resources used for GUI. These resources are packed in .jar and are for internal use.
@@ -33,6 +35,9 @@ public enum ImageResources {
   PA_BOT_PAUSED("paused.png"),
   PA_BOT_DISABLED_ERROR("stopped_error.png"),
   INTERNET("link.png"),
+  HELP("help.png"),
+  GITHUB("github.png"),
+  FACEBOOK("fb.png"),
   ;
   
   //So according to [this guy](http://stackoverflow.com/a/17007533/607407) I
@@ -60,7 +65,7 @@ public enum ImageResources {
   ImageResources(String path, String title) {
     this.path = basepath+path;
     this.title = title;
-    //Resources are retarder so I prefer to keep these debug lines in case I need them again
+    //Resources are retarded so I prefer to keep these debug lines in case I need them again
     //System.out.println("Resource "+name()+" at '"+this.path+"'.");
     //System.out.println("Class location: "+this.getClass().getResource(this.path));
 
@@ -103,7 +108,7 @@ public enum ImageResources {
     //Lazy load...
     if(image==null) {
       //Since the .jar is constant (it's packed) we can
-      //Remember the image is unavailable
+      //remember that the image is unavailable
       if(image_failed)
         return null;
       //System.out.println("  LoadImage(\""+leclass.getResource(".")+"\")");
@@ -124,5 +129,52 @@ public enum ImageResources {
       }
     }
     return image;
+  }
+  
+  public static abstract class ItemCallback<T> implements Runnable {
+    protected T item = null;
+    public void run(T item) {
+      this.item = item;
+      run();
+    }
+  }
+  /** After getting valid icon, run runnable in 
+   *  Swing thread
+   * @param r runnable to run within swing thread
+   */
+  public void getIconAsyncSwing(final ItemCallback<ImageIcon> r) {
+    getIconAsync(new ItemCallback<ImageIcon>() {
+      @Override
+      public void run() {
+        r.item = item;
+        SwingUtilities.invokeLater(r);
+      }
+    });
+  }
+  /** After getting valid icon, run runnable.
+   * @param r runnable to run adter loading.
+   */
+  public void getIconAsync(ItemCallback<ImageIcon> r) {
+    new Thread(null, null, "LoadIcon "+path) {
+      @Override
+      public void run() {
+        ImageIcon icon = getIcon();
+        if(icon!=null) {
+          r.run(icon);
+        }
+        else {
+          System.out.println("Load icon failed "+path);
+        }
+      }
+    }.start();
+  }
+
+  public void setIconAsync(JMenuItem menuItem) {
+    getIconAsyncSwing(new ItemCallback<ImageIcon>() {
+      @Override
+      public void run() {
+        menuItem.setIcon(item);
+      }
+    });
   }
 }

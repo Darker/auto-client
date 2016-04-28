@@ -9,6 +9,7 @@ package cz.autoclient.GUI.notifications;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 
 /**
@@ -54,7 +55,9 @@ public class Notifications {
       ArrayList<Notification> list = (ArrayList)pair.getValue();
       for(Notification notif : list) {
         if(template.isInstance(notif)) {
-          menu.add(notif.getMenuItem());
+          JCheckBoxMenuItem item = notif.getMenuItem();
+          if(item!=null)
+            menu.add(notif.getMenuItem());
         }
       }
     }

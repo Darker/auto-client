@@ -159,13 +159,13 @@ public class ConfigurationManager {
     //Component[] comps = input.getComponents();
     String item = (String)input.getEditor().getItem();//(String)input.getSelectedItem();
     
-    if(champion_names==null)
-      champion_names = ConstData.lolData.getChampions().enumValues(Champions.getName, true);
+    //if(champion_names==null)
+    //  champion_names = ConstData.lolData.getChampions().enumValues(Champions.getName, true);
     if(item!=null) {
       //System.out.println("JComboBox.getEditor().getItem() = "+input.getEditor().getItem()+"");
       //System.out.println("JComboBox.getSelectedItem()     = "+input.getSelectedItem()+"");
 
-      if(champion_names.contains(item)) {
+      if(!item.isEmpty()) {
         //Avoid repetitive loading...
         if(currentChampion!=null && currentChampion.equals(item))
           return;
@@ -209,7 +209,7 @@ public class ConfigurationManager {
     if(currentSetup!=null)
       delete.setEnabled(true);
     
-    System.out.println("Saved settings for "+currentChampion+". "+settings.size()+" settings total.");
+    //System.out.println("Saved settings for "+currentChampion+". "+settings.size()+" settings total.");
   }
   protected void loadSettings(String name) {
     Settings set = settings.get(name);
@@ -227,9 +227,9 @@ public class ConfigurationManager {
         main_settings.displaySettingsOnBoundFields(names);
       }
     }
-    System.out.println("Loaded settings for "+name);
-    if(currentSetup==null && name!=null)
-      System.out.println("  Acutally loaded null, settings were unavalable.");
+    //System.out.println("Loaded settings for "+name);
+    //if(currentSetup==null && name!=null)
+    //  System.out.println("  Acutally loaded null, settings were unavalable.");
   }
   protected void loadSettings() {
     loadSettings(currentChampion);

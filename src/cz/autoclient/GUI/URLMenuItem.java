@@ -22,15 +22,21 @@ import javax.swing.JMenuItem;
  */
 public class URLMenuItem extends JMenuItem {
   public final URL url;
-  public URLMenuItem(String text, String title, URL url) {
+  public URLMenuItem(String text, String title, URL url, ImageResources icon) {
     super(text);
     this.url = url;
     this.setToolTipText(title);
     addActionListener(new URLOpener(this.url));
+    if(icon != null) {
+      icon.setIconAsync(this);
+    }
   }
 
+  public URLMenuItem(String text, String title, String url, ImageResources icon) {
+    this(text, title, urlOrNull(url), icon);
+  }
   public URLMenuItem(String text, String title, String url) {
-    this(text, title, urlOrNull(url));
+    this(text, title, urlOrNull(url), null);
   }
   
   public static URL urlOrNull(String url) {

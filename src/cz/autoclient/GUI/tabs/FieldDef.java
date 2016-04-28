@@ -7,9 +7,7 @@
 package cz.autoclient.GUI.tabs;
 
 import cz.autoclient.settings.Settings;
-import java.awt.Color;
 import java.awt.GridLayout;
-import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -31,6 +29,7 @@ public class FieldDef {
     label_text = lab;
     container = new JPanel();
     container.setLayout(new GridLayout(1, 1));
+    
     //container.setBorder(BorderFactory.createLineBorder(Color.red));
 
     label = new JLabel(lab);
