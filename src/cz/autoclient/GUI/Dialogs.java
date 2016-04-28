@@ -9,8 +9,11 @@ package cz.autoclient.GUI;
 import cz.autoclient.GUI.dialogs.DoNotAskAgainPanel;
 import cz.autoclient.settings.Settings;
 import java.awt.Component;
+import java.awt.Desktop;
 import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 
 /**
  *
@@ -172,6 +175,19 @@ public class Dialogs {
       f.setEditable(false); // as before
       f.setBackground(null); // this is the same as a JLabel
       f.setBorder(null); // remove the border
+      
+      // This allows hyperlinks to be clicked
+      f.addHyperlinkListener((HyperlinkEvent hle)->{
+              if (HyperlinkEvent.EventType.ACTIVATED.equals(hle.getEventType())) {
+                  System.out.println(hle.getURL());
+                  Desktop desktop = Desktop.getDesktop();
+                  try {
+                      desktop.browse(hle.getURL().toURI());
+                  } catch (Exception ex) {
+                      ex.printStackTrace();
+                  }
+              }
+      });
       return f;
     }
     
