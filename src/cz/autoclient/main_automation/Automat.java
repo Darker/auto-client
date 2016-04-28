@@ -154,148 +154,106 @@ import cz.autoclient.scripting.exception.ScriptParseException;
      
      
      gui.setTitle("Waiting for match.");
-     for (;;)
+     while (!isInterrupted())
      {
-       
        time = System.currentTimeMillis()/1000L;
        if(pretendAccepted == true) {
          pretendAccepted = false;
          accepted = time;        
        }
-       if (!isInterrupted())
-       {
-         sleep(accepted>0 ? 10L : 600L);
-         try
-         {
-           if (accepted>0)
-           {   
-             boolean lobby = false;
-             if(checkPoint(window, PixelOffset.LobbyChat)
-                && checkPoint(window, PixelOffset.LobbyChat2) &&
-                 checkPoint(window, PixelOffset.LobbyChatBlueTopFrame)
-                //&& checkPoint(PixelOffset.Blind_SearchChampion, 1)
-                 
-             )
-             {
-               dbgmsg("Lobby detected. Picking champion and lane.");
-               if(normal_lobby())
-                 break;
-               else
-                 continue;
-             }
-             //Here detect teambuilder lobby
-             else if(checkPoint(window, PixelOffset.TeamBuilder_CaptainIcon)) {
-               dbgmsg("Team builder lobby detected.");
-               
-               if(!isInterrupted())
-                 //Function returns true if it sucessfully matched you into game
-                 if(teamBuilder_lobby()) {
-                   end();
-                   break;
-                 }
-                 //Function returns false when you are kicked from the group
-                 else {
-                   accepted = -1;
-                   gui.setTitle("Waiting for group.");
-                 }
-             }
-             /*else {
-               Rect rect = window.getRect();
-               PixelOffset point = PixelOffset.TeamBuilder_CaptainIcon;
-               Color a = window.getColor((int)(rect.width * point.x), (int)(rect.height * point.y));
-             
-               dbgmsg("new Color("+a.getRed()+", "+a.getGreen()+", "+a.getBlue()+", 1)");
-               sleep(600L);
-             }*/
-             
-             if(time-accepted>12) {
-               dbgmsg("Match was declined.");
-               gui.setTitle("Waiting for match.");
-               accepted = -1;
-               tb = false;
-             }
-           }
-           else
-           {
-             if (/*pixelCheckS(new Color(255, 255, 255), width * PixelOffset.MatchFound.x, height * PixelOffset.MatchFound.y, 1)*/
-                 
-                 checkPoint(window, PixelOffset.MatchFound)
-                )
-             {
-               //SelectItem("accept");
+ 
+        sleep(accepted>0 ? 10L : 600L);
+        try
+        {
+          if (accepted>0)
+          {   
+            if(checkPoint(window, PixelOffset.LobbyChat)
+               && checkPoint(window, PixelOffset.LobbyChat2) &&
+                checkPoint(window, PixelOffset.LobbyChatBlueTopFrame)
+               //&& checkPoint(PixelOffset.Blind_SearchChampion, 1)
 
-               click(PixelOffset.AcceptButton);
-               //this.gui.getProgressBar1().setValue(60);
-               accepted = time;
-               gui.setTitle("Match accepted, waiting for lobby.");
-               tb = false;
-               play_button = false;
-             }
-             else if(checkPoint(window, PixelOffset.TeamBuilder_AcceptGroup)) {
-               click(PixelOffset.TeamBuilder_AcceptGroup);
-               //this.gui.getProgressBar1().setValue(60);
-               gui.setTitle("Group accepted, waiting for lobby.");
-               dbgmsg("Group accepted, waiting for lobby.");
-               accepted = time;
-               tb = true;
-               play_button = false;
-             }
-             /*else if (pixelCheckS(new Color(255, 255, 255), width * 0.7361D, height * 0.91875D, 1))
-             {
-               accepted = -1;
-               this.gui.getProgressBar1().setValue(40);
-             }*/
-             else if(checkPoint(window, PixelOffset.TeamBuilder_CaptainLobby_Invited)) {
-               
-               if( teamBuilder_captain_lobby()) {
-                 dbgmsg("Game started as captain, the job is over.");
-                 end();
-                 break;
-               }
-               else {
-                 dbgmsg("Lobby failed, waiting for another game.");
-               }
-               
-             }
-             //If this is a lobby with invited players
-             else if(checkPoint(window, PixelOffset.InviteChat) && checkPoint(window, PixelOffset.InviteStart)) {
-               invite_lobby();
-               gui.setTitle("Waiting for match.");
-               play_button = false;
-               
-             }
-             //If play button wasn't there and sudenly appeared, the program shall quit
-             else if(checkPoint(window, PixelOffset.PlayButton_red) && !play_button) {
-               dbgmsg("The play button is red. Something must've gone wrong.");
-               play_button = true;
-               tb = false;
-               gui.setTitle("Waiting for match.");
-             }
+            )
+            {
+              dbgmsg("Lobby detected. Picking champion and lane.");
+              if(normal_lobby())
+                break;
+              else
+                continue;
+            }
+            /*else {
+              Rect rect = window.getRect();
+              PixelOffset point = PixelOffset.TeamBuilder_CaptainIcon;
+              Color a = window.getColor((int)(rect.width * point.x), (int)(rect.height * point.y));
 
-             //Please kick me, I need to test something :)
-             /*Color cCol = window.getColor((int)(width * PixelOffset.PlayButton.x), (int)(height * PixelOffset.PlayButton.y));
-             if ((cCol.getRed() > 70) && (cCol.getGreen() < 10) && (cCol.getBlue() < 5) && (!isInterrupted()))
-             {
-               sleep(700L);
-               
-               cCol = window.getColor((int)(width * PixelOffset.PlayButton.x), (int)(height * PixelOffset.PlayButton.y));
-               if ((cCol.getRed() > 70) && (cCol.getGreen() < 10) && (cCol.getBlue() < 5) && (!isInterrupted()))
-               {
-                 dbgmsg("The play button is red. Something must've gone wrong. Aborting.");
-                 interrupt();
-                 break;
-               }
-             }*/
-           }
-         }
-         catch (IllegalArgumentException fe)
-         {
-           fe.printStackTrace();
-           //Run standard end actions
-           end();
-           interrupt();
-         }
-       }
+              dbgmsg("new Color("+a.getRed()+", "+a.getGreen()+", "+a.getBlue()+", 1)");
+              sleep(600L);
+            }*/
+
+            if(time-accepted>12) {
+              dbgmsg("Match was declined.");
+              gui.setTitle("Waiting for match.");
+              accepted = -1;
+              tb = false;
+            }
+          }
+          else
+          {
+            if (/*pixelCheckS(new Color(255, 255, 255), width * PixelOffset.MatchFound.x, height * PixelOffset.MatchFound.y, 1)*/
+
+                checkPoint(window, PixelOffset.MatchFound)
+               )
+            {
+              //SelectItem("accept");
+
+              click(PixelOffset.AcceptButton);
+              //this.gui.getProgressBar1().setValue(60);
+              accepted = time;
+              gui.setTitle("Match accepted, waiting for lobby.");
+              tb = false;
+              play_button = false;
+            }
+            /*else if (pixelCheckS(new Color(255, 255, 255), width * 0.7361D, height * 0.91875D, 1))
+            {
+              accepted = -1;
+              this.gui.getProgressBar1().setValue(40);
+            }*/
+            //If this is a lobby with invited players
+            else if(checkPoint(window, PixelOffset.InviteChat) && checkPoint(window, PixelOffset.InviteStart)) {
+              invite_lobby();
+              gui.setTitle("Waiting for match.");
+              play_button = false;
+            }
+            //If play button wasn't there and sudenly appeared, the program shall quit
+            else if(checkPoint(window, PixelOffset.PlayButton_red) && !play_button) {
+              dbgmsg("The play button is red. Something must've gone wrong.");
+              play_button = true;
+              tb = false;
+              gui.setTitle("Waiting for match.");
+            }
+
+            //Please kick me, I need to test something :)
+            /*Color cCol = window.getColor((int)(width * PixelOffset.PlayButton.x), (int)(height * PixelOffset.PlayButton.y));
+            if ((cCol.getRed() > 70) && (cCol.getGreen() < 10) && (cCol.getBlue() < 5) && (!isInterrupted()))
+            {
+              sleep(700L);
+
+              cCol = window.getColor((int)(width * PixelOffset.PlayButton.x), (int)(height * PixelOffset.PlayButton.y));
+              if ((cCol.getRed() > 70) && (cCol.getGreen() < 10) && (cCol.getBlue() < 5) && (!isInterrupted()))
+              {
+                dbgmsg("The play button is red. Something must've gone wrong. Aborting.");
+                interrupt();
+                break;
+              }
+            }*/
+          }
+        }
+        catch (IllegalArgumentException fe)
+        {
+          fe.printStackTrace();
+          //Run standard end actions
+          end();
+          interrupt();
+        }
      }
 
      if (!isInterrupted())
@@ -313,8 +271,10 @@ import cz.autoclient.scripting.exception.ScriptParseException;
      pretendAccepted = true;     
    }
    public boolean normal_lobby() throws InterruptedException, APIException {
-     if(settings.getBoolean(Setnames.NOTIF_MENU_BLIND_IN_LOBBY.name, false))
+     {
        gui.notification(Notification.Def.BLIND_TEAM_JOINED);
+       dbgmsg("Triggered notification for normal lobby.");
+     }
      sleep(200L);
      dbgmsg("In normal lobby.");
      //boolean ARAM = false;
