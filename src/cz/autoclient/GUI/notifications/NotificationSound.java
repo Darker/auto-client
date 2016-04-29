@@ -7,11 +7,8 @@
 package cz.autoclient.GUI.notifications;
 
 import cz.autoclient.settings.Settings;
-import java.awt.TrayIcon;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -39,7 +36,7 @@ public class NotificationSound extends Notification {
   protected void playSound() {
    if(this.definition.audioFile!=null) {
       AudioListener listener = new AudioListener();
-      InputStream file = NotificationSound.class.getResourceAsStream("/notify.wav");
+      InputStream file = NotificationSound.class.getResourceAsStream(this.definition.audioFile);
 
       try(AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file)) {
         Clip clip = AudioSystem.getClip();

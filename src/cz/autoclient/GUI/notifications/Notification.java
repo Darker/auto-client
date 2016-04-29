@@ -93,7 +93,7 @@ public abstract class Notification {
                  "blind.lobby.joined",
                  "You've been put in lobby with your teammates.",
                  TrayIcon.MessageType.INFO,
-                 "/notify.wav"
+                 "/bell.wav"
     ),
     UPDATE_AVAILABLE("Update available",
                  "app.update.exists",
