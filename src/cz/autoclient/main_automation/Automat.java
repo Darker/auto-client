@@ -344,10 +344,11 @@ import cz.autoclient.scripting.exception.ScriptParseException;
      Rect winRect = window.getRect();
      double winSizeCoef = ConstData.sizeCoeficientInverted(winRect);
      Rect cropRect = null;
-     // Get the screenshot of selected spells first
-     BufferedImage selected_spells = ScreenWatcher.resampleImage(
-        window.screenshotCrop(ImageFrame.NormalLobby_SummonerSpells.rect(window)),
-        winSizeCoef,winSizeCoef);
+     // The rectangles of the spell buttons
+     ImageFrame[] spellButtonRectangles = {
+       ImageFrame.NormalLobby_SummonerSpell_1,
+       ImageFrame.NormalLobby_SummonerSpell_2
+     };
      
      for(int i=0; i<2; i++) {
        SummonerSpell s = ConstData.lolData.getSummonerSpells().get(spells[i]);
@@ -356,28 +357,26 @@ import cz.autoclient.scripting.exception.ScriptParseException;
          continue;
        }
        // First check if the same spell is already selected
-       BufferedImage small_icon = LazyLoadedImage.crop(s.img.getScaledDiscardOriginal(38, 38), 5);
-       //DebugDrawing.displayImage(s.img.getScaledDiscardOriginal(38, 38), "Spell #"+(i+1));
-       //DebugDrawing.displayImage(small_icon, "Spell #"+(i+1));  
+       // Get the screenshot of selected spells first
+       BufferedImage selected_spell = ScreenWatcher.resampleImage(
+         window.screenshotCrop(spellButtonRectangles[i].rect(window)),
+         winSizeCoef,winSizeCoef);
        
-       Rect selected_spell = ScreenWatcher.findByAvgColor(small_icon, selected_spells, 0.001f, true, null);
-       // Spll found selected
-       if(selected_spell!=null) {
-         Rect middle = selected_spell.middle();
-         float halfLength = selected_spells.getWidth()/2;
-         boolean isSelected = 
-             selected_spell.left()<halfLength && i==0 
-             || selected_spell.left()>halfLength && i==1;
+       BufferedImage small_icon_no_crop = s.img.getScaledDiscardOriginal(36, 36);
+       BufferedImage small_icon = LazyLoadedImage.crop(small_icon_no_crop, 3);
+       DebugDrawing.displayImage(selected_spell, "Spell #"+(i+1));
+       DebugDrawing.displayImage(small_icon_no_crop, "Spell #"+(i+1));
+       DebugDrawing.displayImage(small_icon, "Spell #"+(i+1));  
+       
+       Rect selected_spell_rect = ScreenWatcher.findByAvgColor(small_icon, selected_spell, 0.001f, false, null);
+       // Spell found selected
+       if(selected_spell_rect!=null) {
+         BufferedImage test = DebugDrawing.cloneImage(selected_spell);
+         DebugDrawing.drawResult(test, selected_spell_rect, Color.GREEN);
+         DebugDrawing.displayImage(test, "Spell #"+(i+1)+" icon "+small_icon.getWidth()+"x"+small_icon.getHeight());
          
-         //BufferedImage test = DebugDrawing.cloneImage(selected_spells);
-         //DebugDrawing.drawResult(test, selected_spell, isSelected?Color.GREEN:Color.RED);
-         //DebugDrawing.displayImage(test, "Spell #"+(i+1)+" icon "+small_icon.getWidth()+"x"+small_icon.getHeight());
-         
-         // Now we determine whether it's the RIGHT spell.
-         if(isSelected) {
-           dbgmsg("  Spell #"+(i+1)+" already selected."); 
-           continue; 
-         }
+         dbgmsg("  Spell #"+(i+1)+" already selected."); 
+         continue; 
        }
        
         //Crop the icon - the GUI disorts the icon borders so I ignore them

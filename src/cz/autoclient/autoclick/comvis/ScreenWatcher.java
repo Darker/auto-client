@@ -23,6 +23,14 @@ import java.util.ArrayList;
 /**All static. Set of methods to allow you finding locations on screen **/
 
 public class ScreenWatcher {
+  /**
+   * 
+   * @param image
+   * @param bigImage
+   * @param tolerance
+   * @param return_nearest
+   * @return 
+   */
   public static Rect findByAvgGrayscale(BufferedImage image, BufferedImage bigImage, float tolerance, boolean return_nearest) {
     //These variables will be used to return the best (nearest) match
     //If return_nearest is false, these will not be used
