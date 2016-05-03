@@ -89,4 +89,14 @@ public class ColorPixel implements ComparablePixel {
   public ComparablePixel offset(double x, double y) {
     return new ColorPixel(this.x+x, this.y+y, color, tolerance);
   }
+  
+  @Override
+  public double distanceSq(Rect r) {
+    return (r.left-this.x)*(r.left-this.x)+(r.top-this.y)*(r.top-this.y);
+  }
+  
+  @Override
+  public double distance(Rect r) {
+    return Math.sqrt(distanceSq(r));
+  }
 }

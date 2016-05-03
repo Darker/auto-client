@@ -21,4 +21,12 @@ public interface RectInterface {
    * @return Rectangle that represents the center point of this rectangle. Such rectangle has 0 size.
    */
   public RectInterface middle();
+  
+ /**
+  * Crop the current rectangle. Cropping rectangle by 1 pixel means top and left
+  * will increase by one while bottom and right will decrease by one.
+  * @param howMuch
+  * @return 
+  */
+  public RectInterface crop(int howMuch);
 }

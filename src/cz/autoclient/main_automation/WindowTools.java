@@ -4,13 +4,17 @@
  * and open the template in the editor.
  */
 
-package cz.autoclient.PVP_net;
+package cz.autoclient.main_automation;
 
+import cz.autoclient.PVP_net.ConstData;
+import cz.autoclient.PVP_net.ImageFrame;
+import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.autoclick.ColorPixel;
 import cz.autoclient.autoclick.ComparablePixel;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.comvis.DebugDrawing;
+import cz.autoclient.autoclick.comvis.ScreenWatcher;
 import cz.autoclient.autoclick.exceptions.APIException;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -96,17 +100,17 @@ public class WindowTools {
      
      Rect rect = window.getRect();
      //When the client is minimized...
-     if(rect.width<point.getX() || rect.height < point.getY())
+     if(rect.width<1 || rect.height < 1)
        return false;
      
-     Color a = window.getColor((int)(rect.width * point.getX()), (int)(rect.height * point.getY()));
+     Color a = window.getColor((int)Math.round(rect.width * point.getX()), (int)Math.round(rect.height * point.getY()));
      
      if(debug!=null) {
-       System.out.println("DEBUG#"+debug+" checkPoint("+point.toSource()+"), "+tolerance+")");
-       System.out.println("   Comparing to: "+a);
-       System.out.println("    R: "+Math.abs(a.getRed() - b.getRed())+" => "+(Math.abs(a.getRed() - b.getRed()) < tolerance));
-       System.out.println("    G: "+Math.abs(a.getGreen() - b.getGreen())+" => "+(Math.abs(a.getGreen() - b.getGreen()) < tolerance));
-       System.out.println("    B: "+Math.abs(a.getBlue() - b.getBlue())+" => "+(Math.abs(a.getBlue() - b.getBlue()) < tolerance));
+       dbg("DEBUG#"+debug+" checkPoint("+point.toSource()+"), "+tolerance+")");
+       dbg("   Comparing to: "+a);
+       dbg("    R: "+Math.abs(a.getRed() - b.getRed())+" => "+(Math.abs(a.getRed() - b.getRed()) < tolerance));
+       dbg("    G: "+Math.abs(a.getGreen() - b.getGreen())+" => "+(Math.abs(a.getGreen() - b.getGreen()) < tolerance));
+       dbg("    B: "+Math.abs(a.getBlue() - b.getBlue())+" => "+(Math.abs(a.getBlue() - b.getBlue()) < tolerance));
      }
      return (Math.abs(a.getRed() -   b.getRed())   < tolerance) &&
             (Math.abs(a.getGreen() - b.getGreen()) < tolerance) &&
@@ -161,6 +165,37 @@ public class WindowTools {
         (p instanceof Enum)?((Enum)p).name() : null
      );
    }
+   public static boolean waitForPixel(Window window, ComparablePixel pixelOffset, int timeout)
+   throws InterruptedException
+   {
+     long timeStarted = System.currentTimeMillis();
+     long time = timeStarted;
+     final int sleepBaseTime = 30;
+     
+     while(timeout<0 || time-timeStarted<timeout) {
+       //BufferedImage screenshot = window.screenshot();
+       if(checkPoint(window, pixelOffset)) {
+         return true;
+       }
+       else {
+         //dbg("T: "+ (System.currentTimeMillis()-timeStarted)+" - pixel failed.");
+         //drawCheckPoint(screenshot, pixelOffset);
+         //DebugDrawing.displayImage(screenshot);
+       }
+       time = System.currentTimeMillis();
+       // Calculate time to sleep so that it never goes over timeout
+       long sleep = time+sleepBaseTime-timeStarted<timeout?sleepBaseTime:timeout-(time-timeStarted);
+       //dbg("T: "+ (System.currentTimeMillis()-timeStarted)+" - sleep for "+sleep+"ms");
+       if(sleep>0) {
+         Thread.sleep(sleep);
+         time = System.currentTimeMillis();
+       }
+       else
+         break;
+     }
+     dbg("T: "+ (System.currentTimeMillis()-timeStarted)+" - timeout returning false for "+pixelOffset.toSource());
+     return false;
+   }
    public static void drawCheckPoint(BufferedImage img, ComparablePixel pixelOffset) throws APIException {
      drawCheckPoint(img, pixelOffset, pixelOffset.getTolerance());
    }
@@ -174,6 +209,29 @@ public class WindowTools {
      DebugDrawing.displayImage(img);
    }
    
+   public static BufferedImage getNormalizedScreenshot(Window window) {
+      Rect winRect = window.getRect();
+      double winSizeCoef = ConstData.sizeCoeficientInverted(winRect);
+      return normalizeImage(
+          window.screenshot(),
+          winSizeCoef);
+   }
+   
+   public static BufferedImage getNormalizedScreenshot(Window window, ImageFrame crop) {
+      Rect winRect = window.getRect();
+      Rect cropRect = crop.multiplyBySize(winRect);
+      double winSizeCoef = ConstData.sizeCoeficientInverted(winRect);
+      return normalizeImage(
+          window.screenshotCrop(cropRect),
+          winSizeCoef);
+   }
+   
+   public static BufferedImage normalizeImage(BufferedImage i, double coefficient) {
+     return ScreenWatcher.resampleImage(
+          i,
+          coefficient, coefficient);
+   }
+
    public static void say(Window w, String text, Rect field) throws APIException, InterruptedException {
      if(text==null || text.isEmpty())
        return;
@@ -186,5 +244,9 @@ public class WindowTools {
      if(text==null || text.isEmpty())
        return;
      say(w, text, field.toRect(w.getRect()));
+   }
+   
+   public static void dbg(String str) {
+     System.out.println("[WINDOW-TOOLS] "+str); 
    }
 }

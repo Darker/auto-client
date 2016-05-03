@@ -67,7 +67,7 @@ public enum PixelOffset implements ComparablePixel {
     //Spaces between mastery tabs
     Masteries_Big_Spaces(0.0258D, 0D),
     //Close button for the mastery editor
-    Masteries_Big_Close (0.9092088770144683D, 0.2199774437191499D),
+    Masteries_Big_Close (0.9115D, 0.219D, new Color(225, 203, 131, 1), 46),
     //Summoner spell icons
     Blind_SumSpell1 (0.46045805869955697D, 0.6502242027276122D),
     
@@ -80,9 +80,21 @@ public enum PixelOffset implements ComparablePixel {
     Blind_Runes_Dropdown_First (0.25385971622052933D, 0.6502242027276122D),
     Blind_Runes_Dropdown_Spaces (0D, 0.0275D),
     Blind_SearchChampion(0.779484336388102D, 0.16596235113330773D, new Color(255, 255, 255, 1)),
+    /** ARAM **/
+    ARAM_REROLL_BLUE (0.6689782462249011D, 0.6440742990122299D, new Color(37, 81, 134, 1), 10),
+    ARAM_REROLL_WHITE (0.690118541734383D, 0.6655989620160678D, new Color(255, 255, 255, 1), 10),
+    ARAM_REROLL_GRAY (0.665134556132268D, 0.647149250869921D, new Color(127, 127, 127, 1), 10),
+    // Player list in norma lobby
+    Lobby_Player1 (0.015550930477278908D, 0.0845611760865062D),
+    Lobby_Player2 (0.015550930477278908D, 0.2105060870777794D),
+    Lobby_Player3 (0.015550930477278908D, 0.3350416373142705D),
+    Lobby_Player4 (0.015550930477278908D, 0.4611146634796071D),
+    Lobby_Player5 (0.015550930477278908D, 0.5842408529613162D),
+    Lobby_Player_Box_Size (0.1623959064137473D, 0.10762331501918981D),
+    
     MatchFound(0.495117D, 0.515625D, new Color(255, 255, 255),1),
     AcceptButton(0.39004512649241546D, 0.5599898226129755D, new Color(25, 60, 101, 1)),
-    //Search champion field in blind queue
+   
     
     TeamBuilder_AcceptGroup  (0.36240150633806045D, 0.5802060676136939D, new Color(43, 85, 137, 1),25),
     TeamBuilder_CaptainIcon (0.5120583464840514D, 0.17717336270716075D, new Color(56, 97, 99, 1), 11),
@@ -170,12 +182,15 @@ public enum PixelOffset implements ComparablePixel {
                            +color.getAlpha()
                          +")":"")+")";
     }
-    public Rect toRect(Rect win_dimensions) {
-      return new Rect((int)(x*(double)win_dimensions.width), (int)(y*(double)win_dimensions.height));
-    }
-    public Rect toRect(int width, int height) {
-      return new Rect((int)(x*(double)width), (int)(y*(double)height));
-    }
+  @Override
+  public Rect toRect(Rect win_dimensions) {
+    return new Rect((int)(x*(double)win_dimensions.width), (int)(y*(double)win_dimensions.height));
+  }
+  @Override
+  public Rect toRect(int width, int height) {
+    return new Rect((int)(x*(double)width), (int)(y*(double)height));
+  }
+  
 
   @Override
   public Color getColor() {
@@ -195,5 +210,15 @@ public enum PixelOffset implements ComparablePixel {
   @Override
   public double getY() {
     return y;
+  }
+
+  @Override
+  public double distanceSq(Rect r) {
+    return (r.left-this.x)*(r.left-this.x)+(r.top-this.y)*(r.top-this.y);
+  }
+  
+  @Override
+  public double distance(Rect r) {
+    return Math.sqrt(distanceSq(r));
   }
 }

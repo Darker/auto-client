@@ -320,6 +320,9 @@ public class ScreenWatcher {
     int h = original.getHeight();
     return resampleImage(original, (double)width/(double)w, (double)height/(double)h);
   }
+  public static Color averageColor(BufferedImage bi) {
+    return averageColor(bi, 0, 0, bi.getWidth(), bi.getHeight());
+  }
   /*
  * Where bi is your image, (x0,y0) is your upper left coordinate, and (w,h)
  * are your width and height respectively
@@ -330,14 +333,43 @@ public class ScreenWatcher {
     long sumr = 0, sumg = 0, sumb = 0;
     for (int x = x0; x < x1; x++) {
         for (int y = y0; y < y1; y++) {
-            Color pixel = new Color(bi.getRGB(x, y));
-            sumr += pixel.getRed();
-            sumg += pixel.getGreen();
-            sumb += pixel.getBlue();
+            //Color color = new Color(bi.getRGB(x, y));
+            //sumr += color.getRed();
+            //sumg += color.getGreen();
+            //sumb += color.getBlue();
+            
+            int pixel = bi.getRGB(x, y);
+            //Prepare all the colors in advance
+            sumr += ((pixel&0x00FF0000)>>16);
+            sumg += ((pixel&0x0000FF00)>>8);
+            sumb +=  (pixel&0x000000FF);
         }
     }
-    int num = w * h;
-    return new Color(sumr / num, sumg / num, sumb / num);
+    double num = w * h;
+    return new Color(
+        (int)Math.round(sumr / num),
+        (int)Math.round(sumg / num),
+        (int)Math.round(sumb / num)
+    );
+  }
+  /**
+   * Returns squared distance between two colors. Ignores alpha.
+   * @param a
+   * @param b
+   * @return 
+   */
+  public static int compareColorsSq(Color a, Color b) {
+    int argb = a.getRGB();
+    int ar = ((argb&0x00FF0000)>>16);
+    int ag = ((argb&0x0000FF00)>>8);
+    int ab =  (argb&0x000000FF);
+    
+    int brgb = b.getRGB();
+    int br = ((brgb&0x00FF0000)>>16);
+    int bg = ((brgb&0x0000FF00)>>8);
+    int bb =  (brgb&0x000000FF);
+    
+    return (ar-br)*(ar-br)+(ag-bg)*(ag-bg)+(ab-bb)*(ab-bb);
   }
   /** Generate an integral image. Every pixel on such image contains sum of colors or all the
    *  pixels before and itself.

@@ -27,6 +27,7 @@ public abstract class GameObject implements java.io.Serializable {
     jsonKey = key;
   }
   /** Returns visible (in-game) localised name of this spell.
+   * wtf. Spell? I don't understand my own javadoc!
    * 
    * @return Name as string. Can contain diacritic characters.
    * @throws JSONException when JSON is broken
