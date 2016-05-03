@@ -55,12 +55,16 @@ public class ConfigurationManager {
   private static List<String> champion_names;
   
   public ConfigurationManager(JComboBox input, Settings main) {
-    setting_name = "ConfigurationManager_"+(instID++);
+    setting_name = "ConfigurationManager";
     //Initialise settings
     main_settings = main;
     
     if(main.exists(setting_name, HashMap.class)) {
       settings = (HashMap)main.getSetting(setting_name); 
+    }
+    else if(main.exists(setting_name+"_0", HashMap.class)) {
+      settings = (HashMap)main.getSetting(setting_name+"_0"); 
+      main.empty(setting_name+"_0");
     }
     else {
       settings = new HashMap<String, Settings>();
