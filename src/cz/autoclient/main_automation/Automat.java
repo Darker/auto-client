@@ -4,6 +4,7 @@ import cz.autoclient.GUI.Dialogs;
 import cz.autoclient.GUI.Gui;
 import cz.autoclient.GUI.LazyLoadedImage;
 import cz.autoclient.GUI.notifications.Notification;
+import cz.autoclient.PVP_net.AcceptedGameType;
 import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.ImageFrame;
 import cz.autoclient.autoclick.windows.Window;
@@ -12,6 +13,7 @@ import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
 import cz.autoclient.settings.Settings;
 import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.PVP_net.Images;
+import cz.autoclient.PVP_net.PxGroup;
 import cz.autoclient.PVP_net.Setnames;
 import cz.autoclient.PVP_net.TeamBuilderPlayerSlot;
 import cz.autoclient.autoclick.exceptions.APIException;
@@ -105,22 +107,6 @@ public class Automat
       end();
     }
     end();
-    /*try
-     {
-     for (;;)
-     {
-     sleep(1000L);
-     if (this.gui.getSelectedMode().length > 1) {
-     StartMode(cID, this.gui.getSelectedMode());
-     }
-     }
-     }
-     catch (InterruptedException e)
-     {
-     if (this.gui.getToggleButton1().isSelected()) {
-     this.gui.getToggleButton1().doClick();
-     }
-     }*/
   }
 
   private void end() {
@@ -140,10 +126,10 @@ public class Automat
      int height = cRec.height;
      int width = cRec.width;*/
     long accepted = -1;
-    //If the accepted mode is team builder
-    boolean tb = false;
-    long time;
 
+    long time;
+    
+    AcceptedGameType type = AcceptedGameType.UNKNOWN;
     //If the play button is there, do not do anything
     boolean play_button = true;
 
@@ -153,78 +139,64 @@ public class Automat
       if (pretendAccepted == true) {
         pretendAccepted = false;
         accepted = time;
+        type = AcceptedGameType.NORMAL;
+        gui.setTitle("Match accepted, waiting for lobby.");
       }
 
       sleep(accepted > 0 ? 10L : 600L);
       try {
         if (accepted > 0) {
-          if (checkPoint(window, PixelOffset.LobbyChat)
-              && checkPoint(window, PixelOffset.LobbyChat2)
-              && checkPoint(window, PixelOffset.LobbyChatBlueTopFrame) //&& checkPoint(PixelOffset.Blind_SearchChampion, 1)
-              ) {
-            dbgmsg("Lobby detected. Picking champion and lane.");
-            if (normal_lobby()) {
-              break;
-            } else {
-              continue;
+          if(type == AcceptedGameType.NORMAL) {
+            if (PxGroup.NORMAL_LOBBY.test(window)) {
+              dbgmsg("Lobby detected. Picking champion and lane.");
+              if (normal_lobby()) {
+                break;
+              } else {
+                continue;
+              }
             }
           }
-          /*else {
-           Rect rect = window.getRect();
-           PixelOffset point = PixelOffset.TeamBuilder_CaptainIcon;
-           Color a = window.getColor((int)(rect.width * point.x), (int)(rect.height * point.y));
-
-           dbgmsg("new Color("+a.getRed()+", "+a.getGreen()+", "+a.getBlue()+", 1)");
-           sleep(600L);
-           }*/
-
-          if (time - accepted > 12) {
+          else if(type == AcceptedGameType.DRAFT) {
+            if(PxGroup.DRAFT_LOBBY.test(window)) {
+              dbgmsg("Draft lobby handled, that's all I can do right now.");
+              accepted = -1;
+              gui.notification(Notification.Def.DRAFT_TEAM_JOINED);
+            }
+            else {
+              dbgmsg("Draft lobby match failed!"); 
+            }
+          }
+          if (time - accepted > type.timeout) {
             dbgmsg("Match was declined.");
             gui.setTitle("Waiting for match.");
             accepted = -1;
-            tb = false;
+            type = AcceptedGameType.UNKNOWN;
           }
         } else {
-          if (/*pixelCheckS(new Color(255, 255, 255), width * PixelOffset.MatchFound.x, height * PixelOffset.MatchFound.y, 1)*/checkPoint(window, PixelOffset.MatchFound)) {
-            //SelectItem("accept");
-
+          if (checkPoint(window, PixelOffset.MatchFound)) {
             click(PixelOffset.AcceptButton);
-            //this.gui.getProgressBar1().setValue(60);
             accepted = time;
+            type = AcceptedGameType.NORMAL;
             gui.setTitle("Match accepted, waiting for lobby.");
-            tb = false;
             play_button = false;
-          } /*else if (pixelCheckS(new Color(255, 255, 255), width * 0.7361D, height * 0.91875D, 1))
-           {
-           accepted = -1;
-           this.gui.getProgressBar1().setValue(40);
-           }*/ //If this is a lobby with invited players
+          }
+          /** DRAFT LOBBY ACCEPT **/
+          else if (PxGroup.DRAFT_ACCEPT.test(window)) {
+            click(PixelOffset.Draft_Accept_Mid);
+            accepted = time;
+            type = AcceptedGameType.DRAFT;
+            gui.setTitle("Draft match accepted, waiting for lobby.");
+          } 
           else if (checkPoint(window, PixelOffset.InviteChat) && checkPoint(window, PixelOffset.InviteStart)) {
             invite_lobby();
             gui.setTitle("Waiting for match.");
             play_button = false;
-          } //If play button wasn't there and sudenly appeared, the program shall quit
+          } 
           else if (checkPoint(window, PixelOffset.PlayButton_red) && !play_button) {
             dbgmsg("The play button is red. Something must've gone wrong.");
             play_button = true;
-            tb = false;
             gui.setTitle("Waiting for match.");
           }
-
-            //Please kick me, I need to test something :)
-            /*Color cCol = window.getColor((int)(width * PixelOffset.PlayButton.x), (int)(height * PixelOffset.PlayButton.y));
-           if ((cCol.getRed() > 70) && (cCol.getGreen() < 10) && (cCol.getBlue() < 5) && (!isInterrupted()))
-           {
-           sleep(700L);
-
-           cCol = window.getColor((int)(width * PixelOffset.PlayButton.x), (int)(height * PixelOffset.PlayButton.y));
-           if ((cCol.getRed() > 70) && (cCol.getGreen() < 10) && (cCol.getBlue() < 5) && (!isInterrupted()))
-           {
-           dbgmsg("The play button is red. Something must've gone wrong. Aborting.");
-           interrupt();
-           break;
-           }
-           }*/
         }
       } catch (IllegalArgumentException fe) {
         fe.printStackTrace();
@@ -257,6 +229,72 @@ public class Automat
     //boolean ARAM = false;
     this.callText(settings.getStringEquivalent(Setnames.BLIND_CALL_TEXT.name));
 
+    if (SituationDetector.IsAram(window) || true) {
+      dbgmsg("Probably ARAM!");
+      if(Setnames.ARAM_ENABLED.getBoolean(settings)) {
+        aram_lobby();
+      }
+    }
+    else {
+      blind_lobby(); 
+    }
+    
+    dbgmsg("NORMAL LOBBY: Waiting for a game to start.");
+    gui.setTitle("In normal lobby, waiting for a game to start.");
+    //Wait and return false if lobby ends unexpectedly
+    PixelOffset[] points = new PixelOffset[] {
+      PixelOffset.LobbyChat,
+      PixelOffset.LobbyChat2,
+      //PixelOffset.Blind_SearchChampion,
+      PixelOffset.LobbyTopBar,
+      PixelOffset.LobbyHoverchampTop,
+      //PixelOffset.LobbySummonerSpellsHeader,
+      PixelOffset.LobbyRunesCheckmark,
+      PixelOffset.Masteries_Edit
+    };
+    PixelOffset[] failPoints = new PixelOffset[] {
+      PixelOffset.StoreButton,
+      PixelOffset.PlayButton_red,
+      PixelOffset.PlayButton_SearchingCorner,
+      PixelOffset.PlayButton_cancel
+    };
+    while (true) {
+      if (WindowTools.checkPoint(window, points) < 3) {
+        dbgmsg("NORMAL LOBBY: lobby gone, waiting for the game.");
+         //Internal loop will wait until lobby reappears or game starts
+        //or main screen reappears
+        do {
+          //Wait 2 seconds, then check if back in main screen
+          sleep(2000);
+
+          BufferedImage img = window.screenshot();
+          if ((WindowTools.checkPoint(img, failPoints)) > 1) {
+            dbgmsg("NORMAL LOBBY: Game did not start, waiting for another game.");
+            return false;
+          } //Check if the game is running, return true if it does
+          else if (CacheByTitle.initalInst.getWindow(ConstData.game_window_title) != null) {
+            dbgmsg("NORMAL LOBBY: Game started.");
+            return true;
+          } else {
+            dbgmsg("NORMAL LOBBY: Waiting...");
+          }
+
+           //WindowTools.drawCheckPoint(img, points);
+          //WindowTools.drawCheckPoint(img, failPoints);
+          //WindowTools.drawCheckPoint(screenshot, failPoints);
+          //DebugDrawing.displayImage(img);
+          //else if(WindowTools.checkPoint(window, points)>=4) {
+          //  dbgmsg("NORMAL LOBBY: lobby back here, waiting for game again."); 
+          //dbgmsg("NORMAL LOBBY: Game did not start, waiting for another game."); 
+          //return false;
+          //}
+        } while (WindowTools.checkPoint(window, points) < 4);
+        dbgmsg("NORMAL LOBBY: lobby back here, looping again.");
+      }
+      sleep(800);
+    }
+  }
+  public void blind_lobby() throws InterruptedException {
     if (settings.getStringEquivalent(Setnames.BLIND_CHAMP_NAME.name).length() > 1) {
       click(PixelOffset.Blind_SearchChampion);
       sleep(20L);
@@ -269,115 +307,6 @@ public class Automat
       sleep(100L);
       click(PixelOffset.LobbyChampionSlot1);
     }
-
-    
-
-    if (SituationDetector.IsAram(window)) {
-      dbgmsg("Probably ARAM!");
-      
-      BufferedImage player_list = WindowTools.getNormalizedScreenshot(
-          window,
-          ImageFrame.NormalLobby_PlayerList_Left
-      );
-
-      Rect player_pos;
-      PixelOffset[] playerOffsets = {
-        PixelOffset.Lobby_Player1,
-        PixelOffset.Lobby_Player2,
-        PixelOffset.Lobby_Player3,
-        PixelOffset.Lobby_Player4,
-        PixelOffset.Lobby_Player5,
-      };
-      
-      try {
-        player_pos = ScreenWatcher.findByAvgColor(
-            Images.LOBBY_BOX_LOCKED.getImg(),
-            player_list,
-            0.001f,
-            false,
-            null
-        );
-        if (player_pos != null) {
-          DebugDrawing.drawResult(player_list, player_pos, Color.RED);
-          // The offset by which the current area is cropped
-          Rect moveOffset = ImageFrame.NormalLobby_PlayerList_Left.multiplyBySize(ConstData.smallestSize);
-          // Dimensions of the full window (I'm usning the const minimal dimensions)
-          // applied to dimension of player box
-          Rect size = PixelOffset.Lobby_Player_Box_Size.toRect(ConstData.smallestSize);
-          
-          Rect fullRect = null;
-          double bestDist = Double.MAX_VALUE;
-          for(PixelOffset o: playerOffsets) {
-            // Convert relative point offset to offset in our cropped wiew
-            Rect fullRectTmp = o.toRect(ConstData.smallestSize, moveOffset, size);
-            
-            double dist = fullRectTmp.distanceSq(player_pos);
-            if(dist<bestDist) {
-              fullRect = fullRectTmp;
-              bestDist = dist;
-            }
-            // Draw the pixel
-            DebugDrawing.drawPoint(player_list,
-                fullRectTmp.left,
-                fullRectTmp.top,
-                6,
-                Color.WHITE,
-                fullRectTmp.distanceSq(player_pos)+""
-            );
-          }
-
-          DebugDrawing.drawResult(player_list, fullRect, Color.GREEN);
-          DebugDrawing.drawPoint(player_list, fullRect.left, fullRect.top, 4, Color.CYAN);
-          
-          //Champion face relative to (any) champion box
-          // This is because 1st box is subtracted from 1st avatar pos
-          // so only relative difference remains
-          Rect champion = (Rect)ImageFrame.NormalLobby_PlayerList_Champion1
-                    .relativeTo(ImageFrame.NormalLobby_PlayerList_Box1)
-                    .multiplyBySize(ConstData.smallestSize)
-                    .move(fullRect.left, fullRect.top)
-                    .crop(1);
-          BufferedImage avatar = player_list.getSubimage(
-              champion.left,
-              champion.top,
-              champion.width+1,
-              champion.height+1
-          );
-          // move the rectangle towards the champion box that was found
-          //DebugDrawing.drawResult(player_list, champion, Color.magenta);
-          
-          moveOffset = moveOffset.move(-moveOffset.left, -moveOffset.top);
-          dbgmsg("The list frame: "+moveOffset);
-          //DebugDrawing.drawResult(player_list, moveOffset, Color.YELLOW);
-          
-          //DebugDrawing.displayImage(player_list, "Player position.");
- 
-          //DebugDrawing.displayImage(avatar, "Player position.");
-          //Color avg = ScreenWatcher.averageColor(avatar);
-          if(championColors==null)
-            championColors = new ChampionImages(new File("LOLResources"));
-          String best = championColors.find(avatar);
-          dbgmsg("Detected champion: "+best);
-          if(settings.exists("ConfigurationManager", HashMap.class)) {
-            HashMap cust_settings = (HashMap)settings.getSetting("ConfigurationManager_0"); 
-            if(cust_settings.containsKey(best)) {
-              Settings custom = (Settings)cust_settings.get(best);
-              setMastery(custom.getInt(Setnames.BLIND_MASTERY.name, 0));
-              setRunes(custom.getInt(Setnames.BLIND_RUNE.name, 0));
-            }
-            else {
-              dbgmsg("Error: no settings for champion "+best+"!");
-            }
-          }
-          else {
-            dbgmsg("Error: no settings manager available for custom settings.");
-          }
-        }
-      } catch (IOException ex) {
-        dbgmsg("Missing image for aram lobby.");
-      }
-    }
-
     //Set summoner spells
     String[] spells = {
       (String) settings.getSetting(Setnames.BLIND_SUMMONER1.name),
@@ -508,62 +437,7 @@ public class Automat
     //Set runes:
     int rune = settings.getInt(Setnames.BLIND_RUNE.name, 0);
     setRunes(rune);
-    dbgmsg("NORMAL LOBBY: Waiting for a game to start.");
-    gui.setTitle("In normal lobby, waiting for a game to start.");
-    //Wait and return false if lobby ends unexpectedly
-    PixelOffset[] points = new PixelOffset[]{
-      PixelOffset.LobbyChat,
-      PixelOffset.LobbyChat2,
-      //PixelOffset.Blind_SearchChampion,
-      PixelOffset.LobbyTopBar,
-      PixelOffset.LobbyHoverchampTop,
-      //PixelOffset.LobbySummonerSpellsHeader,
-      PixelOffset.LobbyRunesCheckmark,
-      PixelOffset.Masteries_Edit
-    };
-    PixelOffset[] failPoints = new PixelOffset[]{
-      PixelOffset.StoreButton,
-      PixelOffset.PlayButton_red,
-      PixelOffset.PlayButton_SearchingCorner,
-      PixelOffset.PlayButton_cancel
-    };
-    while (true) {
-      if (WindowTools.checkPoint(window, points) < 3) {
-        dbgmsg("NORMAL LOBBY: lobby gone, waiting for the game.");
-         //Internal loop will wait until lobby reappears or game starts
-        //or main screen reappears
-        do {
-          //Wait 2 seconds, then check if back in main screen
-          sleep(2000);
-
-          BufferedImage img = window.screenshot();
-          if ((WindowTools.checkPoint(img, failPoints)) > 1) {
-            dbgmsg("NORMAL LOBBY: Game did not start, waiting for another game.");
-            return false;
-          } //Check if the game is running, return true if it does
-          else if (CacheByTitle.initalInst.getWindow(ConstData.game_window_title) != null) {
-            dbgmsg("NORMAL LOBBY: Game started.");
-            return true;
-          } else {
-            dbgmsg("NORMAL LOBBY: Waiting...");
-          }
-
-           //WindowTools.drawCheckPoint(img, points);
-          //WindowTools.drawCheckPoint(img, failPoints);
-          //WindowTools.drawCheckPoint(screenshot, failPoints);
-          //DebugDrawing.displayImage(img);
-          //else if(WindowTools.checkPoint(window, points)>=4) {
-          //  dbgmsg("NORMAL LOBBY: lobby back here, waiting for game again."); 
-          //dbgmsg("NORMAL LOBBY: Game did not start, waiting for another game."); 
-          //return false;
-          //}
-        } while (WindowTools.checkPoint(window, points) < 4);
-        dbgmsg("NORMAL LOBBY: lobby back here, looping again.");
-      }
-      sleep(800);
-    }
   }
-
   /**
    * Call text to chat in standard lobby. Supports scripts.
    *
@@ -602,220 +476,112 @@ public class Automat
     sleep(200L);
   }
 
-  public boolean teamBuilder_lobby() throws InterruptedException {
-    gui.notification(Notification.Def.TB_GROUP_JOINED);
-    dbgmsg("In team builder lobby now.");
-    //Check if the teambuilder is enabled
-    if (!settings.getBoolean(Setnames.TEAMBUILDER_ENABLED.name, (boolean) Setnames.TEAMBUILDER_ENABLED.default_val)) {
-      gui.setTitle("Team builder - actions are disabled");
-      while (true) {
-        if (!checkPoint(window, PixelOffset.TeamBuilder_CaptainIcon)) {
-          dbgmsg("The group was disbanded.");
-          return false;
-        }
-        sleep(1000L);
-      }
-    }
-    gui.setTitle("Waiting for ready button. (Team builder)");
-    /*click(PixelOffset.TeamBuilder_Chat);
-     if(settings.getStringEquivalent(Setnames.BLIND_CALL_TEXT.name).length()>0) {
-     sleep(50L);
-     window.typeString(settings.getStringEquivalent(Setnames.BLIND_CALL_TEXT.name));
-     Enter();
-     }
-     sleep(50L);*/
-    //Wait for ready button
-    dbgmsg("Waiting for ready button.");
-    while (true) {
-      if (!checkPoint(window, PixelOffset.TeamBuilder_CaptainIcon)) {
-        dbgmsg("The group was disbanded.");
-        return false;
-      }
-      sleep(700L);
-      //If ready button is available
-      if (checkPoint(window, PixelOffset.TeamBuilder_Ready_Enabled)) {
-        dbgmsg("Clicking ready button!");
-        WindowTools.click(window, PixelOffset.TeamBuilder_Ready);
-      } //If ready button is selected
-      else if (checkPoint(window, PixelOffset.TeamBuilder_CaptainReady, PixelOffset.PlayButton_SearchingForGame_Approx) == 2) {
-        dbgmsg("Searching for game!");
-        gui.setTitle("Waiting for game. (Team builder)");
-        //TODO: add a while that waits for game to make really sre a game will be joined
-        while (checkPoint(window, PixelOffset.PlayButton_SearchingForGame_Approx)) {
-          sleep(500L);
-          /*click(PixelOffset.PlayButton_cancel);
-           sleep(800L);
-           return false;*/
+  public void aram_lobby() throws InterruptedException {
+    // Constant sleep to ensure the ARAM champion is already displayed
+    sleep(1500);
+    // Get screenshot of the player box area to the left
+    BufferedImage player_list = WindowTools.getNormalizedScreenshot(
+        window,
+        ImageFrame.NormalLobby_PlayerList_Left
+    );
 
-          if (checkPoint(window, PixelOffset.TeamBuilder_MatchFound, PixelOffset.TeamBuilder_MatchFound2) == 2) {
-            dbgmsg("Match found!");
-            return true;
+    Rect player_pos;
+    PixelOffset[] playerOffsets = {
+      PixelOffset.Lobby_Player1,
+      PixelOffset.Lobby_Player2,
+      PixelOffset.Lobby_Player3,
+      PixelOffset.Lobby_Player4,
+      PixelOffset.Lobby_Player5,
+    };
+
+    try {
+      player_pos = ScreenWatcher.findByAvgColor(
+          Images.LOBBY_BOX_LOCKED.getImg(),
+          player_list,
+          0.001f,
+          false,
+          null
+      );
+      if (player_pos != null) {
+        //DebugDrawing.drawResult(player_list, player_pos, Color.RED);
+        // The offset by which the current area is cropped
+        Rect moveOffset = ImageFrame.NormalLobby_PlayerList_Left.multiplyBySize(ConstData.smallestSize);
+        // Dimensions of the full window (I'm usning the const minimal dimensions)
+        // applied to dimension of player box
+        Rect size = PixelOffset.Lobby_Player_Box_Size.toRect(ConstData.smallestSize);
+
+        Rect fullRect = null;
+        double bestDist = Double.MAX_VALUE;
+        for(PixelOffset o: playerOffsets) {
+          // Convert relative point offset to offset in our cropped wiew
+          Rect fullRectTmp = o.toRect(ConstData.smallestSize, moveOffset, size);
+
+          double dist = fullRectTmp.distanceSq(player_pos);
+          if(dist<bestDist) {
+            fullRect = fullRectTmp;
+            bestDist = dist;
+          }
+          // Draw the pixel
+          DebugDrawing.drawPoint(player_list,
+              fullRectTmp.left,
+              fullRectTmp.top,
+              6,
+              Color.WHITE,
+              fullRectTmp.distanceSq(player_pos)+""
+          );
+        }
+
+        //Champion face relative to (any) champion box
+        // This is because 1st box is subtracted from 1st avatar pos
+        // so only relative difference remains
+        Rect champion = (Rect)ImageFrame.NormalLobby_PlayerList_Champion1
+                  .relativeTo(ImageFrame.NormalLobby_PlayerList_Box1)
+                  .multiplyBySize(ConstData.smallestSize)
+                  .move(fullRect.left, fullRect.top)
+                  .crop(1);
+        BufferedImage avatar = player_list.getSubimage(
+            champion.left,
+            champion.top,
+            champion.width+1,
+            champion.height+1
+        );
+        // move the rectangle towards the champion box that was found
+        //DebugDrawing.drawResult(player_list, champion, Color.magenta);
+
+        //moveOffset = moveOffset.move(-moveOffset.left, -moveOffset.top);
+        //dbgmsg("The list frame: "+moveOffset);
+        //DebugDrawing.drawResult(player_list, moveOffset, Color.YELLOW);
+
+        //DebugDrawing.displayImage(player_list, "Player position.");
+
+        //DebugDrawing.displayImage(avatar, "Player position.");
+        //Color avg = ScreenWatcher.averageColor(avatar);
+        if(championColors==null)
+          championColors = new ChampionImages(new File("LOLResources"));
+        String best = championColors.find(avatar);
+        dbgmsg("Detected champion: "+best);
+        if(settings.exists("ConfigurationManager", HashMap.class)) {
+          HashMap cust_settings = (HashMap)settings.getSetting("ConfigurationManager_0"); 
+          if(cust_settings.containsKey(best)) {
+            Settings custom = (Settings)cust_settings.get(best);
+            setMastery(custom.getInt(Setnames.BLIND_MASTERY.name, 0));
+            setRunes(custom.getInt(Setnames.BLIND_RUNE.name, 0));
+          }
+          else {
+            dbgmsg("Error: no settings for champion "+best+"!");
           }
         }
-        dbgmsg("Game cancelled!");
-      } else {
-        //dbgmsg("   ... still waiting.");
+        else {
+          dbgmsg("Error: no settings manager available for custom settings.");
+        }
       }
-    }
-    /*if(true)
-     return false;*/
-    //click(PixelOffset.TeamBuilder_FindAnotherGroup);
-  }
-
-  public boolean teamBuilder_captain_lobby() throws InterruptedException {
-    dbgmsg("In team builder lobby as captain now.");
-    gui.setTitle("Waiting for players. (Team builder)");
-    //Player slots - initally 4 empty ones
-    TeamBuilderPlayerSlot slots[] = {TeamBuilderPlayerSlot.Empty, TeamBuilderPlayerSlot.Empty, TeamBuilderPlayerSlot.Empty, TeamBuilderPlayerSlot.Empty};
-    //Another array required for comparison and change detection
-    TeamBuilderPlayerSlot oldslots[] = {TeamBuilderPlayerSlot.Empty, TeamBuilderPlayerSlot.Empty, TeamBuilderPlayerSlot.Empty, TeamBuilderPlayerSlot.Empty};
-    //Distance between player slots, vertically
-    double offset = PixelOffset.TeamBuilder_CaptainLobby_slot_dist.y;
-
-    //If all ready message was called, do not call it again (would be a lot of spam)
-    boolean allReadyCalled = false;
-    //If all ready notification has been issued
-    boolean gameReadyNotified = false;
-
-    byte old_ready = 0;
-    byte old_joined = 0;
-    //Wait for the slots to be filled
-    while (true) {
-      if (!checkPoint(window, PixelOffset.TeamBuilder_CaptainLobby_Invited)) {
-        dbgmsg("Lobby has been canceled.");
-        return false;
-      }
-      sleep(1500L);
-
-      //Check slot statuses
-      for (int i = 0; i < 4; i++) {
-        slots[i] = TeamBuilderPlayerSlot.Error;
-        //Summoner spell - player is in - may need to be accepted
-        if (checkPoint(window, (ComparablePixel) PixelOffset.TeamBuilder_CaptainLobby_slot_kickPlayer.offset(0, i * offset))) {
-          if (checkPoint(window, PixelOffset.TeamBuilder_CaptainLobby_slot_acceptPlayer.offset(0, i * offset))) {
-            click(PixelOffset.TeamBuilder_CaptainLobby_slot_acceptPlayer.offset(0, i * offset));
-            slots[i] = TeamBuilderPlayerSlot.Accepted;
-            //Time penalty for clicking
-            sleep(80L);
-          } //WARNING - this match can be errorneous if previous match fails to match properly
-          else if (checkPoint(window, PixelOffset.TeamBuilder_CaptainLobby_slot_greenBorder.offset(0, i * offset))) {
-            slots[i] = TeamBuilderPlayerSlot.Ready;
-          } else if (checkPoint(window, PixelOffset.TeamBuilder_CaptainLobby_slot_blueBorder.offset(0, i * offset))) {
-            slots[i] = TeamBuilderPlayerSlot.Occupied;
-          } else {
-            slots[i] = TeamBuilderPlayerSlot.ErrorPlayer;
-            dbgmsg("Matching problems. Slot #" + (i + 1));
-
-            ColorPixel[] points = {
-              PixelOffset.TeamBuilder_CaptainLobby_slot_acceptPlayer.offset(0, i * offset),
-              PixelOffset.TeamBuilder_CaptainLobby_slot_greenBorder.offset(0, i * offset),
-              PixelOffset.TeamBuilder_CaptainLobby_slot_blueBorder.offset(0, i * offset)
-            };
-            String[] names = {
-              "TeamBuilder_CaptainLobby_slot_acceptPlayer",
-              "TeamBuilder_CaptainLobby_slot_greenBorder",
-              "TeamBuilder_CaptainLobby_slot_blueBorder"
-            };
-            for (byte ii = 0; ii < points.length; ii++) {
-              ColorPixel point = points[ii];
-              dbgmsg("    " + point.toString(names[ii]));
-              try {
-                Rect rect = window.getRect();
-                Color a = window.getColor((int) (rect.width * point.x), (int) (rect.height * point.y));
-                dbgmsg("     - Real color: " + ColorPixel.ColorToSource(a));
-              } catch (APIException e) {
-
-              }
-            }
-          }
-        } //No summoner spell = no player in lobby at this slot
-        else if (checkPoint(window, PixelOffset.TeamBuilder_CaptainLobby_slot_summonerSpell.offset(0, i * offset))) {
-          slots[i] = TeamBuilderPlayerSlot.Empty;
-        } //Green means the player is now joining
-        else if (checkPoint(window, PixelOffset.TeamBuilder_CaptainLobby_slot_greenBorder.offset(0, i * offset))) {
-          slots[i] = TeamBuilderPlayerSlot.Accepted;
-        }
-
-        /*if(slots[i] == TeamBuilderPlayerSlot.Error) {
-         dbgmsg("Matching problems. Slot #"+(i+1));
-         dbgmsg("    "+PixelOffset.TeamBuilder_CaptainLobby_slot_acceptPlayer.offset(0, i*offset).toString("TeamBuilder_CaptainLobby_slot_acceptPlayer"));
-
-         }*/
-      }
-      //Now check player status and react to it
-      byte ready = 0;
-      byte joined = 0;
-      dbgmsg("Current slot status:");
-      for (int i = 0; i < 4; i++) {
-        if (slots[i].isJoined) {
-          joined++;
-        }
-        if (slots[i] == TeamBuilderPlayerSlot.Ready) {
-          ready++;
-        }
-        dbgmsg("  " + (i + 1) + " - " + slots[i]);
-         //React to individual changes
-        //Greet new players here
-        if (!oldslots[i].isJoined && slots[i].isJoined) {
-          if (!settings.getStringEquivalent("tb_cap_greet").isEmpty()) {
-            teamBuilder_say(settings.getStringEquivalent("tb_cap_greet"));
-          }
-          dbgmsg("    A new player appeared in slot #" + (i + 1));
-          //dbgmsg("Matchpoint: "+PixelOffset.TeamBuilder_CaptainLobby_slot_kickPlayer.offset(0, i*offset).toSource());
-        }
-        if (oldslots[i] != TeamBuilderPlayerSlot.Accepted && slots[i] == TeamBuilderPlayerSlot.Accepted) {
-          dbgmsg("    A new player accepted #" + (i + 1));
-          //dbgmsg("Matchpoint: "+PixelOffset.TeamBuilder_CaptainLobby_slot_kickPlayer.offset(0, i*offset).toSource());
-        }
-
-        //Update old slots to new slots here (it's probably shitty to update it before reading is finished)
-        oldslots[i] = slots[i];
-      }
-      if (old_joined < joined) {
-        gui.notification(Notification.Def.TB_PLAYER_JOINED);
-      }
-      //If all have joined and are ready, start the game
-      if (ready == 4) {
-        if (!gameReadyNotified) {
-          gui.notification(Notification.Def.TB_GAME_CAN_START);
-        }
-        if (settings.getBoolean(Setnames.TEAMBUILDER_AUTOSTART_ENABLED.name, false)) {
-          dbgmsg("Clicking play button!");
-          click(PixelOffset.TeamBuilder_Ready);
-        }
-        //Wait for screen update
-        sleep(500L);
-        gameReadyNotified = true;
-      } else if (joined == 4) {
-        if (!allReadyCalled && settings.getStringEquivalent("tb_cap_lock").length() > 0) {
-          teamBuilder_say(settings.getStringEquivalent("tb_cap_lock"));
-        }
-        allReadyCalled = true;
-        gameReadyNotified = false;
-      } //Reset all ready message until somebody joins again
       else {
-        allReadyCalled = false;
-        gameReadyNotified = false;
+        dbgmsg("Error: player lobby bar was not found.");
       }
-
-      //Test if game is being searched, in which case break this loop
-      while (checkPoint(window, PixelOffset.PlayButton_SearchingForGame_Approx)) {
-        sleep(500L);
-        if (checkPoint(window, PixelOffset.TeamBuilder_MatchFound, PixelOffset.TeamBuilder_MatchFound2) == 2) {
-          dbgmsg("Match found!");
-          return true;
-        }
-      }
-      old_ready = ready;
-      old_joined = joined;
+    } catch (IOException ex) {
+      dbgmsg("Missing image for aram lobby.");
     }
-
-    /*if(true)
-     return true;
-     else
-     return false;*/
   }
-
   public void invite_lobby() throws APIException, InterruptedException {
     //Handle disabled invite lobby
     if (!settings.getBoolean(Setnames.INVITE_ENABLED.name, (boolean) Setnames.INVITE_ENABLED.default_val)) {
@@ -924,7 +690,6 @@ public class Automat
     this.window.keyDown(13);
     this.window.keyUp(13);
   }
-
   private void click(PixelOffset pos) {
     try {
       Rect rect = window.getRect();

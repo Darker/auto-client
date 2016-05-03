@@ -7,11 +7,14 @@
 package cz.autoclient.GUI.tabs;
 
 import cz.autoclient.GUI.tabs.FieldDef;
+import java.awt.Component;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextPane;
 
 /**
  *
@@ -62,13 +65,23 @@ public class TabbedWindow {
   }
   
   public void addLine(FieldDef line) {
-    if(currentPanel==null) {
-      throw new IllegalStateException("First open tab using newTab."); 
-    }
-    hGroup.addComponent(line.container);
-    vGroup.addComponent(line.container, GroupLayout.PREFERRED_SIZE,
-            GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE);
-    vGroup.addGap(5);
+    addComponent(line.container);
     //currentPanel.add(line.container);
   } 
+  public void addLine(JLabel line) {
+    addComponent(line);
+  } 
+  public void addLine(JTextPane line) {
+    addComponent(line);
+  } 
+  protected void addComponent(Component comp) {
+   if(currentPanel==null) {
+      throw new IllegalStateException("First open tab using newTab."); 
+    }
+    hGroup.addComponent(comp);
+    vGroup.addComponent(comp, GroupLayout.PREFERRED_SIZE,
+            GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE);
+    vGroup.addGap(5);
+  }
+  
 }

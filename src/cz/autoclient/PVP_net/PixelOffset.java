@@ -84,6 +84,14 @@ public enum PixelOffset implements ComparablePixel {
     ARAM_REROLL_BLUE (0.6689782462249011D, 0.6440742990122299D, new Color(37, 81, 134, 1), 10),
     ARAM_REROLL_WHITE (0.690118541734383D, 0.6655989620160678D, new Color(255, 255, 255, 1), 10),
     ARAM_REROLL_GRAY (0.665134556132268D, 0.647149250869921D, new Color(127, 127, 127, 1), 10),
+    /** DRAFT **/
+    Draft_Accept_1 (0.4076073199258522D, 0.5581037621709415D, new Color(226, 112, 0, 1), 10),
+    Draft_Accept_2 (0.4969731145795711D, 0.5564381710680324D, new Color(228, 114, 0, 1), 10),
+    // This point is not recommended for matching
+    Draft_Accept_Mid (0.4556534460837656D, 0.5748878822141793D, new Color(252, 255, 254, 1), 1),
+    Draft_Lobby_Chat (0.1356662458720624D, 0.9209480813784958D, new Color(14, 31, 41, 1), 5),
+    Draft_Lobby_MainBar (0.6958840768733325D, 0.9023702550582854D, new Color(6, 21, 26, 1), 5),
+    Draft_Lobby_TopBar (0.41241193254164354D, 0.05842408529613162D, new Color(9, 33, 37, 1), 6),
     // Player list in norma lobby
     Lobby_Player1 (0.015550930477278908D, 0.0845611760865062D),
     Lobby_Player2 (0.015550930477278908D, 0.2105060870777794D),

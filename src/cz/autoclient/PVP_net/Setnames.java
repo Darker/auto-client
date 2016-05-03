@@ -38,6 +38,8 @@ public enum Setnames {
   
   BLIND_MASTERY("masterypg", 0),
   BLIND_RUNE("runepg", 0),
+  /** ARAM **/
+  ARAM_ENABLED(false),
   /**NOTFICATONS**/
   NOTIF_APP_UPDATE_EXISTS_TRAYBALOON(true),
 
@@ -78,9 +80,17 @@ public enum Setnames {
     name = this.name().toLowerCase();
     default_val = null;    
   }
+  public boolean getBoolean(Settings settings) {
+    return settings.getBoolean(name, default_val instanceof Boolean?(Boolean)default_val:false);
+  }
+  public String getString(Settings settings) {
+    return settings.getStringEquivalent(name);
+  }
+  
   public static void setDefaults(Settings settings) {
     for(Setnames set : Setnames.values()) {
       settings.setSettingDefault(set.name, set.default_val);
     }
   }
+  
 }

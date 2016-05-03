@@ -95,6 +95,12 @@ public abstract class Notification {
                  TrayIcon.MessageType.INFO,
                  "/bell.wav"
     ),
+    DRAFT_TEAM_JOINED("Draft lobby",
+                 "draft.lobby.joined",
+                 "You've been put in draft lobby!",
+                 TrayIcon.MessageType.INFO,
+                 "/bell.wav"
+    ),
     UPDATE_AVAILABLE("Update available",
                  "app.update.exists",
                  "An update is available. Check Tools->Updates. Configure this notification on Notifications menu.",

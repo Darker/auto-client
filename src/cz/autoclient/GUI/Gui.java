@@ -1071,6 +1071,15 @@ import javax.swing.SwingUtilities;
         win.addLine(field);
         */
         
+        win.newTab("ARAM", "Aram settings");
+        
+        win.addLine(Dialogs.makeTextPane("<a href=\"https://github.com/Darker/auto-client/wiki/Automation-description#aram\">Help</a>"));
+        
+        field = new FieldDef("Enabled:", "Enable or disable this function.", Setnames.ARAM_ENABLED.name);
+        field.addField(new JCheckBox());
+        field.attachToSettings(settings);
+        win.addLine(field);
+        
         win.newTab("Invite friends", "Start automatically when everybody accepts.");
         
         field = new FieldDef("Auto start:", "Enable or disable this function.", Setnames.INVITE_ENABLED.name);
