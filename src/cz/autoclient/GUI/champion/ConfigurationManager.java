@@ -62,9 +62,11 @@ public class ConfigurationManager {
     if(main.exists(setting_name, HashMap.class)) {
       settings = (HashMap)main.getSetting(setting_name); 
     }
+    // This is used to convert old settings manager to new one
     else if(main.exists(setting_name+"_0", HashMap.class)) {
       settings = (HashMap)main.getSetting(setting_name+"_0"); 
       main.empty(setting_name+"_0");
+      main.setSetting(setting_name, settings, true);
     }
     else {
       settings = new HashMap<String, Settings>();
