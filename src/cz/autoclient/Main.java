@@ -401,7 +401,7 @@ import sirius.constants.IWMConsts;
              System.out.println("Cannot execute the command.");
            }
          });
-         updater.setUpdateListener(wnd);
+         //updater.setUpdateListener(wnd);
          InstallUpdate();
        }
      };

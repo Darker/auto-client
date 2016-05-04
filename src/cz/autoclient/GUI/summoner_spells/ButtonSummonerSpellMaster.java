@@ -7,7 +7,7 @@
 package cz.autoclient.GUI.summoner_spells;
 
 import cz.autoclient.event.EventCallback;
-import cz.autoclient.event.Eventable;
+import cz.autoclient.event.EventEmitter;
 import cz.autoclient.settings.Settings;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,7 +19,7 @@ import java.util.Map;
  *
  * @author Jakub
  */
-public class ButtonSummonerSpellMaster extends ButtonSummonerSpell implements Eventable {
+public class ButtonSummonerSpellMaster extends ButtonSummonerSpell implements EventEmitter {
   private FrameSummonerSpells popup;
   protected Settings settings;
   private ButtonSummonerSpellMaster twin;

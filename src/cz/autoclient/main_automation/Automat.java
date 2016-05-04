@@ -229,7 +229,7 @@ public class Automat
     //boolean ARAM = false;
     this.callText(settings.getStringEquivalent(Setnames.BLIND_CALL_TEXT.name));
 
-    if (SituationDetector.IsAram(window) || true) {
+    if (SituationDetector.IsAram(window)) {
       dbgmsg("Probably ARAM!");
       if(Setnames.ARAM_ENABLED.getBoolean(settings)) {
         aram_lobby();

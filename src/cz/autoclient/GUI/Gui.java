@@ -79,6 +79,8 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
  
  public class Gui
    extends JFrame
@@ -101,6 +103,7 @@ import javax.swing.SwingUtilities;
    private JMenu updateMenu = null;
    
    UpdateMenuItem updateMenuItem;
+   UpdateVisual updateVisual;
    
    //TRAY ICON STUFF
    private TrayIcon tray_icon;
@@ -207,6 +210,9 @@ import javax.swing.SwingUtilities;
      destroyTray();
      dispose();
      robots.interrupt();
+     if(updateVisual!=null) {
+       updateVisual.removeListeners();
+     }
    }
    //
    // AUTOMATION INDICATION HERE!
@@ -497,6 +503,27 @@ import javax.swing.SwingUtilities;
          checkBox = new JCheckBoxMenuItem("Ignore beta versions");
          checkBox.setToolTipText("Prereleases and beta version will be ignored");
          settings.bindToInput(Setnames.UPDATES_IGNORE_BETAS.name, checkBox, true);
+         checkBox.addMouseListener(new MouseListener() {
+           @Override
+           public void mouseClicked(MouseEvent e) {}
+
+           @Override
+           public void mousePressed(MouseEvent e) {}
+
+           @Override
+           public void mouseReleased(MouseEvent e) {
+             if(updater!=null)
+               updater.updateFiltersChanged();
+           }
+           @Override
+           public void mouseEntered(MouseEvent e) {}
+           @Override
+           public void mouseExited(MouseEvent e) {}
+         });
+         
+         /*checkBox.addChangeListener((ChangeEvent e)->{
+           updater.updateFiltersChanged();
+         });*/
          updateMenu.add(checkBox);
          
          updateMenu.add(new URLMenuItem(
@@ -739,7 +766,7 @@ import javax.swing.SwingUtilities;
     }
 
    public void setUpdateManager(final Updater updater) {
-     updater.setUpdateListener(new UpdateVisual(this, updateMenuItem, updater));
+     updateVisual = new UpdateVisual(this, updateMenuItem, updater);
      this.updater = updater;
      SwingUtilities.invokeLater(()->{
        if(updateMenu!=null)

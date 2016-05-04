@@ -116,7 +116,7 @@ public class UpdateInfo implements java.io.Serializable {
     //}
     return true;
   }
-  void downloadFile(Progress process) {
+  void downloadFile(Updater updater) {
     if(downloadLink==null)
       throw new RuntimeException("Cannot download update, download link is null.");
     HttpURLConnection httpConnection;
@@ -125,7 +125,8 @@ public class UpdateInfo implements java.io.Serializable {
       httpConnection = (HttpURLConnection) (downloadLink.openConnection());
     }
     catch(IOException e) {
-      process.stopped(e);
+      //process.stopped(e);
+      updater.dispatchEvent("download.stopped", e);
       return;
     }
     long completeFileSize = httpConnection.getContentLength();
@@ -135,23 +136,25 @@ public class UpdateInfo implements java.io.Serializable {
     final int BUFFER_SIZE = 128;
     try {
       fos = new java.io.FileOutputStream(localFile);
-    } catch (FileNotFoundException ex) {
-      process.stopped(ex);
+    } catch (FileNotFoundException e) {
+      updater.dispatchEvent("download.stopped", e);
       return;
     }
     try (java.io.BufferedInputStream in = new java.io.BufferedInputStream(httpConnection.getInputStream());
         java.io.BufferedOutputStream bout = new BufferedOutputStream(fos, 1024)
         ) { 
-      process.started();
+      updater.dispatchEvent("download.started");
       byte[] data = new byte[BUFFER_SIZE];
       long downloadedFileSize = 0;
-      process.process((double)downloadedFileSize, completeFileSize);
+      //process.process((double)downloadedFileSize, completeFileSize);
+      updater.dispatchEvent("download.process", (double)downloadedFileSize, (double)completeFileSize);
       int x = 0;
       while ((x = in.read(data, 0, BUFFER_SIZE)) >= 0) {
         downloadedFileSize += x;
         //System.out.println("Downloaded bytes: "+downloadedFileSize);
         bout.write(data, 0, x);
-        process.process(downloadedFileSize, completeFileSize);
+        updater.dispatchEvent("download.process", (double)downloadedFileSize, (double)completeFileSize);
+        //process.process(downloadedFileSize, completeFileSize);
       }
       bout.close();
       validateFile();
@@ -159,26 +162,29 @@ public class UpdateInfo implements java.io.Serializable {
     catch(Exception e) {
       System.out.println(e.getMessage());
       e.printStackTrace(System.out);
-      process.stopped(e);
+      updater.dispatchEvent("download.stopped", e);
+      
       localFile.delete();
     }
-    process.finished();
+    updater.dispatchEvent("download.finished");
   }
-  public void unzip() {
+  public void unzip() throws ZipException {
     File destination = new File(localFile.getParentFile(), version.toString());
     destination.mkdirs();
-    try {
-         ZipFile zipFile = new ZipFile(localFile);
-         zipFile.extractAll(destination.getAbsolutePath());
-    } catch (ZipException e) {
-        e.printStackTrace();
-    }
+   
+    ZipFile zipFile = new ZipFile(localFile);
+    zipFile.extractAll(destination.getAbsolutePath());
+  }
+  public void deleteFile() {
+    if(localFile.isFile() && localFile.canWrite())
+      localFile.delete();
   }
   /** Replaces all sourceFileiles, then schledules replacement osourceFile this jar sourceFileile. Also creates backup.
   Shut down all other threads besourceFileore calling this sourceFileunction.
    */
-  public void install(Progress progress) {
-    progress.started();
+  public void install(Updater updater) {
+    updater.dispatchEvent("install.started");
+    
     File updates = localFile.getParentFile();
     File updateDirectory = new File(updates, version.toString());
     File backup = new File(updates, "backup");
@@ -188,7 +194,7 @@ public class UpdateInfo implements java.io.Serializable {
     catch(Exception e) {
       System.out.println("Some error with getting current jar file path.");
       e.printStackTrace();
-      progress.stopped(e);
+      updater.dispatchEvent("install.stopped", e);
       return;
     }
     File home = myself.getParentFile();
@@ -203,7 +209,7 @@ public class UpdateInfo implements java.io.Serializable {
           return false;
       }
     });*/
-    progress.status("Getting list of files.");
+    updater.dispatchEvent("install.status", "Getting list of files.");
     /** Part 2: copy **/
     ArrayList<File> updateFiles = listFileChildren(updateDirectory, new FileFilter() {
       @Override
@@ -214,11 +220,11 @@ public class UpdateInfo implements java.io.Serializable {
     
     
     int count = updateFiles.size();
-    progress.status("Copying "+count+" files.");
+    updater.dispatchEvent("install.status", "Copying "+count+" files.");
     int processed = 0;
     Process copyScript = null;
     for(File sourceFile: updateFiles) {
-      progress.process(processed++, count);
+      updater.dispatchEvent("install.process", (double)processed++, (double)count);
       String relative = relativePath(updateDirectory, sourceFile);
       if(relative.matches(ignore))
         continue;
@@ -226,7 +232,8 @@ public class UpdateInfo implements java.io.Serializable {
       File targetFile = new File(home,relative);
       if(targetFile.exists()) {
         File backupFile = new File(backup, relative);
-        progress.status("Backup "+targetFile.getAbsolutePath()+" to "+backup.getAbsolutePath());
+        updater.dispatchEvent("install.status",
+            "Backup "+targetFile.getAbsolutePath()+" to "+backup.getAbsolutePath());
         try {
           backup.mkdir();
           copyFile(targetFile, backupFile);
@@ -252,19 +259,19 @@ public class UpdateInfo implements java.io.Serializable {
         continue;
       }
       try {
-        progress.status("Copy "+sourceFile.getAbsolutePath()+" to "+targetFile.getAbsolutePath());
+        updater.dispatchEvent("install.status", "Copy "+sourceFile.getAbsolutePath()+" to "+targetFile.getAbsolutePath());
         copyFile(sourceFile, targetFile);
       } catch (IOException ex) {
-        progress.status("ERROR: "+ex.getMessage()+" file: "+sourceFile.getAbsolutePath());
+        updater.dispatchEvent("install.status", "ERROR: "+ex.getMessage()+" file: "+sourceFile.getAbsolutePath());
       }
     }
     if(copyScript!=null && copyScript.isAlive()) {
-      progress.status("Waiting for the copy script.");
+      updater.dispatchEvent("install.status", "Waiting for the copy script.");
       try {
         copyScript.waitFor();
       } catch (InterruptedException ex) {/*do not allow interupts*/}
     }
-    progress.finished();
+    updater.dispatchEvent("install.finished");
   }
   /**
    * Removes any sourceFileiles (except sourceFileor the zip sourceFileile) created by this update. This is 

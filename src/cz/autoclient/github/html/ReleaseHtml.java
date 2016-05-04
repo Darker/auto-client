@@ -30,17 +30,17 @@ public class ReleaseHtml implements Release {
   
   protected ArrayList<ReleaseFileHtml> downloads;
   public final RepositoryHtml parent;
-  protected final Element rootElm;
+  //protected final Element rootElm;
   public ReleaseHtml(RepositoryHtml parent, Element elm) {
     this.tag = elm.select("div.release-meta span.css-truncate-target").get(0).text();
     this.description = elm.select("div.release-body div.markdown-body").get(0).html();
     //https://github.com/twbs/bootstrap/releases/tag/v1.4.0
     this.parent = parent;
     this.url = url_or_null_java_is_retarded(parent.getURL(), "releases/tag/v1.4.0"); 
-    this.rootElm = elm;
+    loadDownloads(elm);
     // The release label
     Element label = null;
-    try {label = elm.select("span.release-label").get(0);} catch(Throwable e){}
+    try {label = elm.select("span.release-label").get(0);} catch(Exception e){}
     this.isPre = label!=null && label.hasClass("prerelease");
     this.isLatest = label!=null && label.hasClass("latest");
     
@@ -73,16 +73,24 @@ public class ReleaseHtml implements Release {
 
   @Override
   public List<? extends ReleaseFile> downloads() {
-    if(downloads==null) {
-      ArrayList<ReleaseFileHtml> releases = new ArrayList();
-      Elements elms = rootElm.select("ul.release-downloads li");
-      //System.out.println("Download elements: "+elms.size());
-      for (Element div : elms) {
-        releases.add(new ReleaseFileHtml(this, div));
-      }
-      downloads = releases;
-    }
     return downloads;
+  }
+  
+  protected void loadDownloads(Element elm) {
+    ArrayList<ReleaseFileHtml> releases = new ArrayList();
+    Elements elms = elm.select("ul.release-downloads li");
+    //System.out.println("Download elements: "+elms.size());
+    for (Element div : elms) {
+      ReleaseFileHtml tmp = null;
+      try {
+        tmp = new ReleaseFileHtml(this, div);
+      }
+      catch(Exception e) {
+        continue;
+      }
+      releases.add(tmp);
+    }
+    downloads = releases;
   }
 
   @Override
