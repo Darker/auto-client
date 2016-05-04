@@ -335,20 +335,20 @@ public class Automat
           window.screenshotCrop(spellButtonRectangles[i].rect(window)),
           winSizeCoef, winSizeCoef);
 
-      BufferedImage small_icon_no_crop = s.img.getScaledDiscardOriginal(36, 36);
-      BufferedImage small_icon = LazyLoadedImage.crop(small_icon_no_crop, 3);
-       //DebugDrawing.displayImage(selected_spell, "Spell #"+(i+1));
-      //DebugDrawing.displayImage(small_icon_no_crop, "Spell #"+(i+1));
-      //DebugDrawing.displayImage(small_icon, "Spell #"+(i+1));  
+      BufferedImage small_icon_no_crop = s.img.getScaledDiscardOriginal(35, 35);
+      BufferedImage small_icon = LazyLoadedImage.crop(small_icon_no_crop, 1);
+      DebugDrawing.displayImage(selected_spell, "Spell #"+(i+1));
+      DebugDrawing.displayImage(small_icon_no_crop, "Spell #"+(i+1));
+      DebugDrawing.displayImage(small_icon, "Spell #"+(i+1));  
 
-      Rect selected_spell_rect = ScreenWatcher.findByAvgColor(small_icon, selected_spell, 0.001f, false, null);
+      RectMatch selected_spell_rect = ScreenWatcher.findByAvgColor(small_icon, selected_spell, 0.001f, false, null);
       // Spell found selected
       if (selected_spell_rect != null) {
         BufferedImage test = DebugDrawing.cloneImage(selected_spell);
-         //DebugDrawing.drawResult(test, selected_spell_rect, Color.GREEN);
-        //DebugDrawing.displayImage(test, "Spell #"+(i+1)+" icon "+small_icon.getWidth()+"x"+small_icon.getHeight());
+        DebugDrawing.drawResult(test, selected_spell_rect, Color.GREEN);
+        DebugDrawing.displayImage(test, "Spell #"+(i+1)+" icon "+small_icon.getWidth()+"x"+small_icon.getHeight());
 
-        dbgmsg("  Spell #" + (i + 1) + " already selected.");
+        dbgmsg("  Spell #" + (i + 1) + " already selected, difference: "+selected_spell_rect.diff);
         continue;
       }
 
@@ -672,18 +672,13 @@ public class Automat
   private boolean setRunes(int rune) throws InterruptedException {
     //int rune = settings.getInt(Setnames.BLIND_RUNE.name, 0);
     if (rune > 0) {
+      dbgmsg("Set RUNES to #"+rune);
       click(PixelOffset.Blind_Runes_Dropdown);
       sleep(700);
       click(PixelOffset.Blind_Runes_Dropdown_First.offset(0, PixelOffset.Blind_Runes_Dropdown_Spaces.y * (rune - 1)));
       return true;
     }
     return false;
-  }
-  private void teamBuilder_say(String message) throws InterruptedException {
-    click(PixelOffset.TeamBuilder_Chat);
-    sleep(50L);
-    window.typeString(message);
-    Enter();
   }
 
   private void Enter() {

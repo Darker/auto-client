@@ -31,7 +31,7 @@ public class ScreenWatcher {
    * @param return_nearest
    * @return 
    */
-  public static Rect findByAvgGrayscale(BufferedImage image, BufferedImage bigImage, float tolerance, boolean return_nearest) {
+  public static RectMatch findByAvgGrayscale(BufferedImage image, BufferedImage bigImage, float tolerance, boolean return_nearest) {
     //These variables will be used to return the best (nearest) match
     //If return_nearest is false, these will not be used
     double difference = Double.MAX_VALUE;    
@@ -78,7 +78,7 @@ public class ScreenWatcher {
         //Find first match below tolerance - ONLY USE WHEN YOUR SEARCHED OBJECT IS VERY UNIQUE
         else {
           if(diff<=tolerance) {
-            return Rect.byWidthHeight(rect_y, rect_x, ws, hs);
+            return RectMatch.byWidthHeight(rect_y, rect_x, ws, hs, diff);
           }
         }
       }
@@ -86,7 +86,7 @@ public class ScreenWatcher {
     if(return_nearest) {
       //System.out.println("Lowest difference: "+difference+". Wolerance: "+tolerance);
       if(difference<=tolerance) {
-        return Rect.byWidthHeight(difference_pos[1], difference_pos[0], ws, hs);
+        return RectMatch.byWidthHeight(difference_pos[1], difference_pos[0], ws, hs, difference);
       }      
     }
     //Nothing found - return null
@@ -108,7 +108,7 @@ public class ScreenWatcher {
    * @param matches if this is not null, it will be filled with all matches that are below threshold
    * @return Rect object or null if nothing was found below threshold.
    */
-  public static Rect findByAvgColor(double sum_small[], double integral_image[][][], final int ws, final int hs, final int wb, final int hb, float tolerance, boolean return_nearest, ArrayList<RectMatch> matches) {
+  public static RectMatch findByAvgColor(double sum_small[], double integral_image[][][], final int ws, final int hs, final int wb, final int hb, float tolerance, boolean return_nearest, ArrayList<RectMatch> matches) {
     //These variables will be used to return the best (nearest) match
     //If return_nearest is false, these will not be used
     double difference =  Double.MAX_VALUE;
@@ -163,14 +163,14 @@ public class ScreenWatcher {
             difference_pos[1] = rect_y;          
           }
           if(matches!=null && diff<=tolerance) {
-            matches.add(RectMatch.byWidthHeight(rect_y-1, rect_x-1, ws, hs, difference));
+            matches.add(RectMatch.byWidthHeight(rect_y-1, rect_x-1, ws, hs, difference, tolerance));
             //System.out.println("Diff "+diff+" <= tolerance. Adding ["+(rect_x-1)+", "+(rect_y-1)+"]");
           }
         }
         //Find first match below tolerance - ONLY USE WHEN YOUR SEARCHED OBJECT IS VERY UNIQUE
         else {
           if(diff<=tolerance) {
-            return Rect.byWidthHeight(rect_y-1, rect_x-1, ws, hs);
+            return RectMatch.byWidthHeight(rect_y-1, rect_x-1, ws, hs, diff, tolerance);
           }
         }
       }
@@ -178,27 +178,27 @@ public class ScreenWatcher {
     if(return_nearest) {
       //System.out.println("Lowest difference: "+difference+". Tolerance: "+tolerance);
       if(difference<=tolerance) {
-        return Rect.byWidthHeight(difference_pos[1]-1, difference_pos[0]-1, ws, hs);
+        return RectMatch.byWidthHeight(difference_pos[1]-1, difference_pos[0]-1, ws, hs, difference, tolerance);
       }      
     }
     //Nothing found - return null
     return null;
   }
-  public static Rect findByAvgColor(BufferedImage image, BufferedImage bigImage) {
+  public static RectMatch findByAvgColor(BufferedImage image, BufferedImage bigImage) {
     return findByAvgColor(image, bigImage, 0.5f, true, null); 
   }/* */
-  public static Rect findByAvgColor(BufferedImage image, BufferedImage bigImage, float tolerance, boolean return_nearest) {
+  public static RectMatch findByAvgColor(BufferedImage image, BufferedImage bigImage, float tolerance, boolean return_nearest) {
     return findByAvgColor(image, bigImage, tolerance, return_nearest, null); 
   } 
-  public static Rect findByAvgColor(BufferedImage image, double[][][] bigIntegralImage, float tolerance, boolean return_nearest) {
+  public static RectMatch findByAvgColor(BufferedImage image, double[][][] bigIntegralImage, float tolerance, boolean return_nearest) {
     return findByAvgColor(image, bigIntegralImage, tolerance, return_nearest, null); 
   } 
-  public static Rect findByAvgColor(BufferedImage image, BufferedImage bigImage, float tolerance, boolean return_nearest, ArrayList<RectMatch> matches) {
+  public static RectMatch findByAvgColor(BufferedImage image, BufferedImage bigImage, float tolerance, boolean return_nearest, ArrayList<RectMatch> matches) {
     double integral_image[][][] = integralImage(bigImage);
     double sum_small[] = colorSum(image);
     return findByAvgColor(sum_small, integral_image, image.getWidth(), image.getHeight(), bigImage.getWidth(), bigImage.getHeight(), tolerance, return_nearest, matches);
   }
-  public static Rect findByAvgColor(BufferedImage image, double[][][] integral_image, float tolerance, boolean return_nearest, ArrayList<RectMatch> matches) {
+  public static RectMatch findByAvgColor(BufferedImage image, double[][][] integral_image, float tolerance, boolean return_nearest, ArrayList<RectMatch> matches) {
     if(integral_image.length==0)
       throw new IllegalArgumentException("Empty integral image can't be accepted.");
     double sum_small[] = colorSum(image);
