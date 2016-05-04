@@ -130,7 +130,16 @@ requirejs(["ColorPixel", "TestImage"], (ColorPixel, TestImage)=>{
     });
     document.getElementById("point_test_button").addEventListener("click", function() {
       drawTestPixel(document.getElementById("point_test").value);
-    });
+    }); 
+    document.getElementById("move_relative_test").addEventListener("click", moveTestPointRelative);
+    /*document.getElementById("point_test_button").addEventListener("click", function() {
+      int x = document.getElementById('x_offset').value*1;
+      int y = document.getElementById('y_offset').value*1;
+      
+      
+      drawTestPixel(document.getElementById("point_test").value);
+      moveRelative(document.getElementById('x_offset').value*1, document.getElementById('y_offset').value*1)
+    }); */
   }
   function drawTestPixel(test) {
     var pixel = ColorPixel.fromStringJava(test, IMAGE.width, IMAGE.height);
