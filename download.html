@@ -9,6 +9,11 @@
     <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
 
     <title>Auto-client by Darker</title>
+    <style>
+    #download_info {
+      background-color: 
+    }
+    </style>
   </head>
 
   <body>
@@ -23,9 +28,10 @@
     <div class="container">
       <section id="main_content">
         <h3>Download will start soon...</h3>
-        <h4 id="download_info" style="display: none"></h4>
-          <p>
+          <p id="download" style="display: none">
+            <p id="download_info"></p>
             <iframe style="width:1px; height: 1px; position:absolute; top:-100px; left: -100px" id="dl_frame"></iframe>
+            <a class="btn" id="dl_link" href="https://github.com/Darker/auto-client/releases/tag/v4.1">Click to download</a>
           </p>
       </section>
     </div>
@@ -43,8 +49,9 @@
 
             var releaseInfo = asset.name + " was updated " + timeAgo(asset.updated_at) + " and downloaded " + new Number(asset.download_count).toLocaleString("EN-GB") + " times.";
             $("#dl_frame").attr("src", asset.browser_download_url);
+            $("#dl_link").attr("href", asset.browser_download_url);
             $("#download_info").text(releaseInfo);
-            $("#download_info").fadeIn("slow");
+            $("#download").fadeIn("slow");
         });
     }
     function timeAgo(timestamp) {
@@ -71,6 +78,7 @@
           var diff = Math.round(dateDiff/day);
           timeAgo = diff+" day"+(diff>1?"s":"")+" ago"; 
       }
+      return timeAgo;
     }
     GetLatestReleaseInfo();
 </script>
