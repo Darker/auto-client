@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-dark.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <title>Auto-client by Darker</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>Auto-client</h1>
+        <h2>League of Legends: Auto call, auto accept and other automatic features for LoL PVP.net Client launcher</h2>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <h3>Download will start soon...</h3>
+        <h4 id="download_info" style="display: none"></h4>
+          <p>
+            <iframe style="width:1px; height: 1px; position:absolute; top:-100px; left: -100px" id="dl_frame"></iframe>
+          </p>
+      </section>
+    </div>
+<script
+			  src="https://code.jquery.com/jquery-2.2.3.min.js"
+			  integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="
+			  crossorigin="anonymous"></script>
+        
+<script type="text/javascript">
+
+
+    function GetLatestReleaseInfo() {
+        $.getJSON("https://api.github.com/repos/Darker/auto-client/releases/latest").done(function (release) {
+            var asset = release.assets[0];
+
+            var releaseInfo = asset.name + " was updated " + timeAgo(asset.updated_at) + " and downloaded " + new Number(asset.download_count).toLocaleString("EN-GB") + " times.";
+            $("#dl_frame").attr("src", asset.browser_download_url);
+            $("#download_info").text(releaseInfo);
+            $("#download_info").fadeIn("slow");
+        });
+    }
+    function timeAgo(timestamp) {
+      var second = 1000;
+      var minute = 60 * second;
+      var hour = 60*minute;
+      var day = 24*hour;
+      
+
+      var dateDiff = new Date() - new Date(timestamp);
+      var timeAgo = "never";
+      if (dateDiff < 5*minute) {
+          timeAgo = "just now"; 
+      }
+      else if (dateDiff < hour) {
+          timeAgo = Math.round(dateDiff/minute)+" minutes ago"; 
+      }
+      else if (dateDiff < day) {
+          var diff = Math.round(dateDiff/hour);
+          timeAgo = diff+" hour"+(diff>1?"s":"")+" ago"; 
+      }
+      else
+      {
+          var diff = Math.round(dateDiff/day);
+          timeAgo = diff+" day"+(diff>1?"s":"")+" ago"; 
+      }
+    }
+    GetLatestReleaseInfo();
+</script>
+  </body>
+</html>
