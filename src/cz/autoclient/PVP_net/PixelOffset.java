@@ -77,8 +77,8 @@ public enum PixelOffset implements ComparablePixel {
     //Open dropdown menu with runes
     Blind_Runes_Dropdown (0.35860027124478056D, 0.6240871119372374D),
     //First item in the rune dropdown menu
-    Blind_Runes_Dropdown_First (0.25385971622052933D, 0.6502242027276122D),
-    Blind_Runes_Dropdown_Spaces (0D, 0.0275D),
+    Blind_Runes_Dropdown_First (0.25385971622052933D, 0.6565022216170578D),
+    Blind_Runes_Dropdown_Spaces (0D, 0.03D),
     Blind_SearchChampion(0.779484336388102D, 0.16596235113330773D, new Color(255, 255, 255, 1)),
     /** ARAM **/
     ARAM_REROLL_BLUE (0.6689782462249011D, 0.6440742990122299D, new Color(37, 81, 134, 1), 10),
