@@ -1,0 +1,41 @@
+# Name of your blog (this will show up at the top of your page and in the RSS feed)
+name: LoL AutoClient
+
+# Short description (goes below the title; it will also be used in the RSS feed)
+description: LoL League of legends auto pick champion, auto call lane, auto acccept afk check, auto login.
+keywords: lol, league of legends, instalock, insta lock
+
+# Your name, as you want it to appear underneath each post and in the footer
+author: Darker
+
+# Your email if you want it to be linked on the contact page
+author_email: autoclient@hmamail.com
+
+# The directory for category index pages. Change it to something else if
+# for example you want links like /categories/category1 instead of /category1
+category_dir: /
+
+# Uncomment if you are planning to run the blog in a subdirectory
+# Note - if you enable this, and attempt to view your site locally you have to use the baseurl in your local path.
+# Example, you must use http://localhost:4000/path/to/blog
+#baseurl: /path/to/blog 
+baseurl: /auto-client/
+
+gh_repo: https://github.com/Darker/auto-client/
+gh_api: https://api.github.com/repos/Darker/auto-client/
+
+
+# The URL of your actual domain. This will be used to make absolute links in the RSS feed.
+url: http://127.0.0.1:4000
+
+
+#### Under the Hood Stuff #####
+
+# Makes pretty (descriptive) permalinks. See Jekyll docs for alternatives.
+permalink: pretty
+
+# How many articles do you wish to appear on the front page:
+# paginate: 3
+
+# Exclude metadata and development time dependencies (like Grunt plugins)
+exclude: [README.markdown, package.json, grunt.js, Gruntfile.js, Gruntfile.coffee, node_modules]

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title> Guest Posts |  LoL AutoClient [DEBUG MODE]</title>
+        <meta name="description" content="LoL League of legends auto pick champion, auto call lane, auto acccept afk check, auto login."/>
+        <meta name="keywords" content="lol, league of legends, instalock, insta lock"/>
+        <meta name="author" content="Darker"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/auto-client//feed.xml" />
+
+        <link rel="stylesheet" type="text/css" href="/auto-client//stylesheets/stylesheet.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/auto-client//stylesheets/github-dark.css" media="screen">
+        <script>
+          var onready_ = [];
+          function onready(cb) {
+            if(typeof cb=="function")
+              onready_.push(cb);
+          }
+
+          var SETTINGS = {debug: false};
+          SETTINGS.debug = true;
+          try {
+            var user_settings = location.hash.length>1?JSON.parse(decodeURIComponent(location.hash.substr(1))):{};
+            for(var i in user_settings) {
+              if(typeof SETTINGS[i]!="undefined")
+                SETTINGS[i] = user_settings[i];
+            }
+          }
+          catch(e) {
+            console.warn("Error parsing settings: ",e);
+          }
+          // Settings that cannot be overriden
+          SETTINGS.ghapi = "https://api.github.com/repos/Darker/auto-client/";
+
+        </script>
+    </head>
+
+    <body>
+  
+      <header>
+        <div class="container">
+          <h1><a href="/auto-client/">auto-client</a> / <a href="/auto-client//guest posts">guest posts</a></h1>
+          <h2>League of Legends: Auto call, auto accept and other automatic features for LoL PVP.net Client launcher</h2>
+  
+          <section id="downloads">
+            <a href="https://github.com/Darker/auto-client//releases/latest" id="main_dl_link" class="btn btn-zip"><span class="icon"></span>Download program</a>
+            <a href="https://github.com/Darker/auto-client//zipball/master" class="btn btn-java" target="_blank"><span class="icon"></span>Download sourcecode</a>
+            <a href="https://github.com/Darker/auto-client/" class="btn btn-github" target="_blank"><span class="icon"></span>View on GitHub</a>
+            <a href="https://facebook.com/autoclient" class="btn btn-fb" target="_blank"><span class="icon"></span>Help (use chat)</a>
+          </section>
+        </div>
+      </header>
+  
+      <div class="container">
+        <section id="main_content">
+          <article>
+        <header>
+            <h2>Guest Posts</h2>
+            <span><i class="icon-clock"></i><time datetime="2012-03-15">Mar 15, 2012</time></span><br/>
+            <span class="category"><i class="icon-tag"></i> Meta</span><br/>
+            <span class="author"><i class="icon-user"></i> John Smith</span>
+        </header>
+
+        <div class="entry"><p>If you want to create a guest post that will appear as if written by another author, simply add an <code class="highlighter-rouge">author</code> attribute to the 
+YAML header of your blog post. This will be picked up in the template and displayed in the meta-section both on the front page 
+as well as on the individual post pages.</p>
+</div>
+
+        <footer><!-- additional info --></footer>
+
+</article>
+
+
+        </section>
+      </div>
+    </body>
+<script
+			  src="//code.jquery.com/jquery-2.2.3.min.js"
+			  integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="
+			  crossorigin="anonymous"></script>
+<script src="/auto-client//js/ghapi.js"></script>
+<script>
+  onready_.forEach((cb)=>{
+    try {
+      cb();
+    }
+    catch(e) {
+      console.error(e);
+    }
+  });
+  GetLatestReleaseInfo((release)=>{
+      var asset = release.assets[0];
+      $("#main_dl_link").attr("href", asset.browser_download_url);
+  });
+</script>
+</html>

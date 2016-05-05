@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title> Hello World! |  LoL AutoClient [DEBUG MODE]</title>
+        <meta name="description" content="LoL League of legends auto pick champion, auto call lane, auto acccept afk check, auto login."/>
+        <meta name="keywords" content="lol, league of legends, instalock, insta lock"/>
+        <meta name="author" content="Darker"/>
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/auto-client//feed.xml" />
+
+        <link rel="stylesheet" type="text/css" href="/auto-client//stylesheets/stylesheet.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/auto-client//stylesheets/github-dark.css" media="screen">
+        <script>
+          var onready_ = [];
+          function onready(cb) {
+            if(typeof cb=="function")
+              onready_.push(cb);
+          }
+
+          var SETTINGS = {debug: false};
+          SETTINGS.debug = true;
+          try {
+            var user_settings = location.hash.length>1?JSON.parse(decodeURIComponent(location.hash.substr(1))):{};
+            for(var i in user_settings) {
+              if(typeof SETTINGS[i]!="undefined")
+                SETTINGS[i] = user_settings[i];
+            }
+          }
+          catch(e) {
+            console.warn("Error parsing settings: ",e);
+          }
+          // Settings that cannot be overriden
+          SETTINGS.ghapi = "https://api.github.com/repos/Darker/auto-client/";
+
+        </script>
+    </head>
+
+    <body>
+  
+      <header>
+        <div class="container">
+          <h1><a href="/auto-client/">auto-client</a> / <a href="/auto-client//hello world!">hello world!</a></h1>
+          <h2>League of Legends: Auto call, auto accept and other automatic features for LoL PVP.net Client launcher</h2>
+  
+          <section id="downloads">
+            <a href="https://github.com/Darker/auto-client//releases/latest" id="main_dl_link" class="btn btn-zip"><span class="icon"></span>Download program</a>
+            <a href="https://github.com/Darker/auto-client//zipball/master" class="btn btn-java" target="_blank"><span class="icon"></span>Download sourcecode</a>
+            <a href="https://github.com/Darker/auto-client/" class="btn btn-github" target="_blank"><span class="icon"></span>View on GitHub</a>
+            <a href="https://facebook.com/autoclient" class="btn btn-fb" target="_blank"><span class="icon"></span>Help (use chat)</a>
+          </section>
+        </div>
+      </header>
+  
+      <div class="container">
+        <section id="main_content">
+          <article>
+        <header>
+            <h2>Hello World!</h2>
+            <span><i class="icon-clock"></i><time datetime="2012-01-18">Jan 18, 2012</time></span><br/>
+            <span class="category"><i class="icon-tag"></i> Meta</span><br/>
+            <span class="author"><i class="icon-user"></i> Darker</span>
+        </header>
+
+        <div class="entry"><p>Hello World!</p>
+
+<p>This is just a sample post.</p>
+
+<p>Vestibulum imperdiet adipiscing arcu, quis aliquam dolor condimentum dapibus. Aliquam fermentum leo aliquet quam volutpat et molestie mauris mattis. Suspendisse semper consequat velit in suscipit. Praesent blandit, mi id facilisis adipiscing, tortor tellus mollis quam, sed dignissim sapien diam ac lectus. Nunc eget ornare quam. Vivamus sit amet tortor dolor, non egestas ligula. Mauris nisi risus, semper nec blandit id, suscipit eget dolor. Sed placerat odio at erat porttitor varius. Phasellus ornare vestibulum dolor ac rhoncus. Mauris laoreet varius est eu rhoncus. Curabitur facilisis mauris eu purus pharetra vitae tincidunt nulla gravida. Duis sagittis, felis a luctus mattis, metus sem tempus velit, sit amet blandit tellus nisi id augue.</p>
+
+<p>Proin feugiat libero ac lorem mollis fermentum. Cras et lacus sodales nisl facilisis ornare. Sed dolor eros, pulvinar ac varius non, bibendum eget odio. Nulla facilisi. Pellentesque et nisi a tellus ullamcorper faucibus. Nullam sagittis tempor mi non mattis. Proin ultricies, enim sit amet bibendum tristique, ligula ante feugiat nunc, sit amet imperdiet tortor nisl et felis. Pellentesque et nisl dui, non dictum libero. Vivamus tempor ante ac leo suscipit a sodales ligula iaculis. Curabitur massa mi, semper sed bibendum eget, auctor in nulla. Quisque at mi in ligula viverra suscipit sed vitae leo.</p>
+</div>
+
+        <footer><!-- additional info --></footer>
+
+</article>
+
+
+        </section>
+      </div>
+    </body>
+<script
+			  src="//code.jquery.com/jquery-2.2.3.min.js"
+			  integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="
+			  crossorigin="anonymous"></script>
+<script src="/auto-client//js/ghapi.js"></script>
+<script>
+  onready_.forEach((cb)=>{
+    try {
+      cb();
+    }
+    catch(e) {
+      console.error(e);
+    }
+  });
+  GetLatestReleaseInfo((release)=>{
+      var asset = release.assets[0];
+      $("#main_dl_link").attr("href", asset.browser_download_url);
+  });
+</script>
+</html>
