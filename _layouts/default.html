@@ -12,26 +12,15 @@
 
         <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/stylesheets/stylesheet.css" media="screen">
         <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/stylesheets/github-dark.css" media="screen">
+        <script src="{{site.baseurl}}/js/settings.js"></script>
         <script>
           var onready_ = [];
           function onready(cb) {
             if(typeof cb=="function")
               onready_.push(cb);
           }
-
-          var SETTINGS = {debug: false};
-          {% if site.debug %}SETTINGS.debug = true;{% endif %}
-          try {
-            var user_settings = location.hash.length>1?JSON.parse(decodeURIComponent(location.hash.substr(1))):{};
-            for(var i in user_settings) {
-              if(typeof SETTINGS[i]!="undefined")
-                SETTINGS[i] = user_settings[i];
-            }
-          }
-          catch(e) {
-            console.warn("Error parsing settings: ",e);
-          }
           // Settings that cannot be overriden
+          {% if site.debug %}SETTINGS.debug = true;{% endif %}
           SETTINGS.ghapi = "{{site.gh_api}}";
 
         </script>
@@ -63,6 +52,7 @@
 			  src="//code.jquery.com/jquery-2.2.3.min.js"
 			  integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="
 			  crossorigin="anonymous"></script>
+<script src="{{site.baseurl}}/js/github.js"></script>
 <script src="{{site.baseurl}}/js/ghapi.js"></script>
 <script>
   onready_.forEach((cb)=>{
@@ -78,4 +68,6 @@
       $("#main_dl_link").attr("href", asset.browser_download_url);
   });
 </script>
+<!-- GOOGLE ANALYTICS -->
+<script src="{{site.baseurl}}/js/googleanalytics.js" async="true"></script>
 </html>

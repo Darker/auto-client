@@ -1,25 +1,6 @@
-var cache = {releases:{latest: {_last_update: 0}, all: {_last_update: 0}}};
+var GITHUB = new GitHubSimple();
 function GetLatestReleaseInfo(cb) {
-    if(cache_is_outdated(cache.releases.latest)) {
-      $.getJSON(SETTINGS.ghapi+"releases/latest").done(function (release) {
-          cache.releases.latest = release;
-          cache.releases.latest._last_update = new Date().getTime();
-          cb(release);
-      });
-    }
-    else
-      cb(cache.releases.latest);
-}
-function time() {
-  return new Date().getTime();
-}
-function dt(t) {
-  return time()-t;
-}
-function cache_is_outdated(x, limit) {
-  if(typeof limit!="number")
-    limit = 60*60*1000;
-  return x==null || x._last_update==null || dt(x._last_update)>limit;
+  GITHUB.getURL(SETTINGS.ghapi+"releases/latest", cb);
 }
 
 function timeAgo(timestamp) {
@@ -75,6 +56,7 @@ $.fn.countdown = function (callback, duration, message) {
     }, 1000);
 
 };
+
 
 function distribute_text(text) {
   for(var i in text) {
