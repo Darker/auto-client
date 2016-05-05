@@ -1,3 +1,0 @@
-# to run in debug mode, use "jekyll serve --config _config.yml,debug.yml"
-name: LoL AutoClient [DEBUG MODE]
-debug: true

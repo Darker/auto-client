@@ -1,13 +1,13 @@
 .btn-zip .icon {
-    background: rgba(0, 0, 0, 0) url("http://www.stdicon.com/humility/ddd.zip?size=18") no-repeat scroll 0 0;
+    background: rgba(0, 0, 0, 0) url("//www.stdicon.com/humility/ddd.zip?size=18") no-repeat scroll 0 0;
 }
 .btn-java .icon {
-    background: rgba(0, 0, 0, 0) url("http://117.218.56.208:8888/itax/images/java.gif") no-repeat scroll 0 0;
+    background: rgba(0, 0, 0, 0) url("../images/java.gif") no-repeat scroll 0 0;
 }
 .btn-fb .icon {
-    background: rgba(0, 0, 0, 0) url("https://cdn1.iconfinder.com/data/icons/logotypes/32/square-facebook-512.png") no-repeat scroll 0 0;
+    background: rgba(0, 0, 0, 0) url("../images/facebook.png") no-repeat scroll 0 0;
     background-size: contain;
-}
+}                                             
   
 header h1 a, header h2 a {
   color: inherit;
