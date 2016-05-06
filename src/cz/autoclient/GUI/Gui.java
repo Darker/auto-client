@@ -14,6 +14,8 @@ import cz.autoclient.GUI.passive_automation.PAMenu;
 import cz.autoclient.GUI.summoner_spells.ButtonSummonerSpellMaster;
 import cz.autoclient.GUI.tabs.MultiFieldDef;
 import cz.autoclient.GUI.updates.UpdateMenuItem;
+import cz.autoclient.GUI.urls.BasicURL;
+import cz.autoclient.GUI.urls.LazyURL;
 import cz.autoclient.Main;
 import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.Setnames;
@@ -57,6 +59,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.ParallelGroup;
@@ -525,11 +532,27 @@ import javax.swing.event.ChangeListener;
            updater.updateFiltersChanged();
          });*/
          updateMenu.add(checkBox);
+         LazyURL downloadURL = new LazyURL() {
+            @Override
+            public URL getURL() {
+                if(!Setnames.UPDATES_IGNORE_BETAS.getBoolean(settings)) {
+                  return BasicURL.urlOrNull("http://darker.github.io/auto-client/download-beta/");
+                   /*try {
+                     downloadURL = downloadURL + "#" + URLEncoder.encode("{\"download-betas\":true}", "UTF-8");
+                   } catch (UnsupportedEncodingException ex) {
+                     ex.printStackTrace();
+                   }*/
+                 }
+                 else
+                   return BasicURL.urlOrNull("http://darker.github.io/auto-client/download/");
+
+              }   
+         };
          
          updateMenu.add(new URLMenuItem(
                       "Download new version manually",
                       "Download from github releases",
-                      "https://github.com/Darker/auto-client/releases")
+                      downloadURL)
          );
          updateMenu.add(new URLMenuItem(
                       "Help",
@@ -736,6 +759,8 @@ import javax.swing.event.ChangeListener;
                  "Version: <tt>"+ac.getVersion()+"</tt><br />"
                + "e-mail: <a href=\"mailto:autoclient@hmamail.com\">"
                + "autoclient@hmamail.com</a><br />"
+               + "Website: <a href=\"http://darker.github.io/auto-client?from_app\">"
+               + "darker.github.io/auto-client</a><br />"
                + "<a href=\"https://www.facebook.com/autoclient/\">facebook/autoclient"
                + "</a><br />"
                ,
@@ -888,14 +913,7 @@ import javax.swing.event.ChangeListener;
           @Override
           public void actionPerformed(ActionEvent e) {
             String PW = new String(pw.getPassword());
-            /*String check = (String)JOptionPane.showInputDialog(
-                  null,
-                  "Enter password again:\n",
-                  "Confirm password",
-                  JOptionPane.PLAIN_MESSAGE,
-                  null,
-                  null,
-                  "");*/
+ 
             boolean state = true; //PW.equals(check);
             if(!state) {
               JOptionPane.showMessageDialog(Gui.this, "Passwords didn't match.");
@@ -916,63 +934,7 @@ import javax.swing.event.ChangeListener;
         });
         field.addField(button);
         setwin.addLine(field);
-        /*field = new FieldDef(
-            "Master password:",
-            "Password to protect your game password.",
-            null);
-        final JPasswordField pw2 = new JPasswordField();*/
-        /*settings.bindToInputSecure(Setnames.REMEMBER_PASSWORD.name, pw2, new PasswordFieldVerifier() {
-          @Override
-          public Object value(JComponent c) {
-            String v = (String)super.value(c);
-            settings.getEncryptor().setPassword(v);
-            return v;
-          }
-        });*/
-
-        /*field.addField(pw2);
-        setwin.addLine(field);*/
-
-        /*field = new FieldDef(
-            "Use master password:",
-            "Prompts for master password to protect your password.",
-            Setnames.ENCRYPTION_USE_PW.name);
-        final JCheckBox use_pw = new JCheckBox();
-        ActionListener updateUsePW = new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            SecureSettings encr = settings.getEncryptor();
-            boolean value = use_pw.isSelected();
-            encr.setUse_password(value);
-            pw2.setEnabled(value);
-          }
-        };
-        use_pw.addActionListener(updateUsePW);
-        //Set inital values
-        boolean value = settings.getBoolean(setwin.settingName(Setnames.ENCRYPTION_USE_PW.name), false);
-        settings.getEncryptor().setUse_password(value);
-        pw2.setEnabled(value);*/
-
-        //field.addField(use_pw);
-        //setwin.addLine(field);
-
-
-        /*field = new FieldDef(
-            "Encrypt with hardware ID:",
-            "Will use unique key of this computer to encrypt the password.",
-            Setnames.ENCRYPTION_USE_HWID.name);
-        final JCheckBox use_hwid = new JCheckBox();
-        ActionListener updateUseHWID = new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            //settings.getEncryptor().setUse_hwid(use_hwid.isSelected());
-          }
-        };
-        use_hwid.addActionListener(updateUseHWID);
-        //settings.getEncryptor().setUse_hwid(settings.getBoolean(Setnames.ENCRYPTION_USE_HWID.name, true));
-        field.addField(use_hwid);
-        setwin.addLine(field);*/
-
+ 
         setwin.setSize(333, 130);
 
         auto_login.setRobots(robots);

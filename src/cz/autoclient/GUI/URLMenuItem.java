@@ -7,6 +7,9 @@
 package cz.autoclient.GUI;
 
 import static cz.autoclient.GUI.passive_automation.PAMenu.displayAboutPage;
+import cz.autoclient.GUI.urls.AcURL;
+import cz.autoclient.GUI.urls.BasicURL;
+import cz.autoclient.GUI.urls.LazyURL;
 import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,8 +24,8 @@ import javax.swing.JMenuItem;
  * @author Jakub
  */
 public class URLMenuItem extends JMenuItem {
-  public final URL url;
-  public URLMenuItem(String text, String title, URL url, ImageResources icon) {
+  public final AcURL url;
+  public URLMenuItem(String text, String title, AcURL url, ImageResources icon) {
     super(text);
     this.url = url;
     this.setToolTipText(title);
@@ -33,35 +36,31 @@ public class URLMenuItem extends JMenuItem {
   }
 
   public URLMenuItem(String text, String title, String url, ImageResources icon) {
-    this(text, title, urlOrNull(url), icon);
+    this(text, title,  new BasicURL(url), icon);
   }
   public URLMenuItem(String text, String title, String url) {
-    this(text, title, urlOrNull(url), null);
+    this(text, title, new BasicURL(url), null);
   }
-  
-  public static URL urlOrNull(String url) {
-    try {
-      return new URL(url);
-    } catch (MalformedURLException ex) {
-      return null;
-    }
+  public URLMenuItem(String text, String title, LazyURL url) {
+    this(text, title, url, null);
   }
+
   
   public static class URLOpener implements ActionListener {
-    public final URL link;
-    public URLOpener(URL link) {
+    public final AcURL link;
+    public URLOpener(AcURL link) {
       this.link = link;
     }
     @Override
     public void actionPerformed(ActionEvent e) {
-      displayAboutPage(link);
+      displayPage(link);
     }
   };
   
   
   
   private static Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-  public static void displayAboutPage(URL page) {
+  public static void displayPage(AcURL page) {
     if(page==null) {
       Gui.inst.dialogErrorAsync("This menu item is broken and tries to display invalid (null) URL. Contact the developer.");
     }
