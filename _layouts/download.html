@@ -57,8 +57,6 @@ onready(()=>{
             $("#countdown").fadeOut(800,
               ()=>{
                 $("#countdown-after").fadeIn(800);
-                if(!SETTINGS.debug)
-                  $("#dl_frame").attr("src", asset.browser_download_url);
               }
             );
           })
