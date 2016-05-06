@@ -1,0 +1,44 @@
+---
+layout: default
+title: Instalation instructions 
+---
+<section id="help_installing">
+  <h3>Download</h3>
+  <p>
+    To start download, use the <a href="javascript:void(0);" x-highlight="main_dl_link">download button to the top</a>. If you want to try beta versions
+    with cutting-edge features, <a href="{{site.baseurl}}/download-beta">click here.</a>.
+  </p>
+  <p class="browser-specific firefox">
+    To find your downloaded file, press <kbd>Ctrl</kbd>+<kbd>J</kbd> and then click on the folder icon in the popup:
+    <img class="big" src="{{site.baseurl}}/images/installing/download-firefox.png" />
+  </p>
+  
+  <h3>Unpack</h3>
+  <p class="system-specific windows">
+    To unpack files, you can use windows. Double click the archive and you will see the files inside:
+    <img class="big" src="{{site.baseurl}}/images/installing/unzip1-windows.png" />
+    Open second window in Windows Explorer (<kbd class="winkey">&nbsp;</kbd>+<kbd>E</kbd>) and drag all files to any folder you want:
+    <img class="big" src="{{site.baseurl}}/images/installing/unzip2-windows.svg" />
+  </p>
+  <h3>Install java 8 (if needed)</h3>
+  <p class="system-specific windows">
+    <a href="https://java.com/en/download/help/version_manual.xml">Check if you have Java 8 or higher.</a> If not, download java here: <a href="https://java.com/en/download/">java.com/en/download/</a>.   
+  </p>
+  <h3>Run program</h3>
+  <p class="system-specific windows">
+    Once Java is installed, you can run the program by double clicking <tt>AutoClient.jar</tt>.
+  </p>
+</section>
+<script>
+
+
+onready(()=>{
+  var browser = navigator.userAgent.match(/(firefox|chrome|safari|opera|MSIE)/i);
+  if(browser!=null && browser[1]!=null && browser[1].length>0) {
+    browser = browser[1].toLowerCase();
+  }
+  else
+    browser = "unknown";
+  $(".browser-specific."+browser).show();
+});
+</script>

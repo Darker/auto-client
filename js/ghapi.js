@@ -2,6 +2,54 @@ var GITHUB = new GitHubSimple();
 function GetLatestReleaseInfo(cb) {
   GITHUB.getURL(SETTINGS.ghapi+"releases/latest", cb);
 }
+function GetLatestReleaseFromAll(cb, betas) {
+
+  GITHUB.getURL(SETTINGS.ghapi+"releases", FindLatestAsync);
+  function FindLatestAsync(releases) {
+    cb(FindLatest(releases, betas));
+  }
+}
+
+
+function FindLatest(releases, betas) {
+  var latest = new Tag("v0");
+  var latest_release = null;
+  for(var i=0,l=releases.length; i<l; i++) {
+    var r = releases[i];
+    console.log("Comparing ", r, latest_release);
+    var tag = new Tag(r.tag_name);
+    if(tag.beta && !betas)
+      continue;
+    
+    if(tag.compare(latest)>0) {
+      latest = tag;
+      latest_release = r;
+    }
+  }
+  return latest_release;
+}
+
+function clearcache() {
+  GITHUB.cache = {};
+  localStorage.removeItem(GITHUB.cacheName);
+}
+
+
+if(typeof String.prototype.endsWith!="function") {
+  String.prototype.endsWith = function(suffix) {
+      return this.indexOf(suffix, this.length - suffix.length) !== -1;
+  };
+}
+
+function findFirstZipAsset(assets) {
+  for(var i=0,l=assets.length; i<l; i++) {
+    if(assets[i].name.endsWith(".zip")) {
+      return assets[i];
+    }
+  }
+  return null;
+}
+
 
 function timeAgo(timestamp) {
   var second = 1000;
