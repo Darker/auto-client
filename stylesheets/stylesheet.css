@@ -48,6 +48,11 @@ kbd.winkey {
     background-size: contain;
     width: 1.25em;
 }
+
+a.red {
+  color: red;
+  text-shadow: 0 0 5px rgba(255,0,0, 0.5);
+}
 /** GITHUB STYLESHEET **/
 
 body {
