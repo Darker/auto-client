@@ -4,18 +4,20 @@
  * and open the template in the editor.
  */
 
-package cz.autoclient.GUI;
+package cz.autoclient.GUI.updates;
 
+import cz.autoclient.GUI.Dialogs;
+import cz.autoclient.GUI.Gui;
 import cz.autoclient.GUI.notifications.Notification;
-import cz.autoclient.GUI.updates.UpdateMenuItem;
 import cz.autoclient.event.EventCallbackLog;
 import cz.autoclient.updates.Progress;
 import cz.autoclient.updates.UpdateInfo;
-import cz.autoclient.updates.UpdateInfoListener;
 import cz.autoclient.updates.Updater;
 import cz.autoclient.updates.VersionId;
+import java.net.UnknownHostException;
 import java.util.zip.ZipError;
 import javax.swing.SwingUtilities;
+import net.lingala.zip4j.exception.ZipException;
 
 /**
  *
@@ -136,7 +138,20 @@ public class UpdateVisual {
     public void started() {item.setDownloadProgress(inProgress().version, 0);}
  
     @Override
-    public void stopped(Throwable error) {}
+    public void stopped(Throwable error) {
+      String mainText = error.toString();
+      if(error instanceof UnknownHostException) {
+        mainText = "Cannot connect to server "+((UnknownHostException)error).getMessage();
+      }
+     
+
+      Dialogs.dialogErrorAsync("<b>An error occured when downloading:</b><br /><tt>    </tt>"
+          + mainText +"<br />" +
+          "You can try to delete the <tt>/updates</tt> folder or download new version manually.<br />"+
+          "Do not forget to <a href=\"https://github.com/Darker/auto-client/issues/new\">report this problem</a>."
+          ,"Error during download."); 
+      displayCurrentStatus();
+    }
 
     @Override
     public void finished() {

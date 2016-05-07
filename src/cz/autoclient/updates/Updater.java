@@ -48,7 +48,7 @@ public class Updater implements EventEmitter {
   private File cacheMainFile;
   //UpdateInfoListener updateListener = UpdateInfoListener.Empty.getInstance();
   // This is minimum interval, not interval how often does updater check
-  public final int checkInterval = 10000;//24*60*60*1000;
+  public final int checkInterval = 60*60*1000/100;//24*60*60*1000;
   private ExecutorService executor;
   private final UpdaterThreadFactory threadFactory = new UpdaterThreadFactory();
   
@@ -159,9 +159,15 @@ public class Updater implements EventEmitter {
       ex.printStackTrace();
     }
   }
-
   public void checkForUpdates() {
-    if(runInExecutorIfNeeded(()->checkForUpdates()))
+    checkForUpdates(false);
+  }
+  /**
+   * 
+   * @param silent currently has no effect. In future surpresses notifications.
+   */
+  public void checkForUpdates(final boolean silent) {
+    if(runInExecutorIfNeeded(()->checkForUpdates(silent)))
       return;
     setCurrentActionAndThenIdleDelayed(Action.CHECKING);
     updates = getUpdates();
@@ -206,8 +212,15 @@ public class Updater implements EventEmitter {
       updates.checkedRightNow();
     }
     else {
-      dbgmsg("No need to check for updates, everything is cached."); 
+      dbgmsg("No need to download updates, everything is cached."); 
     }
+    // Debug
+    /*VersionId debug = new VersionId("v4.8-beta");
+    if(updates.findVersion(debug)==null) {
+       UpdateInfo info = new UpdateInfo(debug, cacheDir);
+       updates.add(info);
+    }*/
+    
     dbgmsg("Available releases: "+updates.size());
     UpdateInfo newest = null;
     for(UpdateInfo info : updates) {
@@ -229,6 +242,7 @@ public class Updater implements EventEmitter {
       dbgmsg("Latest release that can be installed: "+newest.version);
       if(!newest.validateFile()) {
         dbgmsg("Update can be downloaded.");
+  
         updates.installStep(InstallStep.CAN_DOWNLOAD);
         //if(!newest.seen) {
           //updateListener.updateAvailable(newest);
@@ -259,7 +273,10 @@ public class Updater implements EventEmitter {
       return;
     setCurrentActionAndThenIdleDelayed(Action.DOWNLOADING);
     if(getUpdates().installStepIs(InstallStep.CAN_DOWNLOAD)) {
-      updates.installInProgress().downloadFile(this);
+      if(!updates.installInProgress().downloadFile(this)) {
+        updates.installInProgress().localFile.delete();
+        return; 
+      }
     }
     File result = updates.installInProgress().localFile;
     if(result!=null && result.isFile() && result.length()>0) {

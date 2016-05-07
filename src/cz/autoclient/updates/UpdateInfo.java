@@ -9,6 +9,7 @@ package cz.autoclient.updates;
 
 import cz.autoclient.github.interfaces.Release;
 import cz.autoclient.github.interfaces.ReleaseFile;
+import static cz.autoclient.updates.Updater.dbgmsg;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,6 +37,19 @@ public class UpdateInfo implements java.io.Serializable {
   private static final long serialVersionUID = 666;
   
   public static String UPDATE_DIR = "updates";
+
+  public UpdateInfo(VersionId version, File baseDir) {
+    this.downloadLink = null;
+    this.localFile = new File(baseDir, version.toString()+".zip");
+    this.version = version;
+    this.originalSize = 0;
+    this.id = -1;
+    this.prerelease = version.isBeta;
+    this.valid = false;
+  }
+  
+  
+  
   public UpdateInfo(JsonObject json, File baseDir) {
     JsonArray assets = json.getJsonArray("assets");
     URL tmp = null;
@@ -116,9 +130,14 @@ public class UpdateInfo implements java.io.Serializable {
     //}
     return true;
   }
-  void downloadFile(Updater updater) {
-    if(downloadLink==null)
-      throw new RuntimeException("Cannot download update, download link is null.");
+  boolean downloadFile(Updater updater) {
+    if(downloadLink==null) {
+      updater.dispatchEvent("download.stopped", 
+          new NullPointerException("Download link is null for version "+this.version)
+      );
+      return false;
+    }
+      //throw new RuntimeException("Cannot download update, download link is null.");
     HttpURLConnection httpConnection;
     System.out.println("Downloading update: "+downloadLink);
     try {
@@ -127,7 +146,7 @@ public class UpdateInfo implements java.io.Serializable {
     catch(IOException e) {
       //process.stopped(e);
       updater.dispatchEvent("download.stopped", e);
-      return;
+      return false;
     }
     long completeFileSize = httpConnection.getContentLength();
     System.out.println("File size: "+completeFileSize);
@@ -138,7 +157,7 @@ public class UpdateInfo implements java.io.Serializable {
       fos = new java.io.FileOutputStream(localFile);
     } catch (FileNotFoundException e) {
       updater.dispatchEvent("download.stopped", e);
-      return;
+      return false;
     }
     try (java.io.BufferedInputStream in = new java.io.BufferedInputStream(httpConnection.getInputStream());
         java.io.BufferedOutputStream bout = new BufferedOutputStream(fos, 1024)
@@ -160,13 +179,19 @@ public class UpdateInfo implements java.io.Serializable {
       validateFile();
     }
     catch(Exception e) {
-      System.out.println(e.getMessage());
+      dbgmsg(e.getMessage());
       e.printStackTrace(System.out);
       updater.dispatchEvent("download.stopped", e);
-      
-      localFile.delete();
+      return false;
+    }
+    finally {
+      try { 
+        fos.close();
+        // nobody cares if close fails
+      } catch (IOException ex) {}
     }
     updater.dispatchEvent("download.finished");
+    return true;
   }
   public void unzip() throws ZipException {
     File destination = new File(localFile.getParentFile(), version.toString());

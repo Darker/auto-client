@@ -1,5 +1,6 @@
 package cz.autoclient.GUI;
 
+import cz.autoclient.GUI.updates.UpdateVisual;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.swing.AutoCompleteSupport;
 import cz.autoclient.GUI.champion.ConfigurationManager;
@@ -36,9 +37,6 @@ import cz.autoclient.robots.exceptions.NoSuchRobotException;
 import cz.autoclient.settings.SettingsInputVerifier;
 import cz.autoclient.settings.SettingsValueChanger;
 import cz.autoclient.settings.secure.EncryptedSetting;
-import cz.autoclient.updates.Progress;
-import cz.autoclient.updates.UpdateInfo;
-import cz.autoclient.updates.UpdateInfoListener;
 import cz.autoclient.updates.Updater;
 import java.awt.AWTException;
 import java.awt.Color;
@@ -59,11 +57,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.ParallelGroup;
@@ -86,8 +80,6 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
  
  public class Gui
    extends JFrame
