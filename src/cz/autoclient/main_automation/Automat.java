@@ -229,7 +229,7 @@ public class Automat
     //boolean ARAM = false;
     this.callText(settings.getStringEquivalent(Setnames.BLIND_CALL_TEXT.name));
 
-    if (SituationDetector.IsAram(window)) {
+    if (SituationDetector.IsAram(window) || Setnames.DEBUG_PRETEND_ARAM.getBoolean(settings)) {
       dbgmsg("Probably ARAM!");
       if(Setnames.ARAM_ENABLED.getBoolean(settings)) {
         aram_lobby();
@@ -337,16 +337,16 @@ public class Automat
 
       BufferedImage small_icon_no_crop = s.img.getScaledDiscardOriginal(35, 35);
       BufferedImage small_icon = LazyLoadedImage.crop(small_icon_no_crop, 1);
-      DebugDrawing.displayImage(selected_spell, "Spell #"+(i+1));
-      DebugDrawing.displayImage(small_icon_no_crop, "Spell #"+(i+1));
-      DebugDrawing.displayImage(small_icon, "Spell #"+(i+1));  
+      //DebugDrawing.displayImage(selected_spell, "Spell #"+(i+1));
+      //DebugDrawing.displayImage(small_icon_no_crop, "Spell #"+(i+1));
+      //DebugDrawing.displayImage(small_icon, "Spell #"+(i+1));  
 
       RectMatch selected_spell_rect = ScreenWatcher.findByAvgColor(small_icon, selected_spell, 0.001f, false, null);
       // Spell found selected
       if (selected_spell_rect != null) {
-        BufferedImage test = DebugDrawing.cloneImage(selected_spell);
-        DebugDrawing.drawResult(test, selected_spell_rect, Color.GREEN);
-        DebugDrawing.displayImage(test, "Spell #"+(i+1)+" icon "+small_icon.getWidth()+"x"+small_icon.getHeight());
+        //BufferedImage test = DebugDrawing.cloneImage(selected_spell);
+        //DebugDrawing.drawResult(test, selected_spell_rect, Color.GREEN);
+        //DebugDrawing.displayImage(test, "Spell #"+(i+1)+" icon "+small_icon.getWidth()+"x"+small_icon.getHeight());
 
         dbgmsg("  Spell #" + (i + 1) + " already selected, difference: "+selected_spell_rect.diff);
         continue;
@@ -376,22 +376,22 @@ public class Automat
         Rect pos = ScreenWatcher.findByAvgColor(icon, screenshot, 0.001f, true, null);
 
         if (pos != null) {
-          /*dbgmsg("Original result: "+pos);
-           screenshot = window.screenshot();
-           DebugDrawing.drawResult(screenshot, cropRect, Color.RED);
-           DebugDrawing.displayImage(screenshot, "Non-normalized");
-
-           screenshot = ScreenWatcher.resampleImageTo(
-           window.screenshot(),
-           ConstData.smallestSize.width, ConstData.smallestSize.height);*/
+//           dbgmsg("Original result: "+pos);
+//           screenshot = window.screenshot();
+//           DebugDrawing.drawResult(screenshot, cropRect, Color.RED);
+//           DebugDrawing.displayImage(screenshot, "Non-normalized");
+//
+//           screenshot = ScreenWatcher.resampleImageTo(
+//           window.screenshot(),
+//           ConstData.smallestSize.width, ConstData.smallestSize.height);
           //Add the normalized top/left coordinates of the search rectangle we used
           Rect cropNormalized = ConstData.normalize(cropRect, winRect);
           pos = pos.move(cropNormalized.left, cropNormalized.top);
-          /*dbgmsg("Search region: "+cropNormalized);
-           dbgmsg("Moved result: "+pos);
-           DebugDrawing.drawResult(screenshot, cropNormalized, Color.RED);
-           DebugDrawing.drawResult(screenshot, pos, Color.GREEN);
-           DebugDrawing.displayImage(screenshot, "Normalized");*/
+//           dbgmsg("Search region: "+cropNormalized);
+//           dbgmsg("Moved result: "+pos);
+//           DebugDrawing.drawResult(screenshot, cropNormalized, Color.RED);
+//           DebugDrawing.drawResult(screenshot, pos, Color.GREEN);
+//           DebugDrawing.displayImage(screenshot, "Normalized");
 
   //             dbgmsg("Crop rect: "+cropRect+" and normalized: "+cropNormalized);
           //             screenshot = window.screenshot();
@@ -402,19 +402,19 @@ public class Automat
           // searching the summoner spell)
           pos = ConstData.deNormalize(pos, winRect);
 
-          /*screenshot = window.screenshot();
-           DebugDrawing.drawResult(screenshot, pos, Color.RED, Color.YELLOW);
-           dbgmsg("Rescaled result: "+pos);
-           DebugDrawing.displayImage(screenshot, "Rescaled result");
-
-           //Show some debug
-           screenshot = window.screenshot();
-           DebugDrawing.drawResult(screenshot, pos, Color.RED);*/
+//          screenshot = window.screenshot();
+//           DebugDrawing.drawResult(screenshot, pos, Color.RED, Color.YELLOW);
+//           dbgmsg("Rescaled result: "+pos);
+//           DebugDrawing.displayImage(screenshot, "Rescaled result");
+//
+//           //Show some debug
+//           screenshot = window.screenshot();
+//           DebugDrawing.drawResult(screenshot, pos, Color.RED);
           // Click in middle of button rather than the corner
           pos = pos.middle();
 
-          /*DebugDrawing.drawPoint(screenshot, pos.left, pos.top, 5, Color.YELLOW);
-           DebugDrawing.displayImage(screenshot);*/
+//          DebugDrawing.drawPoint(screenshot, pos.left, pos.top, 5, Color.YELLOW);
+//           DebugDrawing.displayImage(screenshot);
           //Click in the middle of the found rectangle
           dbgmsg("  Spell #" + (i + 1) + " CLICKING: " + pos);
           window.mouseDown(pos.left, pos.top);
@@ -503,6 +503,9 @@ public class Automat
           null
       );
       if (player_pos != null) {
+        if(championColors==null)
+          championColors = new ChampionImages(new File("LOLResources"));
+        championColors.getColorsAsync();
         //DebugDrawing.drawResult(player_list, player_pos, Color.RED);
         // The offset by which the current area is cropped
         Rect moveOffset = ImageFrame.NormalLobby_PlayerList_Left.multiplyBySize(ConstData.smallestSize);
@@ -556,8 +559,7 @@ public class Automat
 
         //DebugDrawing.displayImage(avatar, "Player position.");
         //Color avg = ScreenWatcher.averageColor(avatar);
-        if(championColors==null)
-          championColors = new ChampionImages(new File("LOLResources"));
+
         String best = championColors.find(avatar);
         dbgmsg("Detected champion: "+best);
         if(settings.exists("ConfigurationManager", HashMap.class)) {
@@ -718,3 +720,4 @@ public class Automat
     }
   }
 }
+// [^/ ][^/ ]\s*DebugDrawing.displayImage

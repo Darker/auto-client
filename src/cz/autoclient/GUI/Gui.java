@@ -489,7 +489,6 @@ import javax.swing.event.ChangeListener;
        settings.bindToInput(Setnames.PREVENT_CLIENT_MINIMIZE.name, checkBox, true);
        menuTools.add(checkBox); 
 
-       //Update dll aditions status
        displayDllStatus(false);
        //======== Updates ========
        {
@@ -597,6 +596,12 @@ import javax.swing.event.ChangeListener;
              }
          });
          menu.add(menu_threadcontrol_pretend_accepted);
+         
+         checkBox = new JCheckBoxMenuItem("Always ARAM");
+         checkBox.setToolTipText("Always handle match as ARAM");
+         settings.bindToInput(Setnames.DEBUG_PRETEND_ARAM.name, checkBox, true);
+         menu.add(checkBox);
+         
          JMenuItem item = new JMenuItem();
          item.setText("Show current screenshot.");
          item.setToolTipText("Serves as debug feature to check whether Winapi is working.");

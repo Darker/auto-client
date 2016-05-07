@@ -42,7 +42,7 @@ public class ChampionImages implements
   private final Object color_mutex = new Object();
 
 
-  private GenerateColors generatorThread;
+  private GenerateColors generatorThread = null;
   private final File homeDir;
 
   public ChampionImages(File homeDir) {
@@ -90,20 +90,34 @@ public class ChampionImages implements
   }
   
   public HashMap<String, ColorInfo> getColors() throws InterruptedException {
-    if(colors==null) {
+    if(generatorThread==null) {
       synchronized(color_mutex) {
-        if(colors==null) {
+        if(generatorThread==null) {
           generatorThread = new GenerateColors(); 
           generatorThread.start();
           generatorThread.join();
         }
       }
     }
+    else if(generatorThread.isAlive()) {
+      generatorThread.join();
+    }
     return colors;
+  }
+  public void getColorsAsync() throws InterruptedException {
+    if(generatorThread==null) {
+      synchronized(color_mutex) {
+        if(generatorThread==null) {
+          generatorThread = new GenerateColors(); 
+          generatorThread.start();
+        }
+      }
+    }
   }
   private class GenerateColors extends Thread {
     public GenerateColors() {
       super("Generating champion average colors.");
+      colors = new HashMap();
     }
     @Override
     public void run() {
@@ -115,7 +129,7 @@ public class ChampionImages implements
     }
     private void load() throws InterruptedException {
       File cache = new File(homeDir, "average_champion_colors.ser");
-      colors = new HashMap();
+      
       if(cache.isFile()) {
         if(loadFromFile(cache))
           return;
@@ -185,7 +199,7 @@ public class ChampionImages implements
    * Contains info about champion image color(s). This class will changed 
    * untill it contains enough info to identify every champion in LoL.
    */
-  public static class ColorInfo {
+  public static class ColorInfo implements java.io.Serializable {
     public final Color top_color;
     public final Color bottom_color;
     public ColorInfo(Color top_color, Color bottom_color) {
@@ -242,6 +256,7 @@ public class ChampionImages implements
     }
     catch(ClassNotFoundException | IOException e) {
       System.out.println("Some class was not found when loading champion colors: "+e.getMessage());
+      e.printStackTrace();
       return false;
     }
     finally {
