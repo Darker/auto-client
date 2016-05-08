@@ -20,7 +20,7 @@ var LOCAL_SETTINGS_NAME = "autoclient-settings";
 if(localStorage[LOCAL_SETTINGS_NAME]) {
   try {
     var LOCAL_SETTINGS = JSON.parse(localStorage[LOCAL_SETTINGS_NAME]);
-    SETTINGS.addkeys(saved_settings, true, true);
+    SETTINGS.addkeys(LOCAL_SETTINGS, true, true);
   }
   catch(e) {
     console.warn("Error parsing localStorage settings: ",e);
