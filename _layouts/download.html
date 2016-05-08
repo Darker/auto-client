@@ -37,6 +37,7 @@ var GetDownloadInfo = function(cb) {
 <script type="text/javascript">
 onready(()=>{
     console.log("Getting download info.");
+    console.log("JQuery: ", $);
     GetDownloadInfo((release)=>{
         var asset = findFirstZipAsset(release.assets);
         console.log("Retrieved info: ", release);
@@ -45,9 +46,12 @@ onready(()=>{
           time: timeAgo(asset.updated_at),
           download_count: new Number(asset.download_count).toLocaleString("EN-GB")
         });
-        
+        console.log("Hiding info div: ");
         $("#info").fadeOut(300, ()=>{
-          $("#download, #download_info").fadeIn(300);
+          console.log("Showing download div: ");
+          $("#download, #download_info").fadeIn(300,
+            ()=>{console.log("Done showing the div.");
+          );
         });
 
         $("#dl_link").attr("href", asset.browser_download_url);
