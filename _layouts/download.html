@@ -36,9 +36,10 @@ var GetDownloadInfo = function(cb) {
 
 <script type="text/javascript">
 onready(()=>{
+    console.log("Getting download info.");
     GetDownloadInfo((release)=>{
         var asset = findFirstZipAsset(release.assets);
-
+        console.log("Retrieved info: ", release);
         distribute_text({
           filename: asset.name,
           time: timeAgo(asset.updated_at),
