@@ -1,3 +1,17 @@
+@keyframes pulse {
+    0% {
+     transform: scale(1, 1);
+    }
+
+    50% {
+     transform: scale(1.2, 1.2);
+    }
+
+    100% {
+    transform: scale(1, 1);
+    }
+}
+
 .btn-zip .icon {
     background: rgba(0, 0, 0, 0) url("http://www.stdicon.com/humility/ddd.zip?size=18") no-repeat scroll 0 0;
 }
@@ -52,6 +66,13 @@ kbd.winkey {
 a.red {
   color: red;
   text-shadow: 0 0 5px rgba(255,0,0, 0.5);
+}
+
+.pulse {
+   animation: pulse 1s linear;
+}
+.pulse.red {
+   background: rgba(255,0,0,0.5);
 }
 /** GITHUB STYLESHEET **/
 

@@ -24,7 +24,7 @@ var GetDownloadInfo = function(cb) {
   <span class="filename" style="background-image: url('http://www.stdicon.com/humility/ddd.zip?size=18');"></span> was updated <span class="time"></span> and downloaded <span class="download_count"></span> times.
 </p>
 <p id="download" style="display: none">
-    <span id="countdown">Download will start in <span id="cd">10</span> seconds. <a class="red" id="countdown-cancel" href="javascript:void(0);">Click to cancel.</a></span>
+    <span id="countdown">Download will start in <span id="cd">10</span> seconds. <a class="red" id="countdown-cancel" href="javascript:/* cancel download */void(0);">Click to cancel.</a></span>
     <span id="countdown-after" style="display: none">
       If the download didn't start,
       <a href="{{site.gh_repo}}releases/latest" id="dl_link">click here</a>
@@ -54,7 +54,7 @@ onready(()=>{
           );
         });
 
-        $("#dl_link").attr("href", asset.browser_download_url);
+        $("#dl_link").attr("href", asset.browser_download_url+"#dl_manual");
         
         
         var countdown = $("#cd").countdown(10)
@@ -66,10 +66,25 @@ onready(()=>{
             );
           })
           .done(()=>{
-            if(SETTINGS.auto_download)
+            if(SETTINGS.auto_download) {
               $("#dl_frame").attr("src", asset.browser_download_url);
+              if(typeof ga=="function") {
+                ga('send', 'event', 'download', 'click', "success", {
+                  'transport': 'beacon',
+                });
+              }
+            }
           });
-        $("#countdown-cancel").one("click", ()=>{countdown.stop();});
+        $("#countdown-cancel").one("click", ()=>{
+          // Tell google analytics that download was stopped
+          if(typeof ga=="function") {
+            ga('send', 'event', 'download', 'click', "cancel", {
+               'transport': 'beacon',
+            });
+          }
+          // Stop download
+          countdown.stop();
+        });
     });
 });
 </script>

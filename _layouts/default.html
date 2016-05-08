@@ -55,6 +55,27 @@
 <script src="{{site.baseurl}}/js/github.js"></script>
 <script src="{{site.baseurl}}/js/ghapi.js"></script>
 <script>
+  /** 
+   * Doesn't do anything if google analytics isn't loaded
+  */     
+  function ga_safe() {
+    if(typeof ga=="function") {
+      ga.apply(window, arguments);
+    }
+  }
+  // Pushing as callback in case of errors
+  onready(()=>{
+    $("a[x-highlight]").click(function() {
+      console.log(this);
+      var elms = $(this.getAttribute("x-highlight"));
+      elms.one("animationend", function() {
+        $(this).removeClass("pulse red");
+      });
+      elms.addClass("pulse red");
+      
+    });
+  });
+  
   onready_.forEach((cb)=>{
     try {
       cb();
@@ -65,7 +86,7 @@
   });
   GetLatestReleaseInfo((release)=>{
       var asset = findFirstZipAsset(release.assets);
-      $("#main_dl_link").attr("href", asset.browser_download_url);
+      $("#main_dl_link").attr("href", asset.browser_download_url+"#dl_main_link");
   });
 </script>
 <!-- GOOGLE ANALYTICS -->
