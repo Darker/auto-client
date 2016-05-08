@@ -1,8 +1,8 @@
 function GitHubSimple() {
   this.cache = {};
-  if(localStorage["gh-cache"]) {
+  if(localStorage[this.cacheName]) {
     try {
-      var cache = JSON.parse(localStorage["gh-cache"]);
+      var cache = JSON.parse(localStorage[this.cacheName]);
       for(var i in cache) {
         this.cache[i] = Cache.fromJSON(cache[i]);
         console.log("Cache loaded from storage: ",this.cache[i]);
@@ -11,10 +11,10 @@ function GitHubSimple() {
     catch(e) {console.warn("Error loading cache: "+e);}
   }
   window.addEventListener("unload", ()=>{
-    localStorage["gh-cache"] = JSON.stringify(this.cache);
+    localStorage[this.cacheName] = JSON.stringify(this.cache);
   });
 }
-
+GitHubSimple.prototype.cacheName = "gh-cache";
 GitHubSimple.prototype.getURL = function(url, cb) {
   var cache = this.cache[url];
   if(cache==null)
@@ -101,25 +101,6 @@ Cache.fromJSON = function(x) {
   return c;
 }
 
-function SimplePromise() {
-  
-}
-SimplePromise.prototype.then = function(cb) {
-  this._success = cb;
-  return this;
-}
-SimplePromise.prototype.fail = function(cb) {
-  this._fail = cb;
-  return this;
-}
-SimplePromise.prototype.doCallback = function(cbname, arguments) {
-  if(typeof this[cbname]=="function")
-    cbname.apply(null, arguments);
-}
-// Default callbacks for convenience
-SimplePromise.prototype._success = 
-  SimplePromise.prototype._fail = 
-  ()=>{};
 
 
 function time() {
@@ -130,4 +111,47 @@ function dt(t) {
 }
 function cache_is_outdated(x, limit) {
   return x==null || x.outdated(limit);
+}
+
+
+function Tag(text) {
+  var matches = text.match(/^v([0-9](?:[0-9\.+]*[0-9])?)(?:\-([a-zA-Z0-9\-]+))?\s*$/);
+  var numbers = matches[1].split(".");
+  for(var i=0,l=numbers.length; i<l; i++)
+    numbers[i]*=1;
+  var suffix = matches[2] || "";
+  
+  this.numbers = numbers;
+  this.suffix = suffix;
+  this.beta = suffix.indexOf("beta")!=-1;
+}
+Tag.prototype.compare = function(tag) {
+  //if(tag.numbers.length>this.numbers.length)
+  //  return !tag.compare(this);
+  var n = this.numbers;
+  var n2 = tag.numbers;
+  console.log("Compare ", n, n2);
+  for(var i=0, l=Math.max(n.length, n2.length);i<l; i++) {
+    // this is equal but has aditional numbers
+    if(i>=n2.length)
+      return 1;
+    // this is equal but other tag has more numbers
+    if(i>=n.length)
+      return -1;
+    if(n[i]!=n2[i])
+      return n[i]-n2[i];
+  }
+  return 0;
+}
+Tag.prototype.newer = function(tag) {
+  return this.compare(tag)>=0?this:tag;
+}
+Tag.prototype.toString = function() {
+  if(this.suffix.length>0)
+    return this.numbers.join(".") + "-" + this.suffix;
+  else
+    return this.numbers.join(".");
+}
+Tag.prototype.toJSON = function() {
+  return this.toString();
 }

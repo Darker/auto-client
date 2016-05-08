@@ -1,55 +1,8 @@
 ---
-layout: default
+layout: download
 title: Download
+download_title: Downloading stable release
 ---
-<!-- This sucks but I don't know how make jekyll add the stylesheet to head." -->
-<link rel="stylesheet" type="text/css" href="{{site.baseurl}}/stylesheets/download.css" media="screen">
+You're about to download latest stable release of AutoClient.           <br />
 
-<h3>Download will start soon...</h3>
-<p id="info">Checking status of releases, please wait...</p>
-
-<p id="download_info" style="display: none">
-  <span class="filename" style="background-image: url('http://www.stdicon.com/humility/ddd.zip?size=18');"></span> was updated <span class="time"></span> and downloaded <span class="download_count"></span> times.
-</p>
-<p id="download" style="display: none">
-    <span id="countdown">Download will start in <span id="cd">10</span> seconds.</span>
-    <span id="countdown-after" style="display: none">
-      If the download didn't start,
-      <a href="{{site.gh_repo}}releases/latest" id="dl_link">click here</a>
-      to start manually.
-    </span>
-    <iframe style="width:1px; height: 1px; position:absolute; top:-100px; left: -100px" id="dl_frame"></iframe>
-</p>
-
-
-<script type="text/javascript">
-
-onready(()=>{
-    GetLatestReleaseInfo((release)=>{
-        var asset = release.assets[0];
-
-        distribute_text({
-          filename: asset.name,
-          time: timeAgo(asset.updated_at),
-          download_count: new Number(asset.download_count).toLocaleString("EN-GB")
-        });
-        
-        $("#info").fadeOut(300, ()=>{
-          $("#download, #download_info").fadeIn(300);
-        });
-
-        $("#dl_link").attr("href", asset.browser_download_url);
-        
-        
-        $("#cd").countdown(()=>{
-            $("#countdown").fadeOut(800,
-              ()=>{
-                $("#countdown-after").fadeIn(800);
-                if(!SETTINGS.debug)
-                  $("#dl_frame").attr("src", asset.browser_download_url);
-              }
-            );
-          }, 10);
-    });
-});
-</script>
+Don't forget to read <a href="{{site.baseurl}}/installing">installation instructions</a>.

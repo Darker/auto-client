@@ -30,7 +30,7 @@
   
       <header>
         <div class="container">
-          <h1><a href="{{site.baseurl}}">auto-client</a>{% if page.title %} / <a href="{{site.baseurl}}/{{ page.title | downcase}}">{{ page.title | downcase}}</a>{% endif %}</h1>
+          <h1><a href="{{site.baseurl}}/">auto-client</a>{% if page.title %} / <a href="{{site.baseurl}}/{{ page.title | downcase}}">{{ page.title | downcase}}</a>{% endif %}</h1>
           <h2>League of Legends: Auto call, auto accept and other automatic features for LoL PVP.net Client launcher</h2>
   
           <section id="downloads">
@@ -64,7 +64,7 @@
     }
   });
   GetLatestReleaseInfo((release)=>{
-      var asset = release.assets[0];
+      var asset = findFirstZipAsset(release.assets);
       $("#main_dl_link").attr("href", asset.browser_download_url);
   });
 </script>
