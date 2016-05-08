@@ -1057,7 +1057,7 @@ import javax.swing.SwingUtilities;
         win.addLine(field);
         */
         
-        win.newTab("ARAM", "Aram settings");
+        win.newTab("ARAM (beta)", "Aram settings");
         
         win.addLine(Dialogs.makeTextPane("<a href=\"https://github.com/Darker/auto-client/wiki/Automation-description#aram\">Help</a>"));
         

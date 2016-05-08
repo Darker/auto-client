@@ -72,12 +72,18 @@ public class ChampionImages implements
   public Iterator<Entry<String, ColorInfo>> iteratorWait() throws InterruptedException {
     return getColors().entrySet().iterator();
   }
-  public String find(final BufferedImage b) {
-    return find(getColorInfo(b));
+  public Match find(final BufferedImage b) {
+    return find(b, Long.MAX_VALUE);
   }
-  public String find(ColorInfo avgColor) {
+  public Match find(final BufferedImage b, long minDiff) {
+    return find(getColorInfo(b), Long.MAX_VALUE);
+  }
+  public Match find(ColorInfo avgColor) {
+    return find(avgColor, Long.MAX_VALUE);
+  }
+  public Match find(ColorInfo avgColor, long minDiff) {
     String best = null;
-    long bestDiff = Long.MAX_VALUE;
+    long bestDiff = minDiff;
     for(Entry<String, ColorInfo> e: this) {
       ColorInfo c = e.getValue();
       long diff = avgColor.compare(c);
@@ -86,7 +92,7 @@ public class ChampionImages implements
         best = e.getKey();
       }
     }
-    return best;
+    return new Match(best, bestDiff);
   }
   
   public HashMap<String, ColorInfo> getColors() throws InterruptedException {
@@ -176,6 +182,21 @@ public class ChampionImages implements
       saveToFile(cache);
     }
   }
+  public class Match {
+    public final String name;
+    public final long difference;
+    public Match(String name, long difference) {
+      this.name = name;
+      this.difference = difference;
+    }
+    public boolean valid() {
+      return name!=null && difference<Long.MAX_VALUE;
+    }
+    public String toString() {
+      return name!=null?name:"";
+    }
+  }
+  
   private static class ChampionImageDownload extends Thread {
     public final Champion ch;
     private BufferedImage image = null;

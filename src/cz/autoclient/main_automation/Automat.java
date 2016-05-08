@@ -560,21 +560,29 @@ public class Automat
         //DebugDrawing.displayImage(avatar, "Player position.");
         //Color avg = ScreenWatcher.averageColor(avatar);
 
-        String best = championColors.find(avatar);
-        dbgmsg("Detected champion: "+best);
-        if(settings.exists("ConfigurationManager", HashMap.class)) {
-          HashMap cust_settings = (HashMap)settings.getSetting("ConfigurationManager_0"); 
-          if(cust_settings.containsKey(best)) {
-            Settings custom = (Settings)cust_settings.get(best);
-            setMastery(custom.getInt(Setnames.BLIND_MASTERY.name, 0));
-            setRunes(custom.getInt(Setnames.BLIND_RUNE.name, 0));
+        ChampionImages.Match best = championColors.find(avatar, 5000);
+        dbgmsg("Detected champion: "+best+" with diff "+best.difference);
+        //Detected champion: Elise with diff 5240
+        
+        if(best.valid()) {
+          String name = best.name;
+          if(settings.exists("ConfigurationManager", HashMap.class)) {
+            HashMap cust_settings = (HashMap)settings.getSetting("ConfigurationManager_0"); 
+            if(cust_settings.containsKey(name)) {
+              Settings custom = (Settings)cust_settings.get(name);
+              setMastery(custom.getInt(Setnames.BLIND_MASTERY.name, 0));
+              setRunes(custom.getInt(Setnames.BLIND_RUNE.name, 0));
+            }
+            else {
+              dbgmsg("Error: no settings for champion "+name+"!");
+            }
           }
           else {
-            dbgmsg("Error: no settings for champion "+best+"!");
+            dbgmsg("Error: no settings manager available for custom settings.");
           }
         }
         else {
-          dbgmsg("Error: no settings manager available for custom settings.");
+          dbgmsg("Error: invalid champion match."); 
         }
       }
       else {
@@ -661,7 +669,7 @@ public class Automat
       click(PixelOffset.Masteries_Edit);
       dbgmsg("  Waiting for mastery dialog.");
       if(!WindowTools.waitForPixel(window, PixelOffset.Masteries_Big_Close, 5000)) {
-        dbgmsg("  Mastery wait timeout.");
+        dbgmsg("Error: Mastery wait timeout.");
         return false;
       }
       click(PixelOffset.Masteries_Big_First.offset(PixelOffset.Masteries_Big_Spaces.x * (mastery - 1), 0));

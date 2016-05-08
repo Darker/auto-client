@@ -17,7 +17,6 @@ import cz.autoclient.updates.VersionId;
 import java.net.UnknownHostException;
 import java.util.zip.ZipError;
 import javax.swing.SwingUtilities;
-import net.lingala.zip4j.exception.ZipException;
 
 /**
  *
