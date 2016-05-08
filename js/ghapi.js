@@ -1,10 +1,10 @@
 var GITHUB = new GitHubSimple();
 function GetLatestReleaseInfo(cb) {
-  GITHUB.getURL(SETTINGS.ghapi+"releases/latest", cb);
+  GITHUB.getURL(SETTINGS.ghapi+"releases/latest", cb, SETTINGS.gh_cache_max_age);
 }
 function GetLatestReleaseFromAll(cb, betas) {
 
-  GITHUB.getURL(SETTINGS.ghapi+"releases", FindLatestAsync);
+  GITHUB.getURL(SETTINGS.ghapi+"releases", FindLatestAsync, SETTINGS.gh_cache_max_age);
   function FindLatestAsync(releases) {
     cb(FindLatest(releases, betas));
   }

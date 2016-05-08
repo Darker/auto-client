@@ -15,11 +15,11 @@ function GitHubSimple() {
   });
 }
 GitHubSimple.prototype.cacheName = "gh-cache";
-GitHubSimple.prototype.getURL = function(url, cb) {
+GitHubSimple.prototype.getURL = function(url, cb, max_age) {
   var cache = this.cache[url];
   if(cache==null)
     cache = this.cache[url] = new Cache(url);
-  cache.getData(cb);
+  cache.getData(cb, max_age);
 }
 function Cache(url) {
   this.url = url;

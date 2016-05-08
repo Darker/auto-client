@@ -13,7 +13,11 @@ Object.defineProperty(Object.prototype, "addkeys", {
     },
     enumerable: false
 });
-var SETTINGS = {debug: false, auto_download: true};
+var SETTINGS = {
+    debug: false,
+    auto_download: true,
+    gh_cache_max_age: 60*60*1000
+};
 var LOCAL_SETTINGS = {};
 var LOCAL_SETTINGS_NAME = "autoclient-settings";
 // localStorage["autoclient-settings"] = JSON.stringify({debug: true});
