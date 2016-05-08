@@ -2,10 +2,11 @@
 
 # PVP.bot - Client automation for lazy players
 **Auto call, auto accept and other automatic features for League of Legends (LoL) PVP.net Client launcher**
+ - Autoaccept - automatically accept draft and normal games
  - Autocall your lane
  - Autopick - automatically pick a champion, summoner spells runes and masteries
- - Autoaccept - teambuilder games automatically accept players when captain
- - Autoready - automatically press ready in teambuilder
+ - ARAM bot - automatically select masteries for champion in ARAM
+ - Auto-login, auto launch and autoqueue
  - **Works when client is behind another window**
  - **Doesn't move your mouse**
 
