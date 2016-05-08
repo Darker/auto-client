@@ -15,7 +15,7 @@ Object.defineProperty(Object.prototype, "addkeys", {
 });
 var SETTINGS = {debug: false, auto_download: true};
 var LOCAL_SETTINGS = {};
-var LOCAL_SETTINGS_NAME = "autoclient-settings;
+var LOCAL_SETTINGS_NAME = "autoclient-settings";
 // localStorage["autoclient-settings"] = JSON.stringify({debug: true});
 if(localStorage[LOCAL_SETTINGS_NAME]) {
   try {
