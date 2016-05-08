@@ -66,7 +66,7 @@ onready(()=>{
             );
           })
           .done(()=>{
-            if(!SETTINGS.debug)
+            if(SETTINGS.auto_download)
               $("#dl_frame").attr("src", asset.browser_download_url);
           });
         $("#countdown-cancel").one("click", ()=>{countdown.stop();});

@@ -13,18 +13,25 @@ Object.defineProperty(Object.prototype, "addkeys", {
     },
     enumerable: false
 });
-var SETTINGS = {debug: false};
-
+var SETTINGS = {debug: false, auto_download: true};
+var LOCAL_SETTINGS = {};
+var LOCAL_SETTINGS_NAME = "autoclient-settings;
 // localStorage["autoclient-settings"] = JSON.stringify({debug: true});
-if(localStorage["autoclient-settings"]) {
+if(localStorage[LOCAL_SETTINGS_NAME]) {
   try {
-    var saved_settings = JSON.parse(localStorage["autoclient-settings"]);
+    var LOCAL_SETTINGS = JSON.parse(localStorage[LOCAL_SETTINGS_NAME]);
     SETTINGS.addkeys(saved_settings, true, true);
   }
   catch(e) {
     console.warn("Error parsing localStorage settings: ",e);
   }
 }
+function changeLocalSetting(name, value) {
+  LOCAL_SETTINGS[name] = value;
+  SETTINGS[name] = value;
+  localStorage[LOCAL_SETTINGS_NAME] = JSON.stringify(LOCAL_SETTINGS);
+}
+
 /**
  * Settings from URL can only overwrite, not add. That prevents XSS hopefully.
 **/ 
