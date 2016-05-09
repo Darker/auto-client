@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -138,16 +139,34 @@ public class UpdateInfo implements java.io.Serializable {
       return false;
     }
       //throw new RuntimeException("Cannot download update, download link is null.");
-    HttpURLConnection httpConnection;
-    System.out.println("Downloading update: "+downloadLink);
+    URLConnection connection = null;
     try {
-      httpConnection = (HttpURLConnection) (downloadLink.openConnection());
+      connection = downloadLink.openConnection();
+    } catch (IOException ex) {
+      updater.dispatchEvent("download.stopped",ex);
     }
-    catch(IOException e) {
-      //process.stopped(e);
-      updater.dispatchEvent("download.stopped", e);
+    System.out.println("Downloading update: "+downloadLink);
+    if(connection instanceof HttpURLConnection) {
+      if(!download_http((HttpURLConnection) connection, updater))
+        return false;
+    }
+    else if(connection instanceof URLConnection) {
+      if(!download_http((URLConnection) connection, updater))
+        return false;
+    }
+    else {
+      updater.dispatchEvent("download.stopped",
+          new IllegalStateException("Unknown class type for download conenction: "
+              + connection.getClass().getName()));
       return false;
     }
+ 
+    updater.dispatchEvent("download.finished");
+    return true;
+  }
+  private boolean download_http(URLConnection httpConnection, Updater updater) {
+    System.out.println("Downloading update: "+downloadLink);
+ 
     long completeFileSize = httpConnection.getContentLength();
     System.out.println("File size: "+completeFileSize);
     localFile.getParentFile().mkdirs();
@@ -190,7 +209,6 @@ public class UpdateInfo implements java.io.Serializable {
         // nobody cares if close fails
       } catch (IOException ex) {}
     }
-    updater.dispatchEvent("download.finished");
     return true;
   }
   public void unzip() throws ZipException {

@@ -36,7 +36,7 @@ public class ReleaseHtml implements Release {
     this.description = elm.select("div.release-body div.markdown-body").get(0).html();
     //https://github.com/twbs/bootstrap/releases/tag/v1.4.0
     this.parent = parent;
-    this.url = url_or_null_java_is_retarded(parent.getURL(), "releases/tag/v1.4.0"); 
+    this.url = url_or_null_java_is_retarded(parent.getURL(), "releases/tag/"+tag); 
     loadDownloads(elm);
     // The release label
     Element label = null;

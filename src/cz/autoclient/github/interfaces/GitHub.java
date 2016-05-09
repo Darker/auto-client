@@ -6,6 +6,7 @@
 
 package cz.autoclient.github.interfaces;
 
+
 /**
  *
  * @author Jakub

@@ -16,6 +16,7 @@ import cz.autoclient.github.interfaces.Release;
 import cz.autoclient.github.interfaces.Releases;
 import cz.autoclient.github.interfaces.Repository;
 import cz.autoclient.github.interfaces.RepositoryId;
+import cz.autoclient.github.local.GitHubLocal;
 import cz.autoclient.settings.Settings;
 import java.io.File;
 import java.io.IOException;
@@ -181,10 +182,15 @@ public class Updater implements EventEmitter {
     if(updates.shouldCheck(checkInterval))
     {
       dbgmsg("Connecting to GitHub.");
-      GitHub git = new GitHubHtml();
+      
+      GitHub git;
+      if(Setnames.DEBUG_UPDATES_LOCAL.getBoolean(settings))
+        git = new GitHubLocal(new File(Setnames.DEBUG_UPDATES_LOCAL_PATH.getString(settings)));
+      else
+        git = new GitHubHtml(); 
       Repository repo = git.getRepository(repository);
       Releases releases = repo.releases();
-      dbgmsg("Downloading releases from "+repo.getURL()+"...");
+      dbgmsg("Source of updates: "+repo.getURL());
       if(releases.fetch()) {
         dbgmsg("Downloaded.");
         for(Release r: releases) {

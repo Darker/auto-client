@@ -67,6 +67,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -519,20 +520,12 @@ import javax.swing.SwingUtilities;
            public void mouseExited(MouseEvent e) {}
          });
          
-         /*checkBox.addChangeListener((ChangeEvent e)->{
-           updater.updateFiltersChanged();
-         });*/
          updateMenu.add(checkBox);
          LazyURL downloadURL = new LazyURL() {
             @Override
             public URL getURL() {
                 if(!Setnames.UPDATES_IGNORE_BETAS.getBoolean(settings)) {
                   return BasicURL.urlOrNull("http://darker.github.io/auto-client/download-beta/");
-                   /*try {
-                     downloadURL = downloadURL + "#" + URLEncoder.encode("{\"download-betas\":true}", "UTF-8");
-                   } catch (UnsupportedEncodingException ex) {
-                     ex.printStackTrace();
-                   }*/
                  }
                  else
                    return BasicURL.urlOrNull("http://darker.github.io/auto-client/download/");
@@ -593,7 +586,34 @@ import javax.swing.SwingUtilities;
          checkBox.setToolTipText("Always handle match as ARAM");
          settings.bindToInput(Setnames.DEBUG_PRETEND_ARAM.name, checkBox, true);
          menu.add(checkBox);
-         
+         {
+            JMenu submenu = new JMenu("Updates");
+            checkBox = new JCheckBoxMenuItem("Use local folder for updates");
+            checkBox.setToolTipText("Copy updates from local folder.");
+            settings.bindToInput(Setnames.DEBUG_UPDATES_LOCAL.name, checkBox, true);
+            submenu.add(checkBox);
+            /** Item to select path where local updates are stored **/
+            JMenuItem item = new JMenuItem();
+            item.setText("Change local path");
+            item.setToolTipText("Change path where to look for updates.");
+            item.setEnabled(true);
+            item.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                  JFileChooser fc = new JFileChooser(Setnames.DEBUG_UPDATES_LOCAL_PATH.getString(settings));
+                  fc.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY );
+                  if( fc.showOpenDialog( Gui.this ) == JFileChooser.APPROVE_OPTION )
+                  {
+                      settings.setSetting(
+                          Setnames.DEBUG_UPDATES_LOCAL_PATH.name,
+                          fc.getSelectedFile().getAbsolutePath()
+                      );
+                  }
+                }
+            });
+            submenu.add(item);
+            menu.add(submenu);
+         }
          JMenuItem item = new JMenuItem();
          item.setText("Show current screenshot.");
          item.setToolTipText("Serves as debug feature to check whether Winapi is working.");

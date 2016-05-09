@@ -64,6 +64,8 @@ public enum Setnames {
   DEBUG_PRETEND_ARAM(false)
   //PA names
   
+  , DEBUG_UPDATES_LOCAL(false)
+  , DEBUG_UPDATES_LOCAL_PATH("C:\\MYSELF\\programing\\java\\AutoCall\\fakeupdates")
   ;
   
   public final String name;

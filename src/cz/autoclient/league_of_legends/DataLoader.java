@@ -15,6 +15,7 @@ import java.io.Writer;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Scanner;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -152,6 +153,28 @@ public abstract class DataLoader implements java.io.Serializable {
       throw new FileNotFoundException("Invalid file contents - \n         JSON error:" +ex);
       //Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);
     }
+  }
+  public static JSONArray arrayFromFile(File file) throws FileNotFoundException {
+    String data = stringFromFile(file);
+    //System.out.println("JSON from file:\n"+result);
+    try { 
+      return new JSONArray(data);
+    } catch (JSONException ex) {
+      throw new FileNotFoundException("Invalid file contents - \n         JSON error:" +ex);
+      //Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);
+    }
+  }
+  
+  public static String stringFromFile(File file) throws FileNotFoundException {
+    char[] buff = new char[(int)file.length()];
+    try {
+    (new FileReader(file)).read(buff);
+    }
+    catch(IOException e) {
+      throw new FileNotFoundException("Invalid file.");
+    }
+    
+    return new StringBuilder().append(buff).toString();
   }
   public void toFile(File file) {
     try {
