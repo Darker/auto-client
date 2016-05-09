@@ -1,4 +1,4 @@
-if(location.href.indexOf("127.0.0.1")==-1 && (typeof SETTINGS=="undefined" || !SETTINGS.debug)) {
+if(location.href.indexOf("127.0.0.1")==-1 && (typeof SETTINGS=="undefined" || !SETTINGS.debug) && (localStorage==null || localStorage["noga"]==null)) {
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
   m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
