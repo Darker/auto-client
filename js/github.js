@@ -10,7 +10,7 @@ function GitHubSimple() {
     }
     catch(e) {console.warn("Error loading cache: "+e);}
   }
-  window.addEventListener("unload", ()=>{
+  window.addEventListener("unload", function(){
     localStorage[this.cacheName] = JSON.stringify(this.cache);
   });
 }
@@ -60,22 +60,22 @@ Cache.prototype.loadData = function(cb) {
   if(!this.loading) {
     this.loading = true;
     $.getJSON(this.url)
-      .done((result)=>{
+      .done(function(result){
           this.data = result;
           this._last_update = new Date().getTime();
           this.loading = false;
           this.emitLoad();
-      })
-      .fail((result)=>{
+      }.bind(this))
+      .fail(function(result){
           this.data = null;
           this.loading = false;
           console.warn("Failed to load data.");
           this.discardLoad();
-      });
+      }.bind(this));
   }
 }
 Cache.prototype.emitLoad = function() {
-  this._onload.forEach((x)=>{
+  this._onload.forEach(function(x){
     try {
       x(this.data);
     }
@@ -83,7 +83,7 @@ Cache.prototype.emitLoad = function() {
       if(console)
         console.error(e);
     } 
-  });
+  }, this);
   this._onload = [];
 }
 Cache.prototype.discardLoad = function() {

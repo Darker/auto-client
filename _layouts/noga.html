@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>Disable google analytics</title>
+        <meta name="description" content="{{site.description}}"/>
+        <meta name="keywords" content="{{site.keywords}}"/>
+        <meta name="author" content="{{site.author}}"/>
+        <link rel="icon" href="{{site.baseurl}}/favicon.ico" />
+    </head>
+    <body>
+  
+    
+      <script>
+        localStorage["noga"] = true;
+        location.href = "{{site.baseurl}}/";
+      </script>
+    </body>
+
+</html>

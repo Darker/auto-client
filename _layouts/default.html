@@ -86,7 +86,7 @@
     }
   });
 
-  GetLatestReleaseInfo((release)=>{
+  GetLatestReleaseInfo ( function (release){
       var asset = findFirstZipAsset(release.assets);
       $("#main_dl_link").attr("href", asset.browser_download_url+"#dl_main_link");
   });

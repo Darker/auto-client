@@ -120,7 +120,7 @@ CountdownControl.prototype.id = null;
 CountdownControl.prototype._done = 
   CountdownControl.prototype._fail =
   CountdownControl.prototype._always =
-  ()=>{};
+  function (){};
 
 CountdownControl.prototype.stop = function() {
   if(this.id) {

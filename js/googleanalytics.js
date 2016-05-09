@@ -31,7 +31,9 @@ try {
     var msg = file+":"+e.lineno+":"+e.colno+" \""+e.message+"\" Browser: "+navigator.userAgent;
     
     if(typeof ga=="function") {
-      ga('send', 'event', 'jserror', 'click', msg, {'transport': 'beacon'});
+      ga('send', 'event', 'jserror', 'debug', msg,
+        {transport: 'beacon', nonInteraction: true}
+      );
     }
     else {
       console.error(msg);
