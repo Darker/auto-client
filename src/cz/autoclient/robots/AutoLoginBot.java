@@ -6,7 +6,7 @@
 
 package cz.autoclient.robots;
 
-import cz.autoclient.PVP_net.WindowTools;
+import cz.autoclient.main_automation.WindowTools;
 import cz.autoclient.GUI.Gui;
 import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.PixelOffset;

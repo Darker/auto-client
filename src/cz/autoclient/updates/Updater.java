@@ -7,6 +7,8 @@
 package cz.autoclient.updates;
 
 import cz.autoclient.PVP_net.Setnames;
+import cz.autoclient.event.EventCallback;
+import cz.autoclient.event.EventEmitter;
 import cz.autoclient.github.constructs.BasicRepositoryId;
 import cz.autoclient.github.html.GitHubHtml;
 import cz.autoclient.github.interfaces.GitHub;
@@ -14,18 +16,23 @@ import cz.autoclient.github.interfaces.Release;
 import cz.autoclient.github.interfaces.Releases;
 import cz.autoclient.github.interfaces.Repository;
 import cz.autoclient.github.interfaces.RepositoryId;
+import cz.autoclient.github.local.GitHubLocal;
 import cz.autoclient.settings.Settings;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import net.lingala.zip4j.exception.ZipException;
 
 /**
  *
  * @author Jakub
  */
-public class Updater {
+public class Updater implements EventEmitter {
   private final RepositoryId repository;
   public final VersionId version;
   private UpdateCache updates;
@@ -38,14 +45,20 @@ public class Updater {
  
   private File cacheDir;
   private File cacheMainFile;
-  UpdateInfoListener updateListener = UpdateInfoListener.Empty.getInstance();
+  //UpdateInfoListener updateListener = UpdateInfoListener.Empty.getInstance();
   // This is minimum interval, not interval how often does updater check
-  public final int checkInterval = 5000;//24*60*60*1000;
+  public final int checkInterval = 60*60*1000/100;//24*60*60*1000;
   private ExecutorService executor;
   private final UpdaterThreadFactory threadFactory = new UpdaterThreadFactory();
   
   // remember that update files have just been copied
   private boolean justInstalled = false;
+
+  private HashMap<String, List<EventCallback>> events = new HashMap();
+  @Override
+  public Map<String, List<EventCallback>> getListeners() {
+    return events;
+  }
   
   public static enum InstallStep {
     NOT_INSTALLING,
@@ -75,7 +88,8 @@ public class Updater {
       dbgmsg("Update action: "+currentAction+"->"+a.name());
       currentAction = a; 
     }
-    updateListener.actionChanged(a);
+    //updateListener.actionChanged(a);
+    dispatchEvent("action_changed", a);
   }
  
   public Updater(RepositoryId repository, VersionId version, File cacheDir) {
@@ -126,10 +140,16 @@ public class Updater {
   public static void dbgmsg(String msg) {
     System.out.println("[UPDATES] " + msg);
   }
-  
-  public void setUpdateListener(UpdateInfoListener i) {
-    updateListener = i;
+  /**
+   * Call when the filtering on used updates is changed
+   */
+  public void updateFiltersChanged() {
+    checkForUpdates();
   }
+  
+  //public void setUpdateListener(UpdateInfoListener i) {
+  //  updateListener = i;
+  //}
   public synchronized void saveAll() {
     try {
       updates.saveToFile(cacheMainFile);
@@ -138,9 +158,15 @@ public class Updater {
       ex.printStackTrace();
     }
   }
-
   public void checkForUpdates() {
-    if(runInExecutorIfNeeded(()->checkForUpdates()))
+    checkForUpdates(false);
+  }
+  /**
+   * 
+   * @param silent currently has no effect. In future surpresses notifications.
+   */
+  public void checkForUpdates(final boolean silent) {
+    if(runInExecutorIfNeeded(()->checkForUpdates(silent)))
       return;
     setCurrentActionAndThenIdleDelayed(Action.CHECKING);
     updates = getUpdates();
@@ -156,20 +182,20 @@ public class Updater {
     if(updates.shouldCheck(checkInterval))
     {
       dbgmsg("Connecting to GitHub.");
-      GitHub git = new GitHubHtml();
+      
+      GitHub git;
+      if(Setnames.DEBUG_UPDATES_LOCAL.getBoolean(settings))
+        git = new GitHubLocal(new File(Setnames.DEBUG_UPDATES_LOCAL_PATH.getString(settings)));
+      else
+        git = new GitHubHtml(); 
       Repository repo = git.getRepository(repository);
       Releases releases = repo.releases();
-      dbgmsg("Downloading releases from "+repo.getURL()+"...");
+      dbgmsg("Source of updates: "+repo.getURL());
       if(releases.fetch()) {
         dbgmsg("Downloaded.");
         for(Release r: releases) {
           VersionId id = new VersionId(r.tag());
-          // Check if beta
-          if(ignoreBetas && (id.isBeta || r.isPrerelease())) {
-            dbgmsg("Ignoring "+id+" because it's beta or prerelease."); 
-            continue;
-          }
-          
+  
           if(updates.findVersion(id)==null) {
             dbgmsg("Adding release: "+r.tag());
             UpdateInfo info = new UpdateInfo(r, cacheDir);
@@ -190,32 +216,48 @@ public class Updater {
       updates.checkedRightNow();
     }
     else {
-      dbgmsg("No need to check for updates, everything is cached."); 
+      dbgmsg("No need to download updates, everything is cached."); 
     }
+    // Debug
+    /*VersionId debug = new VersionId("v4.8-beta");
+    if(updates.findVersion(debug)==null) {
+       UpdateInfo info = new UpdateInfo(debug, cacheDir);
+       updates.add(info);
+    }*/
+    
     dbgmsg("Available releases: "+updates.size());
     UpdateInfo newest = null;
     for(UpdateInfo info : updates) {
       dbgmsg("  "+info.basicInfo());
       boolean newer = info.version.compareTo(version)>0;
+
       dbgmsg("     - this is "+(newer?"newer":"older")+" compared to the current version.");
       if(newer && (newest==null || newest.version.compareTo(info.version)<0)) {
-        newest = info;
+        if(ignoreBetas && (info.prerelease || info.version.isBeta )) {
+          dbgmsg("     - Ignoring "+info+" because it's beta or prerelease."); 
+        }
+        else
+          newest = info;
       }
     }
+    
     if(newest!=null) {
       updates.installInProgress(newest);
       dbgmsg("Latest release that can be installed: "+newest.version);
       if(!newest.validateFile()) {
         dbgmsg("Update can be downloaded.");
+  
         updates.installStep(InstallStep.CAN_DOWNLOAD);
-        if(!newest.seen) {
-           updateListener.updateAvailable(newest);
-        }
+        //if(!newest.seen) {
+          //updateListener.updateAvailable(newest);
+        dispatchEvent("update_available", newest);
+        //}
       }
       else {
         dbgmsg("Latest update already downloaded and ready to install.");
         updates.installStep(InstallStep.CAN_UNPACK);
-        updateListener.download.finished();
+        dispatchEvent("download.finished");
+        //updateListener.download.finished();
         /*newest.unzip();
         newest.install(new Progress.Empty() {
           public void status(String s) {
@@ -225,7 +267,8 @@ public class Updater {
       }
     }
     else {
-      updateListener.upToDate(version);
+      //updateListener.upToDate(version);
+      dispatchEvent("up_to_date", version);
       updates.installStep(InstallStep.NOT_INSTALLING);
     }
   }
@@ -234,7 +277,10 @@ public class Updater {
       return;
     setCurrentActionAndThenIdleDelayed(Action.DOWNLOADING);
     if(getUpdates().installStepIs(InstallStep.CAN_DOWNLOAD)) {
-      updates.installInProgress().downloadFile(new UpdaterProgress(this, updateListener.download));
+      if(!updates.installInProgress().downloadFile(this)) {
+        updates.installInProgress().localFile.delete();
+        return; 
+      }
     }
     File result = updates.installInProgress().localFile;
     if(result!=null && result.isFile() && result.length()>0) {
@@ -245,12 +291,18 @@ public class Updater {
     if(runInExecutorIfNeeded(()->installUpdate()))
       return;
     setCurrentActionAndThenIdleDelayed(Action.COPYING);
-    if(updates.installStepIs(InstallStep.CAN_UNPACK)) {
-      updates.installInProgress().unzip();
-      updates.installStep(InstallStep.CAN_COPY_FILES);
+    if(getUpdates().installStepIs(InstallStep.CAN_UNPACK)) {
+      try {
+        updates.installInProgress().unzip();
+        updates.installStep(InstallStep.CAN_COPY_FILES);
+      } catch (ZipException ex) {
+        updates.installInProgress().deleteFile();
+        updates.installStep(InstallStep.CAN_DOWNLOAD);
+        dispatchEvent("install.stopped", ex);
+      }
     }
     if(updates.installStepIs(InstallStep.CAN_COPY_FILES)) {
-      updates.installInProgress().install(updateListener.install);
+      updates.installInProgress().install(this);
     }
   }
   public void terminateAfterAction() {

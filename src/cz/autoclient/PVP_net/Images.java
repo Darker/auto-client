@@ -29,7 +29,8 @@ public enum Images {
   INVITE_ACCEPTED_SMALL("images/search_objects/accepted_small.png"),
   //Green text indicating player has not yet accepted or declined invite to game
   INVITE_PENDING("images/search_objects/pending.png"),
-
+  // The background of the left box in the loby where player champion and name are visible
+  LOBBY_BOX_LOCKED("images/search_objects/lobby_playerbox_locked.png"),
   VOID(null);
   
   public final String path;

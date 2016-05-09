@@ -1,11 +1,13 @@
 package cz.autoclient.GUI;
 
+import cz.autoclient.GUI.updates.UpdateVisual;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.swing.AutoCompleteSupport;
 import cz.autoclient.GUI.champion.ConfigurationManager;
 import cz.autoclient.GUI.tabs.TabbedWindow;
 import cz.autoclient.GUI.tabs.FieldDef;
 import cz.autoclient.GUI.notifications.Notification;
+import cz.autoclient.GUI.notifications.NotificationSound;
 import cz.autoclient.GUI.notifications.NotificationTrayBaloon;
 import cz.autoclient.GUI.notifications.Notifications;
 import cz.autoclient.GUI.passive_automation.PAConfigWindow;
@@ -13,6 +15,8 @@ import cz.autoclient.GUI.passive_automation.PAMenu;
 import cz.autoclient.GUI.summoner_spells.ButtonSummonerSpellMaster;
 import cz.autoclient.GUI.tabs.MultiFieldDef;
 import cz.autoclient.GUI.updates.UpdateMenuItem;
+import cz.autoclient.GUI.urls.BasicURL;
+import cz.autoclient.GUI.urls.LazyURL;
 import cz.autoclient.Main;
 import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.Setnames;
@@ -33,9 +37,6 @@ import cz.autoclient.robots.exceptions.NoSuchRobotException;
 import cz.autoclient.settings.SettingsInputVerifier;
 import cz.autoclient.settings.SettingsValueChanger;
 import cz.autoclient.settings.secure.EncryptedSetting;
-import cz.autoclient.updates.Progress;
-import cz.autoclient.updates.UpdateInfo;
-import cz.autoclient.updates.UpdateInfoListener;
 import cz.autoclient.updates.Updater;
 import java.awt.AWTException;
 import java.awt.Color;
@@ -56,6 +57,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.ParallelGroup;
@@ -65,6 +67,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -100,6 +103,7 @@ import javax.swing.SwingUtilities;
    private JMenu updateMenu = null;
    
    UpdateMenuItem updateMenuItem;
+   UpdateVisual updateVisual;
    
    //TRAY ICON STUFF
    private TrayIcon tray_icon;
@@ -206,6 +210,9 @@ import javax.swing.SwingUtilities;
      destroyTray();
      dispose();
      robots.interrupt();
+     if(updateVisual!=null) {
+       updateVisual.removeListeners();
+     }
    }
    //
    // AUTOMATION INDICATION HERE!
@@ -475,7 +482,6 @@ import javax.swing.SwingUtilities;
        settings.bindToInput(Setnames.PREVENT_CLIENT_MINIMIZE.name, checkBox, true);
        menuTools.add(checkBox); 
 
-       //Update dll aditions status
        displayDllStatus(false);
        //======== Updates ========
        {
@@ -496,12 +502,41 @@ import javax.swing.SwingUtilities;
          checkBox = new JCheckBoxMenuItem("Ignore beta versions");
          checkBox.setToolTipText("Prereleases and beta version will be ignored");
          settings.bindToInput(Setnames.UPDATES_IGNORE_BETAS.name, checkBox, true);
+         checkBox.addMouseListener(new MouseListener() {
+           @Override
+           public void mouseClicked(MouseEvent e) {}
+
+           @Override
+           public void mousePressed(MouseEvent e) {}
+
+           @Override
+           public void mouseReleased(MouseEvent e) {
+             if(updater!=null)
+               updater.updateFiltersChanged();
+           }
+           @Override
+           public void mouseEntered(MouseEvent e) {}
+           @Override
+           public void mouseExited(MouseEvent e) {}
+         });
+         
          updateMenu.add(checkBox);
+         LazyURL downloadURL = new LazyURL() {
+            @Override
+            public URL getURL() {
+                if(!Setnames.UPDATES_IGNORE_BETAS.getBoolean(settings)) {
+                  return BasicURL.urlOrNull("http://darker.github.io/auto-client/download-beta/");
+                 }
+                 else
+                   return BasicURL.urlOrNull("http://darker.github.io/auto-client/download/");
+
+              }   
+         };
          
          updateMenu.add(new URLMenuItem(
                       "Download new version manually",
                       "Download from github releases",
-                      "https://github.com/Darker/auto-client/releases")
+                      downloadURL)
          );
          updateMenu.add(new URLMenuItem(
                       "Help",
@@ -546,6 +581,39 @@ import javax.swing.SwingUtilities;
              }
          });
          menu.add(menu_threadcontrol_pretend_accepted);
+         
+         checkBox = new JCheckBoxMenuItem("Always ARAM");
+         checkBox.setToolTipText("Always handle match as ARAM");
+         settings.bindToInput(Setnames.DEBUG_PRETEND_ARAM.name, checkBox, true);
+         menu.add(checkBox);
+         {
+            JMenu submenu = new JMenu("Updates");
+            checkBox = new JCheckBoxMenuItem("Use local folder for updates");
+            checkBox.setToolTipText("Copy updates from local folder.");
+            settings.bindToInput(Setnames.DEBUG_UPDATES_LOCAL.name, checkBox, true);
+            submenu.add(checkBox);
+            /** Item to select path where local updates are stored **/
+            JMenuItem item = new JMenuItem();
+            item.setText("Change local path");
+            item.setToolTipText("Change path where to look for updates.");
+            item.setEnabled(true);
+            item.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                  JFileChooser fc = new JFileChooser(Setnames.DEBUG_UPDATES_LOCAL_PATH.getString(settings));
+                  fc.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY );
+                  if( fc.showOpenDialog( Gui.this ) == JFileChooser.APPROVE_OPTION )
+                  {
+                      settings.setSetting(
+                          Setnames.DEBUG_UPDATES_LOCAL_PATH.name,
+                          fc.getSelectedFile().getAbsolutePath()
+                      );
+                  }
+                }
+            });
+            submenu.add(item);
+            menu.add(submenu);
+         }
          JMenuItem item = new JMenuItem();
          item.setText("Show current screenshot.");
          item.setToolTipText("Serves as debug feature to check whether Winapi is working.");
@@ -638,19 +706,28 @@ import javax.swing.SwingUtilities;
        //Add this menuAutomation to the bar
        menuBar1.add(menuDisplay);
      }
-     //======== Notifications menuAutomation ========
+     //======== Notifications ========
      initTrayIcon();
      {
        menuNotifications = new JMenu();
        menuNotifications.setText("Notifications");
        Notification.Def.createAll(notifications, NotificationTrayBaloon.class, settings, tray_icon);
-       //======== Tray Notifications menuAutomation ========
+       //======== Tray Notifications ========
        {
          JMenu tray_notifs = new JMenu();
          tray_notifs.setText("Tray bubble");
          notifications.addToJMenu(tray_notifs, NotificationTrayBaloon.class);
          tray_notifs.setEnabled(canTray());
          menuNotifications.add(tray_notifs);
+       }
+       //======== Sound Notifications ========
+       Notification.Def.createAll(notifications, NotificationSound.class, settings);
+       {
+         JMenu tray_notifs = new JMenu();
+         tray_notifs.setText("Sound");
+         notifications.addToJMenu(tray_notifs, NotificationSound.class);
+         if(tray_notifs.getItemCount()>0)
+           menuNotifications.add(tray_notifs);
        }
        menuBar1.add(menuNotifications);
      }
@@ -697,8 +774,10 @@ import javax.swing.SwingUtilities;
         item.addActionListener((ActionEvent e)->{
            Dialogs.dialogInfoAsync(
                  "Version: <tt>"+ac.getVersion()+"</tt><br />"
-               + "e-mail: <a href=\"mailto: autoclient@hmamail.com\">"
+               + "e-mail: <a href=\"mailto:autoclient@hmamail.com\">"
                + "autoclient@hmamail.com</a><br />"
+               + "Website: <a href=\"http://darker.github.io/auto-client?from_app\">"
+               + "darker.github.io/auto-client</a><br />"
                + "<a href=\"https://www.facebook.com/autoclient/\">facebook/autoclient"
                + "</a><br />"
                ,
@@ -729,7 +808,7 @@ import javax.swing.SwingUtilities;
     }
 
    public void setUpdateManager(final Updater updater) {
-     updater.setUpdateListener(new UpdateVisual(this, updateMenuItem, updater));
+     updateVisual = new UpdateVisual(this, updateMenuItem, updater);
      this.updater = updater;
      SwingUtilities.invokeLater(()->{
        if(updateMenu!=null)
@@ -851,14 +930,7 @@ import javax.swing.SwingUtilities;
           @Override
           public void actionPerformed(ActionEvent e) {
             String PW = new String(pw.getPassword());
-            /*String check = (String)JOptionPane.showInputDialog(
-                  null,
-                  "Enter password again:\n",
-                  "Confirm password",
-                  JOptionPane.PLAIN_MESSAGE,
-                  null,
-                  null,
-                  "");*/
+ 
             boolean state = true; //PW.equals(check);
             if(!state) {
               JOptionPane.showMessageDialog(Gui.this, "Passwords didn't match.");
@@ -879,63 +951,7 @@ import javax.swing.SwingUtilities;
         });
         field.addField(button);
         setwin.addLine(field);
-        /*field = new FieldDef(
-            "Master password:",
-            "Password to protect your game password.",
-            null);
-        final JPasswordField pw2 = new JPasswordField();*/
-        /*settings.bindToInputSecure(Setnames.REMEMBER_PASSWORD.name, pw2, new PasswordFieldVerifier() {
-          @Override
-          public Object value(JComponent c) {
-            String v = (String)super.value(c);
-            settings.getEncryptor().setPassword(v);
-            return v;
-          }
-        });*/
-
-        /*field.addField(pw2);
-        setwin.addLine(field);*/
-
-        /*field = new FieldDef(
-            "Use master password:",
-            "Prompts for master password to protect your password.",
-            Setnames.ENCRYPTION_USE_PW.name);
-        final JCheckBox use_pw = new JCheckBox();
-        ActionListener updateUsePW = new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            SecureSettings encr = settings.getEncryptor();
-            boolean value = use_pw.isSelected();
-            encr.setUse_password(value);
-            pw2.setEnabled(value);
-          }
-        };
-        use_pw.addActionListener(updateUsePW);
-        //Set inital values
-        boolean value = settings.getBoolean(setwin.settingName(Setnames.ENCRYPTION_USE_PW.name), false);
-        settings.getEncryptor().setUse_password(value);
-        pw2.setEnabled(value);*/
-
-        //field.addField(use_pw);
-        //setwin.addLine(field);
-
-
-        /*field = new FieldDef(
-            "Encrypt with hardware ID:",
-            "Will use unique key of this computer to encrypt the password.",
-            Setnames.ENCRYPTION_USE_HWID.name);
-        final JCheckBox use_hwid = new JCheckBox();
-        ActionListener updateUseHWID = new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            //settings.getEncryptor().setUse_hwid(use_hwid.isSelected());
-          }
-        };
-        use_hwid.addActionListener(updateUseHWID);
-        //settings.getEncryptor().setUse_hwid(settings.getBoolean(Setnames.ENCRYPTION_USE_HWID.name, true));
-        field.addField(use_hwid);
-        setwin.addLine(field);*/
-
+ 
         setwin.setSize(333, 130);
 
         auto_login.setRobots(robots);
@@ -1060,6 +1076,15 @@ import javax.swing.SwingUtilities;
         field.attachToSettings(settings);
         win.addLine(field);
         */
+        
+        win.newTab("ARAM (beta)", "Aram settings");
+        
+        win.addLine(Dialogs.makeTextPane("<a href=\"https://github.com/Darker/auto-client/wiki/Automation-description#aram\">Help</a>"));
+        
+        field = new FieldDef("Enabled:", "Enable or disable this function.", Setnames.ARAM_ENABLED.name);
+        field.addField(new JCheckBox());
+        field.attachToSettings(settings);
+        win.addLine(field);
         
         win.newTab("Invite friends", "Start automatically when everybody accepts.");
         

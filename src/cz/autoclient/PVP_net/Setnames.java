@@ -38,16 +38,11 @@ public enum Setnames {
   
   BLIND_MASTERY("masterypg", 0),
   BLIND_RUNE("runepg", 0),
+  /** ARAM **/
+  ARAM_ENABLED(false),
   /**NOTFICATONS**/
-  NOTIF_MENU_TB_GROUP_JOINED(false),
-  
-  //Notify when everybody is ready and the game can start (or was started, if auto start is enabled)
-  NOTIF_MENU_TB_READY_TO_START(true),
-  NOTIF_MENU_TB_PLAYER_JOINED(false),
-  
-  NOTIF_MENU_BLIND_IN_LOBBY(false),
-  NOTIF_MENU_UPDATE_EXISTS(true),
-  NOTIF_MENU_UPDATE_DOWNLOADED(true),
+  NOTIF_APP_UPDATE_EXISTS_TRAYBALOON(true),
+
   AM_SAY(),
   AUTO_QUEUE_ENABLED(false),
   
@@ -66,9 +61,11 @@ public enum Setnames {
   UPDATES_IGNORE_BETAS(true),
   
   
-  
+  DEBUG_PRETEND_ARAM(false)
   //PA names
   
+  , DEBUG_UPDATES_LOCAL(false)
+  , DEBUG_UPDATES_LOCAL_PATH("C:\\MYSELF\\programing\\java\\AutoCall\\fakeupdates")
   ;
   
   public final String name;
@@ -85,9 +82,17 @@ public enum Setnames {
     name = this.name().toLowerCase();
     default_val = null;    
   }
+  public boolean getBoolean(Settings settings) {
+    return settings.getBoolean(name, default_val instanceof Boolean?(Boolean)default_val:false);
+  }
+  public String getString(Settings settings) {
+    return settings.getStringEquivalent(name);
+  }
+  
   public static void setDefaults(Settings settings) {
     for(Setnames set : Setnames.values()) {
       settings.setSettingDefault(set.name, set.default_val);
     }
   }
+  
 }

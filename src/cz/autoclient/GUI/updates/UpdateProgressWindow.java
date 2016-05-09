@@ -7,82 +7,74 @@
 package cz.autoclient.GUI.updates;
 
 import cz.autoclient.GUI.Dialogs;
-import cz.autoclient.GUI.notifications.Notification;
 import cz.autoclient.updates.Progress;
-import cz.autoclient.updates.UpdateInfo;
-import cz.autoclient.updates.UpdateInfoListener;
 import cz.autoclient.updates.Updater;
-import cz.autoclient.updates.VersionId;
-import java.awt.GridLayout;
-import javax.swing.JFrame;
-import javax.swing.JProgressBar;
-import javax.swing.SwingUtilities;
+import net.lingala.zip4j.exception.ZipException;
 
 /**
  *
  * @author Jakub
  */
-public class UpdateProgressWindow extends UpdateInfoListener {
+public class UpdateProgressWindow implements Progress {
   private final Updater updater;
   private ProgressBarWindow window;
   private final Runnable onEnd;
 
   public UpdateProgressWindow(final Updater updater, Runnable onEnd) {
-    super(null, Progress.Empty.getInstance());
     this.onEnd = onEnd;
     if(updater == null)
       throw new IllegalArgumentException("Updater is null!");
     this.updater = updater;
     this.window = new ProgressBarWindow();
-    download = Progress.Empty.getInstance();
-    install = new Progress() {
-      @Override
-      public void process(double current, double max) {
-        window.setProgress(current, max);
-      }
-      @Override
-      public void status(String status) {
-        window.status(status);
-      }
-      @Override
-      public void started() {
-        
-      }
-      @Override
-      public void stopped(Throwable error) {
-        System.out.println("Install failed.");
-        error.printStackTrace();
-        window.close();
-        Dialogs.dialogErrorAsync(error.getMessage(), "Error during updates.");
-        onEnd.run();
-      }
-      @Override
-      public void finished() {
-        System.out.println("Finished install. Closing window and calling callback.");
-        window.status("Done. Restarting program.");
-        window.close();
-        onEnd.run();
-      }
-      @Override
-      public void paused() {}
-      @Override
-      public void resumed() {}
-    };
+    
+    updater.addEventListener("install.started", this::started);
+    updater.addEventListener("install.status", this::status);
+    updater.addEventListener("install.process", this::process);
+    updater.addEventListener("install.stopped", this::stopped);
+    updater.addEventListener("install.finished", this::finished);
+  
   }
-  @Override
-  public void updateAvailable(UpdateInfo info) {}
 
-  protected void displayCurrentStatus() {}
+  
+  // Progress
   @Override
-  public void upToDate(UpdateInfo info) {}
-  @Override
-  public void upToDate(VersionId version) {}
-  @Override
-  public void actionChanged(Updater.Action a) {}
-  protected UpdateInfo inProgress() {
-    return updater.getUpdates().installInProgress();
+  public void process(double current, double max) {
+    window.setProgress(current, max);
   }
-  protected UpdateInfo current() {
-    return updater.getUpdates().findVersion(updater.version);
+  @Override
+  public void status(String status) {
+    window.status(status);
   }
+  @Override
+  public void started() {
+
+  }
+  @Override
+  public void stopped(Throwable error) {
+    System.out.println("Install failed.");
+    error.printStackTrace();
+    window.close();
+
+    String mainText = error.toString();
+    if(error instanceof ZipException) {
+      mainText = "Error when unziping package: "+error.getMessage();
+    }
+    
+    Dialogs.dialogErrorAsync("<b>An error occured when updating:</b><br />"
+        + mainText
+        ,"Error during install.");
+        
+    onEnd.run();
+  }
+  @Override
+  public void finished() {
+    System.out.println("Finished install. Closing window and calling callback.");
+    window.status("Done. Restarting program.");
+    window.close();
+    onEnd.run();
+  }
+  @Override
+  public void paused() {}
+  @Override
+  public void resumed() {}
 }

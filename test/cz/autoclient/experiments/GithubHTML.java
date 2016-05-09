@@ -6,9 +6,15 @@
 
 package cz.autoclient.experiments;
 
+import cz.autoclient.github.interfaces.Release;
+import cz.autoclient.github.interfaces.GitHub;
+import cz.autoclient.github.interfaces.Repository;
+import cz.autoclient.github.interfaces.ReleaseFile;
+import cz.autoclient.github.interfaces.Releases;
 import cz.autoclient.github.html.*;
-import cz.autoclient.github.interfaces.*;
 import cz.autoclient.github.constructs.*;
+import cz.autoclient.github.local.GitHubLocal;
+import java.io.File;
 /**
  *
  * @author Jakub
@@ -19,7 +25,7 @@ public class GithubHTML {
    * @param args the command line arguments
    */
   public static void main(String[] args) {
-    GitHub git = new GitHubHtml();
+    GitHub git = new GitHubLocal(new File("C:\\MYSELF\\programing\\java\\AutoCall\\fakeupdates"));
     Repository repo = git.getRepository(new BasicRepositoryId("Darker/auto-client"));
     System.out.println("Repo: "+repo.getURL());
     Releases releases = repo.releases();
