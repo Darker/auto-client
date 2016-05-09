@@ -12,6 +12,8 @@
 
         <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/stylesheets/stylesheet.css" media="screen">
         <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/stylesheets/github-dark.css" media="screen">
+        <!-- GOOGLE ANALYTICS -->
+        <script src="{{site.baseurl}}/js/googleanalytics.js" async="true"></script>
         <script src="{{site.baseurl}}/js/settings.js"></script>
         <script>
           var onready_ = [];
@@ -64,7 +66,7 @@
     }
   }
   // Pushing as callback in case of errors
-  onready(()=>{
+  onready(function() {
     $("a[x-highlight]").click(function() {
       console.log(this);
       var elms = $(this.getAttribute("x-highlight"));
@@ -72,11 +74,10 @@
         $(this).removeClass("pulse red");
       });
       elms.addClass("pulse red");
-      
     });
   });
-  
-  onready_.forEach((cb)=>{
+  // since now, onready evaluates callback immediatelly
+  onready_.forEach(onready = function(cb){
     try {
       cb();
     }
@@ -84,11 +85,11 @@
       console.error(e);
     }
   });
+
   GetLatestReleaseInfo((release)=>{
       var asset = findFirstZipAsset(release.assets);
       $("#main_dl_link").attr("href", asset.browser_download_url+"#dl_main_link");
   });
 </script>
-<!-- GOOGLE ANALYTICS -->
-<script src="{{site.baseurl}}/js/googleanalytics.js" async="true"></script>
+
 </html>
