@@ -1,0 +1,63 @@
+div.script {
+  display: table-cell;
+  vertical-align: top;
+}
+
+div.script div.script-command {
+  display: inline-block;
+  max-width: 10em;
+  min-width:3em;
+  
+  border: 1px solid #66E239;
+  background-color: rgba(102,226,57, 0.3);
+  border-radius: 2pt; 
+  margin: 3pt;
+  
+  vertical-align: top;
+}
+div.script-command p.name {
+  text-align: center;
+  font-size: 15pt;
+}
+div.script-command div.arguments {
+  padding: 0.5 em;
+  text-align: center;
+}
+div.script-command div.arguments .argument {
+  font-family: "Courier new", consolas;
+  color: black;
+  font-size:11pt;
+  background-color: #CCC;
+  border: 1px solid white;
+  padding: 3pt;
+  margin: 2pt;
+  display: inline-block;
+}
+
+div.script-command div.arguments span.argument.named {
+  background-color: rgba(0,0,0, 0.5);
+  color: white;
+  padding: 4pt;
+}
+
+div.arguments span.argument.named .arg-name {
+  font-family: "Arial";
+  margin-right: 3pt;
+}
+div.arguments .argument.named span.arg-name::after {
+  content: ":";
+}
+div.arguments .argument.named .arg-value.string {
+  color: #C34700;
+}
+div.arguments .argument.named .arg-value.number {
+  color: #3E78FF;
+}
+
+input.script-editor {
+  border: none;
+  padding: 3pt;
+  font-size: 14pt;
+  font-family: Courier new;
+  width: 100%;
+}

@@ -1,0 +1,88 @@
+---
+layout: default
+title: Chat scripting
+---
+<h3>Edit the script below:</h3>
+<input type="text" class="script-editor" id="script-editor" value="S>" />
+<div id="script_preview">
+
+</div>
+<link rel="stylesheet" type="text/css" href="{{site.baseurl}}/stylesheets/scripts.css" media="screen">
+<script>
+function scriptsReady() {
+  console.log("Scripts loaded.");
+  var editor = document.getElementById("script-editor");
+  var preview = document.getElementById("script_preview");
+  var SCRIPT = new Script("S>");
+  
+  var validScript = new RegExp("^S>([a-zA-Z0-9_-]+(,[^;]*)*(;[a-zA-Z0-9_-]+(,[^;]*)*)*;?)?$");
+  
+/*var validText = '';
+
+editor.addEventListener("input", function() {
+    if (this.value.match(validScript) || !validText.match(validScript)) {
+        validText = this.value;
+    } else {
+        this.value = validText;
+    }
+});  */
+  
+  editor.addEventListener("keydown", function(e) {
+    var newValue = getNewValue(this, e);
+    console.log(this.value, "=>", newValue);
+    
+    if(this.value.match(validScript) && !newValue.match(validScript)) {    
+      e.preventDefault();
+      return false;
+    }
+  });
+  editor.addEventListener("paste", function(e) {
+    var newValue = insertValue(this, e.clipboardData.getData("text/plain"));
+    console.log(this.value, "=>", newValue);
+    
+    if(this.value.match(validScript) && !newValue.match(validScript)) {    
+      e.preventDefault();
+      return false;
+    }
+  });
+  
+  editor.addEventListener("input", function() {
+    SCRIPT = new Script(this.value);
+    
+  });
+  
+  function getNewValue(input, keydown) {
+    var newValue;
+    var key = keydown.key;
+    if(key.length==1) {
+      newValue = insertValue(input, key);
+    }
+    else if(key=="Backspace") {
+      if(input.selectionStart==input.selectionEnd) {
+        newValue = input.value.substr(0, input.selectionStart-1)+input.value.substr(input.selectionEnd);
+      }
+      else {
+        newValue = insertValue(input, "");
+      }
+    }
+    else if(key=="Delete") {
+      if(input.selectionStart==input.selectionEnd) {
+        newValue = input.value.substr(0, input.selectionStart)+input.value.substr(input.selectionEnd+1);
+      }
+      else {
+        newValue = insertValue(input, "");
+      }
+    }
+    else {
+      newValue = input.value;
+    }
+    return newValue;
+  }
+  /** Calculate new value assuming text is added to the input field at the current cursor location: **/
+  function insertValue(input, text) {
+    var value = input.value;
+    return value.substr(0, input.selectionStart)+text+value.substr(input.selectionEnd);
+  }
+}
+</script>
+<script src="{{site.baseurl}}/js/scripts.js" async="true" onload="scriptsReady();"></script>
