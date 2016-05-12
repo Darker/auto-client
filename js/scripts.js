@@ -6,6 +6,14 @@ Script.commands = {
   s: CommandSay,
   d: CommandDelay
 }
+Script.parseCommand = function(str) {
+  return Script.arrayToCommand(splitByUnescaped(str, ","));
+}
+Script.arrayToCommand = function(arr) {
+  var command_ctor = Script.commands[arr[0]]||Command;
+  return new command_ctor(arr);
+}
+
 Script.prototype.parse = function(data) {
   if(data.indexOf("S>")!==0)
     throw new Error("Script must begin with S>");
@@ -15,12 +23,20 @@ Script.prototype.parse = function(data) {
   // so I iterate by 2 not one
   var commandsStr = splitByUnescaped(data.substr(2), ";");
   for(var i=0,l=commandsStr.length; i<l; i+=1) {
-    var params = splitByUnescaped(commandsStr[i], ",");
-    console.log("Command: ", commandsStr[i], params);
-    var command_ctor = Script.commands[params[0]]||Command;
-    this.commands.push(new command_ctor(params));
+    this.commands.push(Script.parseCommand(commandsStr[i]));
   }
 }
+Script.prototype.addCommand = function(command) {
+  if(command instanceof Command) 
+    this.commands.push(command);
+  else if(typeof command=="string")
+    this.commands.push(command=Script.parseCommand(command));
+  else
+    throw new Error("Invalid command!");
+  this.addCommandToHtml(command, this.commands.length-1);
+}
+
+
 Script.prototype.execute = function(finalCallback, index) {
   if(typeof index!="number")
     index = 0;
@@ -36,14 +52,27 @@ Script.prototype.html = function() {
   if(!this.html_) {
     var main = this.html_ = document.createElement("div");
     main.className = "script";
+    main.appendChild(this.html_end = elmWithText("div", "", "end"));
+    
     
     for(var i=0,l=this.commands.length; i<l; i++) {
       var html = this.commands[i].html();
       html.setAttribute("x-command-index", i);
-      main.appendChild(html);
+      main.insertBefore(html, this.html_end);
     }
   }
   return this.html_;
+}
+Script.prototype.addCommandToHtml = function(command, index) {
+  if(this.html_) {
+    var html = command.html();
+    if(index>0 && index<this.commands.length)
+      html.setAttribute("x-command-index", index);
+    this.html_.insertBefore(html, this.html_end);
+  }
+}
+Script.prototype.toString = function() {
+  return "S>"+this.commands.join(";");
 }
 
 
@@ -60,14 +89,24 @@ Command.prototype.exec = function(cb) {
   if(typeof cb=="function")
     cb.apply(this, Array.prototype.slice.call(arguments, 1));
 }
+Command.prototype.toString = function() {
+  if(this.args.length>0)
+    return this.name+","+this.args.join(",");
+  else
+    return this.name;
+}
 Command.prototype.html = function() {
   if(!this.html_main) {
     var main = this.html_main = document.createElement("div");
     main.className = "script-command";
     
-    var name = document.createElement("p");
-    name.className = "name";
-    name.appendChild(new Text(this.name));
+    var name = document.createElement("div");
+    name.className = "heading";
+    name.appendChild(elmWithText("div", this.name, "name"));
+    if(this.title!=null && this.title.length>0) 
+      name.appendChild(elmWithText("div", this.title, "title"));
+    else
+      name.appendChild(elmWithText("div", "Unknown command", "title error"));
     main.appendChild(name);
     
     main.appendChild(document.createElement("hr"));
@@ -113,12 +152,14 @@ Command.namedArgHTML = function(argname, val) {
 function CommandSay() {
   Command.apply(this, arguments);
   
-  this.text = this.args[0];
-  this.delay = this.args[1]*1>0?this.args[1]*1:200;
-  this.repeat = this.args[2]*1>0?this.args[2]*1:1;
+  this.text = this.args[0]||"";
+  this.repeat = this.args[1]*1>0?this.args[1]*1:1;
+  this.delay = this.args[2]*1>0?this.args[2]*1:500;
 }
 CommandSay.prototype = Object.create(Command.prototype);
 CommandSay.prototype.constructor = CommandSay;
+CommandSay.prototype.title = "Says text in chat."; 
+
 CommandSay.prototype.exec = function(cb) {
   var cbArgs = Array.prototype.slice.call(arguments, 1);
   var repeat = this.repeat;
@@ -144,9 +185,22 @@ CommandSay.prototype.html_arguments = function(container) {
 
 function CommandDelay() {
   Command.apply(this, arguments);
+  this.delay = this.args[0]*1>0?this.args[0]*1:500;
 }
 CommandDelay.prototype = Object.create(Command.prototype);
 CommandDelay.constructor = CommandDelay;
+CommandDelay.prototype.title = "Sleep command."; 
+CommandDelay.prototype.exec = function(cb) {
+  var cbArgs = Array.prototype.slice.call(arguments, 1);
+  var _this = this;
+  setTimeout(function() {
+    cb.apply(this, cbArgs);
+  }, this.delay);
+}
+CommandDelay.prototype.html_arguments = function(container) {  
+  container.appendChild(Command.namedArgHTML("Delay", this.delay));
+  return container;
+}
 
 function splitByUnescaped(str, delimiter) {
   //console.log("Input: ", str);
@@ -171,6 +225,18 @@ function splitByUnescaped(str, delimiter) {
   
   //console.log(parts);
   return parts;
+}
+
+function elmWithText(elmName, text, className) {
+  var span = document.createElement(elmName);
+  if(text instanceof HTMLElement)
+    span.appendChild(text);
+  else
+    span.appendChild(new Text(text));
+  if(typeof className=="string")
+    span.className = className;
+  return span;
+
 }
 
 function makeEnum(names) {

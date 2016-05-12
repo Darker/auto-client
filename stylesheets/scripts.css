@@ -5,20 +5,44 @@ div.script {
 
 div.script div.script-command {
   display: inline-block;
-  max-width: 10em;
-  min-width:3em;
+  max-width: 15em;
+  min-width:2.5em;
   
-  border: 1px solid #66E239;
-  background-color: rgba(102,226,57, 0.3);
+  border: 1px solid #266DD9;
+  background-color: rgba(38,73,199, 0.3);
   border-radius: 2pt; 
   margin: 3pt;
   
   vertical-align: top;
 }
-div.script-command p.name {
+div.script div.script-command hr {
+  border-color: #3F89FF;
+}
+div.script div.end {
+  display: none;
+}
+
+div.script-command div.heading {
+  text-align: center;
+  font-size: 15pt;
+  padding: 3pt;
+}
+div.script-command div.heading div.name {
+  padding: 0px;
+}
+div.script-command div.heading div.title {
+  padding: 0px;
+  font-size:8pt;
+  font-style: italic;
+}
+div.script-command div.heading div.title.error {
+  color: red;
+}
+div.script-command div.heading {
   text-align: center;
   font-size: 15pt;
 }
+
 div.script-command div.arguments {
   padding: 0.5 em;
   text-align: center;
@@ -29,7 +53,7 @@ div.script-command div.arguments .argument {
   font-size:11pt;
   background-color: #CCC;
   border: 1px solid white;
-  padding: 3pt;
+  padding: 2pt;
   margin: 2pt;
   display: inline-block;
 }
@@ -37,7 +61,7 @@ div.script-command div.arguments .argument {
 div.script-command div.arguments span.argument.named {
   background-color: rgba(0,0,0, 0.5);
   color: white;
-  padding: 4pt;
+  padding: 3pt;
 }
 
 div.arguments span.argument.named .arg-name {
@@ -60,4 +84,31 @@ input.script-editor {
   font-size: 14pt;
   font-family: Courier new;
   width: 100%;
+}
+
+/** editor **/
+div.script div.script-command.add-button {
+  display: inline-block;
+  font-size: 20pt;
+  text-align: center;
+  
+  width: 30pt;
+  min-width: 30pt;
+  height: 30pt;
+  
+  border: 1px solid #66E239;
+  background-color: rgba(102,226,57, 0.3);
+  cursor: pointer;
+  
+  transition:background-color 0.3s;
+}
+div.script div.script-command.add-button:hover {
+  background-color: rgba(102,226,57, 0.8);
+}
+
+div.script-edit-dialog {
+  display: none;
+}
+div.script-edit-dialog form.add-command {
+  display: none;
 }

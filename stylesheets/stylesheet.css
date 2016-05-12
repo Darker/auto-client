@@ -67,6 +67,22 @@ kbd.winkey {
     background-size: contain;
     width: 1.25em;
 }
+code {
+  font-family: Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif;
+  background-color: #333;
+  border: 1px solid #666;
+  white-space: pre-wrap;
+  padding: 0.5pt 4pt;
+  color: white;
+}
+
+em {
+  color: red;
+  text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+}
+em i {
+  font-style: normal;
+}
 
 a.red {
   color: red;

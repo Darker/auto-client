@@ -12,8 +12,17 @@
 
         <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/stylesheets/stylesheet.css" media="screen">
         <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/stylesheets/github-dark.css" media="screen">
+        {% if page.jquery_ui %}
+        <!-- Jquery UI -->
+        <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/jqui/jquery-ui.min.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/jqui/jquery-ui.theme.css" media="screen">
+        {%endif%}
         <!-- Array of callbacks called when HTML is parsed -->
         <script>
+          if (window.location.protocol != "http:") {
+            window.location.href = "http:" + window.location.href.substring(window.location.protocol.length);
+            document.close();
+          }
           var onready_ = [];
           function onready(cb) {
             if(typeof cb=="function")
@@ -57,6 +66,12 @@
 			  src="//code.jquery.com/jquery-2.2.3.min.js"
 			  integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="
 			  crossorigin="anonymous"></script>
+{% if page.jquery_ui %}
+<!-- Jquery UI -->
+<script src="{{site.baseurl}}/jqui/jquery-ui.min.js"></script>
+{%endif%}
+</html>
+
 <script src="{{site.baseurl}}/js/github.js"></script>
 <script src="{{site.baseurl}}/js/ghapi.js"></script>
 <script>
@@ -94,5 +109,3 @@
       $("#main_dl_link").attr("href", asset.browser_download_url+"#dl_main_link");
   });
 </script>
-
-</html>

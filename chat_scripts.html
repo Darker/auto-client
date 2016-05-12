@@ -1,88 +1,85 @@
 ---
 layout: default
 title: Chat scripting
+jquery_ui: true
 ---
-<h3>Edit the script below:</h3>
+<h3>About</h3>
+Chat scripts allow you to call text multiple times or with a delay. Special single-line 
+simplified syntax is used to allow for short scripts. The scripts can be entered into the 
+call text field in the program, like this:
+{% include bigscreenshot.html src="call_text_script.png" %} 
+
+<hr />
+<h3>Examples</h3>
+<ul>
+  <li>
+    <code>S>s,midd,3,800;</code>
+       - calls <q>mid</q> three times with 800 ms pauses between calls
+  </li>
+  <li>
+    <code>S>s,top,3,1000;d,2000;s,I go top :)</code>
+       - calls <q>top</q> three times, then waits 2 seconds and says <q>I go top :)</q>
+  </li>
+</ul>
+<hr />
+<h3>Script editor</h3>
+
+<p>Use the edit field to change the script, or press the <kbd>+</kbd> button to add command.</p>
 <input type="text" class="script-editor" id="script-editor" value="S>" />
+<p><b>Program preview:</b></p>
 <div id="script_preview">
 
 </div>
+<!-- <hr />
+<h3>Saved scripts</h3>
+<table id="saved-scripts">
+
+</table> -->
+
+
 <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/stylesheets/scripts.css" media="screen">
 <script>
-function scriptsReady() {
-  console.log("Scripts loaded.");
-  var editor = document.getElementById("script-editor");
-  var preview = document.getElementById("script_preview");
-  var SCRIPT = new Script("S>");
-  
-  var validScript = new RegExp("^S>([a-zA-Z0-9_-]+(,[^;]*)*(;[a-zA-Z0-9_-]+(,[^;]*)*)*;?)?$");
-  
-/*var validText = '';
 
-editor.addEventListener("input", function() {
-    if (this.value.match(validScript) || !validText.match(validScript)) {
-        validText = this.value;
-    } else {
-        this.value = validText;
-    }
-});  */
-  
-  editor.addEventListener("keydown", function(e) {
-    var newValue = getNewValue(this, e);
-    console.log(this.value, "=>", newValue);
-    
-    if(this.value.match(validScript) && !newValue.match(validScript)) {    
-      e.preventDefault();
-      return false;
-    }
-  });
-  editor.addEventListener("paste", function(e) {
-    var newValue = insertValue(this, e.clipboardData.getData("text/plain"));
-    console.log(this.value, "=>", newValue);
-    
-    if(this.value.match(validScript) && !newValue.match(validScript)) {    
-      e.preventDefault();
-      return false;
-    }
-  });
-  
-  editor.addEventListener("input", function() {
-    SCRIPT = new Script(this.value);
-    
-  });
-  
-  function getNewValue(input, keydown) {
-    var newValue;
-    var key = keydown.key;
-    if(key.length==1) {
-      newValue = insertValue(input, key);
-    }
-    else if(key=="Backspace") {
-      if(input.selectionStart==input.selectionEnd) {
-        newValue = input.value.substr(0, input.selectionStart-1)+input.value.substr(input.selectionEnd);
-      }
-      else {
-        newValue = insertValue(input, "");
-      }
-    }
-    else if(key=="Delete") {
-      if(input.selectionStart==input.selectionEnd) {
-        newValue = input.value.substr(0, input.selectionStart)+input.value.substr(input.selectionEnd+1);
-      }
-      else {
-        newValue = insertValue(input, "");
-      }
-    }
-    else {
-      newValue = input.value;
-    }
-    return newValue;
+function scriptsReady(part) {
+  var pos = scriptsReady.needed.indexOf(part);
+  console.log("Loaded: ",part, pos, scriptsReady.needed);
+  if(pos!=-1) {
+    scriptsReady.needed.splice(pos, 1);
+
   }
-  /** Calculate new value assuming text is added to the input field at the current cursor location: **/
-  function insertValue(input, text) {
-    var value = input.value;
-    return value.substr(0, input.selectionStart)+text+value.substr(input.selectionEnd);
+  else
+    throw new Error("undefined part "+part);
+  if(scriptsReady.needed.length==0) {
+    startScriptEditor();
   }
 }
+scriptsReady.needed = ["scripts", "editor"];
 </script>
-<script src="{{site.baseurl}}/js/scripts.js" async="true" onload="scriptsReady();"></script>
+<script src="{{site.baseurl}}/js/scripts.js" async="true" onload="scriptsReady('scripts');"></script>
+<script src="{{site.baseurl}}/js/script-editor.js" async="true" onload="scriptsReady('editor');"></script>
+
+<!-- UI dialogs -->
+<div id="script-edit-select" class="script-edit-dialog" title="Add command wizard">
+  <p class="validateTips">Select type of command to add:</p>
+ 
+  <div class="select">
+    <fieldset>
+      <button value="s">Say to chat command</button>
+      <button value="d">Delay command</button>
+    </fieldset>
+  </div>
+  <form class="add-command s" name="s"> 
+    <fieldset>
+      Text: <input name="text" placeholder="I go mid!" class="command-param"/><br />
+      Repeat count: <input name="count" type="number" value="1" class="command-param" /><br />
+      Delay: <input name="delay" type="number" value="500" class="command-param"/><br />
+      <button>Save</button>
+    </fieldset>
+  </form>
+  <form class="add-command d" name="d"> 
+    <fieldset>
+      Delay: <input name="delay" type="number" value="500" class="command-param"/><br />
+      <button>Save</button>
+    </fieldset>
+  </form>
+</div>
