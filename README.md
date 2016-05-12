@@ -42,16 +42,15 @@ auto calls your lane and automaticaly accepts players in team-builder
 **Ordered by descending probability of being ever implemented**
 
  - ~~Disable/enable start button depending on whether the launcher is available or not~~ **- done**
- - Sound notifications
- - More flexible solution for dll injection
+ - ~~Sound notifications~~ **- done**
  - Auto-requeue
  - ~~Automatically pick runes, masteries and summoner spells for given champion and map~~ **- done**
  - Automatically fetch runes and masteries names and replace the indexes with them
- - [*Technical*] cache screenshot before multiple pixels are being queried
- - automatically kick certain champions in team-builder
+ - ~~[*Technical*] cache screenshot before multiple pixels are being queried~~ **- done**
  - Automatically accept game invite
    - have a blacklist/whitelist for accepts
- - Teambuilder templates that can be auto-filled to save you some clicking.
  - Possibility to edit pixel coordinates externally
- - Version with auto updates
+ - ~~Version with auto updates~~ **- done but requires user confirmation**
  - Converting the automation into scriptable language (Javascript)
+
+[edit readme](https://github.com/Darker/auto-client/edit/master/README.md)
