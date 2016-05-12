@@ -5,7 +5,7 @@ function GitHubSimple() {
       var cache = JSON.parse(localStorage[this.cacheName]);
       for(var i in cache) {
         this.cache[i] = Cache.fromJSON(cache[i]);
-        console.log("Cache loaded from storage: ",this.cache[i]);
+        //console.log("Cache loaded from storage: ",this.cache[i]);
       }
     }
     catch(e) {console.warn("Error loading cache: "+e);}

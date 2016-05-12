@@ -12,15 +12,18 @@
 
         <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/stylesheets/stylesheet.css" media="screen">
         <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/stylesheets/github-dark.css" media="screen">
-        <!-- GOOGLE ANALYTICS -->
-        <script src="{{site.baseurl}}/js/googleanalytics.js" async="true"></script>
-        <script src="{{site.baseurl}}/js/settings.js"></script>
+        <!-- Array of callbacks called when HTML is parsed -->
         <script>
           var onready_ = [];
           function onready(cb) {
             if(typeof cb=="function")
               onready_.push(cb);
           }
+        </script>
+        <!-- GOOGLE ANALYTICS -->
+        <script src="{{site.baseurl}}/js/googleanalytics.js" async="true"></script>
+        <script src="{{site.baseurl}}/js/settings.js"></script>
+        <script>
           // Settings that cannot be overriden
           {% if site.debug %}SETTINGS.debug = true;{% endif %}
           SETTINGS.ghapi = "{{site.gh_api}}";

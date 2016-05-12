@@ -29,11 +29,16 @@ header h1 a, header h2 a {
   text-shadow: inherit;
 }
 
-img.big {
+img.big, iframe.big {
   padding: 10px;
   display: block;
   margin-left: auto;
   margin-right: auto;
+}
+
+iframe.youtube {
+  border: none;
+  background: transparent;
 }
 
 .browser-specific {

@@ -1,0 +1,4 @@
+{% assign words = include.keys | split:" + " %}
+{% assign first_iteration = true %}
+
+{% for word in words %}{% if first_iteration %}{% assign first_iteration = false %}{% else %}+{% endif %}<kbd>{{word}}</kbd>{% endfor %}

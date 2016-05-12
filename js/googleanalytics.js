@@ -7,22 +7,42 @@ if(location.href.indexOf("127.0.0.1")==-1 && (typeof SETTINGS=="undefined" || !S
   ga('create', 'UA-77379209-1', 'auto');
   ga('send', 'pageview');
   
-  try {
-    var links = document.getElementsByTagName("a");
-    var link_callback = function() {
-      ga('send', 'event', 'outbound', 'click', this.href, {
-           'transport': 'beacon',
-           //'hitCallback': function(){document.location = url;}
-         });
-    };
-    for(var i=0,l=links.length; i<l; i++) {
-      links[i].addEventListener(link_callback);
-    } 
-  }
-  catch(e) {
-    console.warn("Failed to add link callbacks.");
-  }
+
 }
+else {
+  var ga = window.ga = function() {
+    console.log("GOOGLE ANALYTICS", arguments);
+  };
+}
+
+try {
+  
+  var link_callback = function() {
+    ga('send', 'event', 'outbound', 'click', this.href, {
+         'transport': 'beacon',
+       });
+  };
+  onready(function() {
+    var links = document.getElementsByTagName("a");
+    for(var i=0,l=links.length; i<l; i++) {
+      links[i].addEventListener("click", link_callback);
+    } 
+  });
+}
+catch(e) {
+  console.warn("Failed to add link callbacks.");
+}
+
+try {
+  var starttime = new Date().getTime();
+  window.addEventListener("unload", function() {
+    ga('send', 'event', "leave", "unload", location.href, Math.round((new Date().getTime()-starttime)/1000), {transport: 'beacon', nonInteraction: true});
+  });
+}
+catch(e) {
+  console.warn("Failed to add link callbacks.");
+}
+
 try {
   window.addEventListener("error", function(e) {
     var file = e.filename.substr(e.filename.lastIndexOf("/")+1);
