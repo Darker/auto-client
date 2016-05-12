@@ -9,6 +9,8 @@
  - Auto-login, auto launch and autoqueue
  - **Works when client is behind another window**
  - **Doesn't move your mouse**
+## [Visit homepage](http://darker.github.io/auto-client/)
+On the homepage, latest versions and updates will be allways available.
 
 ##[Download latest version](http://darker.github.io/auto-client/download/)
 ###[Download beta](http://darker.github.io/auto-client/download-beta/)
