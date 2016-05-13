@@ -24,17 +24,17 @@ call text field in the program, like this:
 <hr />
 <h3>Script editor</h3>
 
-<p>Use the edit field to change the script, or press the <kbd>+</kbd> button to add command.</p>
+<p id="editor-help">Use the edit field to change the script, or press the <kbd>+</kbd> button to add command.</p>
 <input type="text" class="script-editor" id="script-editor" value="S>" />
 <p><b>Program preview:</b></p>
 <div id="script_preview">
 
 </div>
-<!-- <hr />
+<hr />
 <h3>Saved scripts</h3>
-<table id="saved-scripts">
-
-</table> -->
+<div id="saved-scripts">
+  <!--<tr><th>Name</th><th>Comment</th><th>Script</th></tr>-->
+</div>
 
 
 <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/stylesheets/scripts.css" media="screen">
@@ -59,7 +59,7 @@ scriptsReady.needed = ["scripts", "editor"];
 <script src="{{site.baseurl}}/js/script-editor.js" async="true" onload="scriptsReady('editor');"></script>
 
 <!-- UI dialogs -->
-<div id="script-edit-select" class="script-edit-dialog" title="Add command wizard">
+<div id="script-edit-select" class="script-edit-dialog add-command" title="Add command wizard">
   <p class="validateTips">Select type of command to add:</p>
  
   <div class="select">
@@ -80,6 +80,15 @@ scriptsReady.needed = ["scripts", "editor"];
     <fieldset>
       Delay: <input name="delay" type="number" value="500" class="command-param"/><br />
       <button>Save</button>
+    </fieldset>
+  </form>
+</div>
+
+<div id="script-edit-save" class="script-edit-dialog save" title="Save script">
+  <form class="save-script"> 
+    <fieldset>
+      Name: <input name="name" placeholder="My script"/><br />
+      Comment: <input name="comment" type="text" value="" placeholder="The best script in the world." /><br />
     </fieldset>
   </form>
 </div>

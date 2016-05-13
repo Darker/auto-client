@@ -10,16 +10,6 @@ function startScriptEditor() {
   
   var validScript = new RegExp("^S>([a-zA-Z0-9_-]+(,[^;]*)*(;[a-zA-Z0-9_-]+(,[^;]*)*)*;?)?$");
   
-  /*var validText = '';
-  
-  editor.addEventListener("input", function() {
-    if (this.value.match(validScript) || !validText.match(validScript)) {
-        validText = this.value;
-    } else {
-        this.value = validText;
-    }
-  });  */
-  
   editor.addEventListener("keydown", function(e) {
     if(e.ctrlKey)
       return true;
@@ -90,6 +80,7 @@ function startScriptEditor() {
   }
   /** The script editor with dialogs **/
   var dialog;
+  var dialog_save;
   onready(function() {
     /** COMMAND WIZATD **/
     var form;
@@ -136,7 +127,71 @@ function startScriptEditor() {
     });
     
     /** SAVED SCRIPTS **/
-     
+    var savedScripts;
+    if(localStorage["saved-scripts"]) {
+      savedScripts = loadDbFromStorage();
+    }
+    else {
+      savedScripts = new ScriptDb();
+      savedScripts.add(new Script("S>s,top,3,800;"), "top lane", "Typical top lane call"); 
+      savedScripts.add(new Script("S>s,jungle,3,800;"), "jungle", "Typical jungle lane call");     
+      savedScripts.add(new Script("S>s,mid,3,800;"), "mid lane", "Typical mid lane call"); 
+      savedScripts.add(new Script("S>s,bot adc,3,800;"), "bot lane adc", "Typical bot lane ADC call");  
+    }
+    initDbDisplay(savedScripts);
+    window.addEventListener("storage", function(e) {
+      console.log("Storage changed: ",e);
+      if(e.key=="saved-scripts") {
+        savedScripts = loadDbFromStorage();
+        document.getElementById("saved-scripts").innerHTML = ""; 
+        initDbDisplay(savedScripts);
+      }
+    });
+    function loadDbFromStorage() {
+      return ScriptDb.fromJSON(JSON.parse(localStorage["saved-scripts"]));
+    }
+    function initDbDisplay(savedScripts) {
+      document.getElementById("saved-scripts").appendChild(savedScripts.html());
+      savedScripts.onrequestload = function(script) {
+        SCRIPT = script;
+        editor.value = script.toString();
+        drawPreview();
+      }
+      savedScripts.onchange = function() {
+        localStorage["saved-scripts"] = JSON.stringify(savedScripts);
+      }
+    }
+    /** SAVE new script **/
+    dialog_save = $( "#script-edit-save" ).dialog({
+      autoOpen: false,
+      height: 300,
+      width: 350,
+      modal: true,
+      buttons: {
+        Cancel: function() {
+          dialog_save.dialog( "close" );
+        },
+        Save: function() {
+          savedScripts.add(SCRIPT, form_save.name.value, form_save.comment.value);
+          dialog_save.dialog( "close" );
+        }
+      },
+      close: function() {
+        form_save.reset();
+      }
+    });
+    var form_save = dialog_save.find("form")[0];
+    $(form_save).on("submit", function(e) {
+      e.preventDefault();
+      return false;
+    });
+    var a = document.createElement("a");
+    a.href = "javascript: /*save script*/void(0);";
+    a.onclick = function() {
+      dialog_save.dialog("open");
+    }
+    a.appendChild(new Text("Click here to save your script."));
+    document.getElementById("editor-help").appendChild(a);
   }); 
   function startCommandEditor() {
     dialog.dialog( "open" );

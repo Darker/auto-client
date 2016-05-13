@@ -69,8 +69,8 @@ function SynchronizedSettings(superSettings, name, settings_names) {
 SynchronizedSettings.prototype = Object.create(Settings.prototype);
 SynchronizedSettings.prototype.constructor = SynchronizedSettings;
 
-SynchronizedSettings.prototype.reloadSettings = function() {
-  if(localStorage[this.name]) {
+SynchronizedSettings.prototype.reloadSettings = function(e) {
+  if((typeof e=="undefined" || e.key == this.name) && localStorage[this.name]) {
     try {
       this.data = JSON.parse(localStorage[this.name]);
       console.log("User settings: ", this.data);

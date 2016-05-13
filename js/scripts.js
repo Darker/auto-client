@@ -202,6 +202,141 @@ CommandDelay.prototype.html_arguments = function(container) {
   return container;
 }
 
+
+function ScriptDbEntry(script, name, comment) {
+  this.update(script, name, comment);
+}
+ScriptDbEntry.prototype.update = function(script, name, comment) {
+  this.script = script;
+  this.name = name||"unnamed";
+  this.comment = comment||"";
+  
+  if(this.html_) {
+    this.html_name.data = this.name;
+    this.html_comment.data = this.comment;
+    this.html_script.data = this.script.toString();
+  }
+}
+
+ScriptDbEntry.prototype.toJSON = function() {
+  return {name:this.name, comment:this.comment, script: this.script.toString()};
+}
+
+ScriptDbEntry.prototype.html = function() {
+  if(!this.html_) {
+    this.html_ = document.createElement("tr");
+    var td = this.html_.insertCell();
+    td.className = "name";
+    td.appendChild(this.html_name = new Text(this.name));
+    
+    td = this.html_.insertCell();
+    td.className = "comment";
+    td.appendChild(this.html_comment = new Text(this.comment));
+    
+    td = this.html_.insertCell();
+    td.className = "script";
+    td.appendChild(this.html_script = new Text(this.script.toString()));
+    
+    td = this.html_tools = this.html_.insertCell();
+    var load = document.createElement("button");
+    load.addEventListener("click", function() {
+      if(this.onrequestload) {
+        this.onrequestload();
+      }
+    }.bind(this)); 
+    load.appendChild(new Text("Edit"));
+    td.appendChild(load);
+    
+    load = document.createElement("button");
+    load.appendChild(new Text("Delete"));
+    load.addEventListener("click", function() {
+      if(this.onrequestdelete) {
+        this.onrequestdelete();
+      }
+    }.bind(this));
+    td.appendChild(load);
+     
+  }
+  return this.html_;
+}
+
+
+function ScriptDb() {
+  this.scripts = {};
+}
+
+ScriptDb.prototype.html = function() {
+  if(!this.html_) {
+    this.html_ = document.createElement("table");
+    this.html_.className = "saved-scripts";
+    this.html_body = document.createElement("tbody");
+    this.html_body.innerHTML = "<tr><th>Name</th><th>Comment</th><th>Code</th><th></th></tr>";
+    this.html_.appendChild(this.html_body);  
+    this.addScriptsToHTML();   
+  }
+  return this.html_;
+}
+ScriptDb.prototype.add = function(script, name, comment) {
+  if(this.scripts[name]!=null) {
+    this.scripts[name].update(script, name, comment);
+  }
+  else {
+    var entry = new ScriptDbEntry(script, name, comment);
+    this.scripts[name] = entry;
+    
+    var db = this;
+    entry.onrequestload = function() {
+      db.onrequestload(this.script);
+    }
+    entry.onrequestdelete = function() {
+      db.del(this.name);
+    }
+    
+    if(this.html_)
+      this.html_body.appendChild(entry.html());
+  }
+  this.onchange();
+}
+ScriptDb.prototype.del = function(name) {
+  if(this.scripts[name]!=null) {
+    var entry = this.scripts[name];
+    delete this.scripts[name];
+    if(entry.html_) {
+      entry.html_.parentNode.removeChild(entry.html_);
+    }
+    this.onchange();
+  }
+}
+
+ScriptDb.prototype.toJSON = function() {
+  return this.scripts;
+}
+ScriptDb.fromJSON = function(json) {
+  if(typeof json=="string")
+    json = JSON.parse(json);
+  var db = new ScriptDb();
+  for(var i in json) {
+    if(json.hasOwnProperty(i)) {
+      var entry = json[i];
+      db.add(new Script(entry.script), entry.name, entry.comment);
+    }
+  }
+  return db;
+}
+
+ScriptDb.prototype.onrequestload = function(script) {};
+ScriptDb.prototype.onchange = function() {};
+
+ScriptDb.prototype.addScriptsToHTML = function() {
+  for(var i in this.scripts) {
+    if(this.scripts.hasOwnProperty(i)) {
+      this.html_body.appendChild(this.scripts[i].html());
+    }
+  }
+}
+
+
+
 function splitByUnescaped(str, delimiter) {
   //console.log("Input: ", str);
   var reg = new RegExp("(?:^|[^\\\\])(?:\\\\\\\\)*("+delimiter+")", "g");
