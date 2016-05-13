@@ -10,23 +10,38 @@ title:
   <li><a href="{{site.gh_repo}}/wiki" target="_blank">Wiki</a></li>
   <li><a href="{{site.gh_repo}}/issues" target="_blank">Report an issue</a></li>
 </ul>
-<h3>Features</h3>
+<h3>Popular features</h3>
+<!-- Generate this table from the fill feature list using:
+     [\s\S]*?<h4\s+id="([^"]+)"\s*>\s*([^<]+)\s*<\/h4>[\s\S]*?
+And replacement:
+     <li><a href="#$1">$2</a></li>\n
+Link:
+     https://regex101.com/r/eA3vR8/1
+-->
+<ul>
+  <li><a href="#tag_autoaccept">Autoaccept - Accept Blind, ARAM and Normal matches automatically</a></li>
+  <li><a href="#tag_autocall">Autocall - call your lane first</a></li>
+  <li><a href="#tag_autopick">Autopick - Select your champion first</a></li>
+  <li><a href="#tag_autolaunch">Enable auto launch PVP.net client</a></li>
+  <li><a href="#tag_autologin">Auto login - login automatically in the game</a></li>
+</ul>
 
-<ol>
-  <li><b>Autoaccept - Accept Blind, ARAM and Normal matches automatically</b>
+<h3>All main features</h3>
+<ol class="feature-list" id="feature-list">
+  <li><h4 id="tag_autoaccept">Autoaccept - Accept Blind, ARAM and Normal matches automatically</h4>
      <p class="content">
        To do this, just press the start button in the program. The program
        will then start the main AI loop, waiting for buttons to press.     
      </p>
   </li>
-  <li><b>Call your lane first</b>
+  <li><h4 id="tag_autocall">Autocall - call your lane first</h4>
      <p class="content">
        The only way to always call your lane and role first. Just enter the role in the <q>Call text</q>
        field. You can also use {%include link text="special scripts for complex call patterns" href="chat_scripts"%}.
        {% include bigscreenshot.html src="call_text.png" %} 
      </p>
   </li>  
-  <li><b>Select your champion first</b>
+  <li><h4 id="tag_autopick">Autopick - Select your champion first</h4>
      <p class="content">
        Don't let anyone play with your favorite champion. Program includes suggestions for
        champion names, but you're free to enter eny text in the first field. <em>However
@@ -34,27 +49,27 @@ title:
        {% include bigscreenshot.html src="champ.png" %} 
      </p>
   </li>  
-  <li><b>Automatically select runes, masteries and summoner spells</b>
+  <li><h4>Automatically select runes, masteries and summoner spells</h4>
      <p class="content">
        Tired of forgetting to set the correct mastery and rune page? Don't want to forget to pick
        smite when jungling? The runes and masteries are indexed by number.
        {% include bigscreenshot.html src="sum_rum_mas.png" %}
      </p>
   </li>
-  <li><b>Save rune, mastery and summoner spell configurations for every champion</b>
+  <li><h4>Save rune, mastery and summoner spell configurations for every champion</h4>
      <p class="content">
        You don't need to re-configure the program every time you change champion. Just use the save button. Next time you type
        champion name, your settings will be restored.
        {% include bigscreenshot.html src="save.png" %}
      </p>
   </li>
-  <li><b>Use saved mastery and rune settings for champions in ARAM!</b>
+  <li><h4>Use saved mastery and rune settings for champions in ARAM!</h4>
      <p class="content">
        The latest feature allows you to use settings you sved for champions you get in ARAM! This
        means you will no longer end up with wrong masteries in ARAM!
      </p>
   </li>
-  <li><b>Enable auto launch PVP.net client</b>
+  <li><h4 id="tag_autolaunch">Enable auto launch PVP.net client</h4>
      <p class="content">
        Ever been frustrated by waiting for updates to finish, than having to click on <q>Launch</q> button? Auto launch feature
        automatically launches the client when updates are downloaded. It also automatically accepts EULA which is 
@@ -62,13 +77,19 @@ title:
        {%include youtube_small.html id="3JyLU1HEis8"%} 
      </p>
   </li>
-  <li><b>Enable auto login for PVP.net client</b>
+  <li><h4 id="tag_autologin">Auto login - login automatically in the game</h4>
      <p class="content">
        <em>WARNING: Your password is only 100% secure when it's not saved anywhere.</em>
        Auto-login feature can automatically enter your
        password in login form. The password will be encrypted using your Windows SSID. It can still be restored
        so do NOT use this feature on untrusted computers!
        {%include youtube_small.html id="YjrcYsx6h1E"%} 
+     </p>
+  </li>
+  <li><h4>Auto requeue - play again without clicking</h4>
+     <p class="content">
+       You can enable auto queue to have the program automatically put you in the queue for next game 
+       as soon as the last game ends.
      </p>
   </li>
 </ol>
