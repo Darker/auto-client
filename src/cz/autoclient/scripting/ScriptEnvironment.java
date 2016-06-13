@@ -6,8 +6,11 @@
 
 package cz.autoclient.scripting;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 /**
  *
@@ -15,6 +18,8 @@ import java.util.Map;
  */
 public class ScriptEnvironment {
   private final Map variables = new HashMap<String, Object>();
+  private final ArrayList<SleepAction> paralelActions = new ArrayList();
+ 
   public ScriptEnvironment() {}
   /**
    * Construct environment from given variables and their names. 
@@ -102,4 +107,68 @@ public class ScriptEnvironment {
       this(message, null);
     }
   }
+  public void addSleepAction(SleepAction s) {
+    synchronized(paralelActions) {
+      paralelActions.add(s);
+    }
+  }
+  public void addSleepAction(Callable<Boolean> s) {
+    addSleepAction(new SleepActionLambda(s));
+  }
+  public void addSleepAction(Callable<Boolean> s, long time) {
+    addSleepAction(new SleepActionLambda(s, time));
+  }
+  public void addSleepActions(SleepAction[] s) {
+    synchronized(paralelActions) {
+      for(SleepAction a:s) {
+        paralelActions.add(a);
+      }
+    }
+  }
+  public void sleep(long millis) throws InterruptedException {
+    //System.out.println("[Script] Sleep for: "+millis);
+    long start = System.currentTimeMillis();
+    long now = start;
+    long end = now+millis;
+    synchronized(paralelActions) {
+      for (Iterator<SleepAction> iterator = paralelActions.iterator(); iterator.hasNext();) {
+        // get time and end if less than 50ms remains
+        now = System.currentTimeMillis();
+        if(now+50>=end)
+          break;
+        SleepAction a = iterator.next();
+        if (a.duration()+now+50<end) {
+          // Remove the current element from the iterator and the list.
+          // this is done before calling
+          // this means of exception is thrown, the program will not 
+          // retry to call this action
+          iterator.remove();
+          try {
+            a.call();
+          }
+          catch(InterruptedException e) {
+            throw e; 
+          }
+          catch(Exception e) {
+            e.printStackTrace(); 
+          }
+          // Calculate duration
+          /*System.out.println("  [Script] Action duration real/expected: "+
+               (System.currentTimeMillis()-now)+
+               "/"+a.duration()
+          );*/
+          
+        }
+      }
+    }
+    now = System.currentTimeMillis();
+    long sleep = end-now;
+    if(sleep>0)
+      Thread.sleep(sleep);
+    
+    /*System.out.println("[Script] Slept for: "+
+         (System.currentTimeMillis()-start)+" instead of "+millis
+    );*/
+  }
+  
 }

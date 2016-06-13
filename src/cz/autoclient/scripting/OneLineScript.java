@@ -62,6 +62,15 @@ public class OneLineScript implements Callable<Boolean> {
       }
     }
   }
+  
+  /**
+   * Registers an action to be taken when the 
+   * script is sleeping.
+   * The action given is responsible for not taking longer than given timeout.
+   */
+  public void addSleepAction(Callable action, int maxDuration) {
+    
+  }
   /**
    * Configure environmentironment variable in the inner environmentironment.
    * @param name

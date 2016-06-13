@@ -29,7 +29,8 @@ public class CommandDelay extends ScriptCommand {
   }
   @Override
   public boolean execute() throws InterruptedException {
-    Thread.sleep(delay);
+    //Thread.sleep(delay);
+    environment.sleep(delay);
     return true;
   }
 }

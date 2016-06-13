@@ -11,7 +11,7 @@ package cz.autoclient.PVP_net;
  * @author Jakub
  */
 public enum AcceptedGameType {
-  NORMAL,
+  NORMAL(15),
   DRAFT(21),
   UNKNOWN;
   

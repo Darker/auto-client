@@ -19,4 +19,17 @@ public interface PixelGroup {
     return test(window.screenshot());
   }
   public boolean test(BufferedImage i);
+  
+  public static class AlwaysTrue implements PixelGroup {
+    @Override
+    public boolean test(BufferedImage i) {
+      return true;
+    }
+  }
+  public static class AlwaysFalse implements PixelGroup {
+    @Override
+    public boolean test(BufferedImage i) {
+      return false;
+    }
+  }
 }

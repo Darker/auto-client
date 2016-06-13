@@ -59,6 +59,7 @@ public enum PixelOffset implements ComparablePixel {
     //LobbySummonerSpellsHeader(0.4441223758058664D, 0.590262641502635D, new Color(251, 150, 1, 1),50),
     //Green checkmark seen above the rune selectbox
     LobbyRunesCheckmark (0.3441864333974065D, 0.6302370156526198D,new Color(0, 135, 55, 1),10),
+    LobbyLockGray (0.6737828588406924D, 0.6532991545853033D, new Color(124, 124, 124, 1), 1),
 
     //Button for editing masteries in lobby
     Masteries_Edit(0.38550610189321205D, 0.6609865342295311D, new Color(34, 75, 125, 1),10),
@@ -84,6 +85,9 @@ public enum PixelOffset implements ComparablePixel {
     ARAM_REROLL_BLUE (0.6689782462249011D, 0.6440742990122299D, new Color(37, 81, 134, 1), 10),
     ARAM_REROLL_WHITE (0.690118541734383D, 0.6655989620160678D, new Color(255, 255, 255, 1), 10),
     ARAM_REROLL_GRAY (0.665134556132268D, 0.647149250869921D, new Color(127, 127, 127, 1), 10),
+    /** Bans in normal lobby **/
+    BAN_BANNING (0.42778669291217586D, 0.047661753794212634D, new Color(21, 62, 123, 1), 5),
+    BAN_BANNING_ACTIVE (0.14815823867311986D, 0.13991030952494676D, new Color(203, 101, 25, 1), 5),
     /** DRAFT **/
     Draft_Accept_1 (0.4076073199258522D, 0.5581037621709415D, new Color(226, 112, 0, 1), 10),
     Draft_Accept_2 (0.4969731145795711D, 0.5564381710680324D, new Color(228, 114, 0, 1), 10),
