@@ -29,6 +29,10 @@ public enum PxGroup implements PixelGroup {
     PixelOffset.Draft_Lobby_MainBar,
     PixelOffset.Draft_Lobby_TopBar
   )),
+  BLIND_MATCH_FOUND(new PixelGroupSimple(
+    PixelOffset.MatchFound,
+    PixelOffset.MatchFound_Black
+  )),
   ;
   
   public final PixelGroup g;

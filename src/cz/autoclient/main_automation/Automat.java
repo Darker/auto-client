@@ -173,7 +173,7 @@ public class Automat
             type = AcceptedGameType.UNKNOWN;
           }
         } else {
-          if (checkPoint(window, PixelOffset.MatchFound)) {
+          if (PxGroup.BLIND_MATCH_FOUND.test(window)) {
             click(PixelOffset.AcceptButton);
             accepted = time;
             type = AcceptedGameType.NORMAL;
