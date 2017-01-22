@@ -4,6 +4,7 @@ import cz.autoclient.GUI.updates.UpdateVisual;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.swing.AutoCompleteSupport;
 import cz.autoclient.GUI.champion.ConfigurationManager;
+import cz.autoclient.GUI.dialogs.champions.ChampionSettingsDialog;
 import cz.autoclient.GUI.tabs.TabbedWindow;
 import cz.autoclient.GUI.tabs.FieldDef;
 import cz.autoclient.GUI.notifications.Notification;
@@ -581,6 +582,20 @@ import javax.swing.SwingUtilities;
              }
          });
          menu.add(menu_threadcontrol_pretend_accepted);
+         // champion configurations button
+         JMenuItem championConfigs = new JMenuItem();
+         championConfigs.setText("Configure champions");
+         championConfigs.setToolTipText("Allows you to see and edit champion settings.");
+         championConfigs.addActionListener(new ActionListener() {
+             @Override
+             public void actionPerformed(ActionEvent e) {
+                 ChampionSettingsDialog champ_dialog = new ChampionSettingsDialog(champ_config);
+                 champ_dialog.setVisible(true);
+                 champ_dialog.toFront();
+             }
+         });
+         menu.add(championConfigs);
+         
          
          checkBox = new JCheckBoxMenuItem("Always ARAM");
          checkBox.setToolTipText("Always handle match as ARAM");
@@ -774,8 +789,8 @@ import javax.swing.SwingUtilities;
         item.addActionListener((ActionEvent e)->{
            Dialogs.dialogInfoAsync(
                  "Version: <tt>"+ac.getVersion()+"</tt><br />"
-               + "e-mail: <a href=\"mailto:autoclient@hmamail.com\">"
-               + "autoclient@hmamail.com</a><br />"
+               + "e-mail: <a href=\"mailto:lolautoclient@gmail.com\">"
+               + "lolautoclient@gmail.com</a><br />"
                + "Website: <a href=\"http://darker.github.io/auto-client?from_app\">"
                + "darker.github.io/auto-client</a><br />"
                + "<a href=\"https://www.facebook.com/autoclient/\">facebook/autoclient"
