@@ -6,6 +6,7 @@
 
 package cz.autoclient.autoclick.comvis;
 
+import cz.autoclient.autoclick.ComparablePixel;
 import cz.autoclient.autoclick.Rect;
 import java.awt.Color;
 import java.awt.Container;
@@ -97,6 +98,12 @@ public class DebugDrawing {
    }
    public static void drawPoint(BufferedImage target, int x, int y, int size, Color color) {
      drawPoint(target, x, y, size, color, null);
+   }
+   public static void drawPoint(BufferedImage target, ComparablePixel px) {
+     drawPoint(target, px.realX(target.getWidth()), px.realY(target.getHeight()), 5, Color.green, px.getName());
+   }
+   public static void drawPoint(BufferedImage target, ComparablePixel px, Color color) {
+     drawPoint(target, px.realX(target.getWidth()), px.realY(target.getHeight()), 5, color, px.getName());
    }
    public static void drawPointOrRect(BufferedImage target, Rect rect, Color color) {
      if(rect.width>0 || rect.height>0) {

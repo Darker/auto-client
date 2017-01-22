@@ -524,7 +524,7 @@ public class MSWindow extends Common implements Window  {
   }
   public static User32Ext UserExt = User32Ext.INSTANCE;
   public static GDI32Ext GDIExt = GDI32Ext.INSTANCE;
-  public static MSWindow windowFromName(String name,final boolean strict) {
+  public static MSWindow windowFromName(String name, final boolean strict) {
     if(strict) {
       WinDef.HWND hwnd = UserExt.FindWindow(null, name);
       if(hwnd==null)

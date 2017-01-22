@@ -11,7 +11,7 @@ import javax.swing.*;
 import java.beans.*;
 import java.util.Random;
 
-public class ProgressBarWindow extends JFrame{
+public class ProgressBarWindow extends JFrame {
 
     private JProgressBar progressBar;
     private JTextArea taskOutput;
@@ -42,7 +42,7 @@ public class ProgressBarWindow extends JFrame{
         content.add(new JScrollPane(taskOutput), BorderLayout.CENTER);
         
         content.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        content.setOpaque(true); //content panes must be opaque
+        content.setOpaque(true); //content panes must be opaque        
         
         enableDrag(content);
         // Fill the contents and remove decorations

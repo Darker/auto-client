@@ -13,7 +13,7 @@ import java.awt.image.BufferedImage;
  * This groups' test() returns true when all members are valid.
  * @author Jakub
  */
-public class PixelGroupSimple implements PixelGroup {
+public class PixelGroupSimple implements PixelGroupWithPixels {
   protected final ComparablePixel[] pixels;
 
   public PixelGroupSimple(ComparablePixel... pixels) {
@@ -28,4 +28,10 @@ public class PixelGroupSimple implements PixelGroup {
     }
     return true;
   }
+
+  @Override
+  public ComparablePixel[] getPixels() {
+    return pixels;
+  }
+  
 }

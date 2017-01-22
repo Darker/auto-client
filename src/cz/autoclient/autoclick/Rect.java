@@ -261,8 +261,15 @@ public class Rect implements RectInterface {
   }
 
   @Override
-  public RectInterface crop(int howMuch) {
+  public Rect crop(int howMuch) {
     return new Rect(top+howMuch, right-howMuch, bottom-howMuch, left+howMuch);
   }
 
+  @Override
+  public Rect merge(RectInterface r) {
+    return Rect.byWidthHeight(Math.min(top, r.top()),
+                    Math.min(left, r.left()),
+                    Math.max(width, r.width()),
+                    Math.max(height, r.height()));
+  }
 }
