@@ -19,6 +19,7 @@ release.bat
 /cleanest.cfg
 /proguard/
 /proguard/*.*
+/release/**
 /release/last_release/data/settings.bin
 /stop_flashing/wrong_return_value.txt
 *.jar
