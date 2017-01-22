@@ -15,7 +15,13 @@ public interface RectInterface {
   public int left();
   public int width();
   public int height();
-
+  
+  public default int right() {
+    return left()+width();
+  }
+  public default int bottom() {
+    return top()+height();
+  }
   /**
    *
    * @return Rectangle that represents the center point of this rectangle. Such rectangle has 0 size.
@@ -29,4 +35,12 @@ public interface RectInterface {
   * @return 
   */
   public RectInterface crop(int howMuch);
+  
+  /**
+   * Return rectangla that contains both this rectangle and the rectangle given,
+   * as tightly as possible.
+   * @param r other rectangle to contain
+   * @return Rectangle that tighly contains both rectangles
+   */
+  public RectInterface merge(RectInterface r);
 }

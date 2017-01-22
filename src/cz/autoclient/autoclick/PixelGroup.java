@@ -7,16 +7,23 @@
 package cz.autoclient.autoclick;
 
 
-import cz.autoclient.autoclick.windows.Window;
 import java.awt.image.BufferedImage;
 
 /**
  *
  * @author Jakub
  */
-public interface PixelGroup {
-  public default boolean test(Window window) {
-    return test(window.screenshot());
+public interface PixelGroup extends GraphicPredicate {  
+  public static class AlwaysTrue implements PixelGroup {
+    @Override
+    public boolean test(BufferedImage i) {
+      return true;
+    }
   }
-  public boolean test(BufferedImage i);
+  public static class AlwaysFalse implements PixelGroup {
+    @Override
+    public boolean test(BufferedImage i) {
+      return false;
+    }
+  }
 }

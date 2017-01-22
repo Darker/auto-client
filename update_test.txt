@@ -1,0 +1,27 @@
+==UPDATE INSTALLER FOR UPDATE 3.6-==
+This script will copy new jar file and remove old one. It shouldn't
+take more than 3 seconds.
+If something goes wrong with the update, you will find your old version
+in /update/backup folder. It is also possible to restore old versions 
+from update manager if you don't like the new version.
+
+The /update directory is free for you to delete or modify. Deleting it
+should not cause any problems. The /update/backup folder will be automatically
+deleted 7 days after you're using the new version.
+
+Update info:
+  Jar file: C:\MYSELF\programing\java\AutoCall\AutoClient_user\AutoClient.jar
+____________________________________________
+
+Backing up old jar file:
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>xcopy "C:\MYSELF\programing\java\AutoCall\AutoClient_user\AutoClient.jar" "C:\MYSELF\programing\java\AutoCall\AutoClient_user\updates\backup\" /Q /Y 
+Zkop¡rovan‚ soubory: 1
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>echo off 1>NUL 
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>xcopy "C:\MYSELF\programing\java\AutoCall\AutoClient_user\updates\3.6-\AutoClient.jar" "C:\MYSELF\programing\java\AutoCall\AutoClient_user\AutoClient.jar" /Q /Y 
+Zkop¡rovan‚ soubory: 0
+
+C:\MYSELF\programing\java\AutoCall\AutoClient>echo off 1>NUL 
+Copy result: 4

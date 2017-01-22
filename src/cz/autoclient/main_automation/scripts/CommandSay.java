@@ -6,6 +6,7 @@
 
 package cz.autoclient.main_automation.scripts;
 
+import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.scripting.ScriptCommand;
 import cz.autoclient.scripting.exception.IllegalCmdArgumentException;
@@ -39,6 +40,7 @@ public class CommandSay extends ScriptCommand {
     Object window = environment.get("window", Window.class);
     if(window!=null && window instanceof Window) {
       Window w = (Window)window;
+      w.click(PixelOffset.LobbyChat.toRect(w.getRect()));
       for(int i=0; i<repeat; i++) {
         if(i!=0 && timeout!=0)
           Thread.sleep(timeout);

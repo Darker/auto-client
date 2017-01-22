@@ -7,13 +7,15 @@
 package cz.autoclient.autoclick;
 
 import cz.autoclient.PVP_net.ConstData;
+import cz.autoclient.main_automation.WindowTools;
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 
 /**
  *
  * @author Jakub
  */
-public interface ComparablePixel {
+public interface ComparablePixel extends GraphicPredicate {
 
   public default int realX(int width) {
     return (int)Math.round(getX()*width);
@@ -23,6 +25,13 @@ public interface ComparablePixel {
   }
   public double getX();
   public double getY();
+  
+  public default String getName() {
+    return "";
+  }
+  public default boolean test(BufferedImage i) {
+    return WindowTools.checkPoint(i, this);
+  }
   
   public ComparablePixel offset(double x, double y);
   

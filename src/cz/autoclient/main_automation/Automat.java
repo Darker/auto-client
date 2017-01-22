@@ -32,10 +32,13 @@ import java.util.ArrayList;
 import cz.autoclient.autoclick.ComparablePixel;
 import static cz.autoclient.main_automation.WindowTools.*;
 import cz.autoclient.autoclick.comvis.DebugDrawing;
+import cz.autoclient.main_automation.SituationDetector.LobbyType;
 import cz.autoclient.main_automation.scripts.CommandDelay;
 import cz.autoclient.main_automation.scripts.CommandSay;
 import cz.autoclient.scripting.OneLineScript;
 import cz.autoclient.scripting.ScriptCommand;
+import cz.autoclient.scripting.SleepAction;
+import cz.autoclient.scripting.SleepActionLambda;
 import cz.autoclient.scripting.exception.CommandException;
 import cz.autoclient.scripting.exception.ScriptParseException;
 import java.io.File;
@@ -224,16 +227,24 @@ public class Automat
       gui.notification(Notification.Def.BLIND_TEAM_JOINED);
       dbgmsg("Triggered notification for normal lobby.");
     }
-    sleep(200L);
+    sleep(100L);
     dbgmsg("In normal lobby.");
     //boolean ARAM = false;
-    this.callText(settings.getStringEquivalent(Setnames.BLIND_CALL_TEXT.name));
-
-    if (SituationDetector.IsAram(window) || Setnames.DEBUG_PRETEND_ARAM.getBoolean(settings)) {
+    LobbyType current_lobby = LobbyType.NORMAL_BLIND;
+    if(Setnames.DEBUG_PRETEND_ARAM.getBoolean(settings))
+      current_lobby = LobbyType.ARAM;
+    else
+      current_lobby = SituationDetector.loggyType(window);
+    
+    if (current_lobby==LobbyType.ARAM) {
       dbgmsg("Probably ARAM!");
       if(Setnames.ARAM_ENABLED.getBoolean(settings)) {
         aram_lobby();
       }
+    }
+    else if(current_lobby==LobbyType.NORMAL_BAN) {
+      dbgmsg("Probably BAN LOBBY");
+      ban_lobby();
     }
     else {
       blind_lobby(); 
@@ -295,17 +306,22 @@ public class Automat
     }
   }
   public void blind_lobby() throws InterruptedException {
-    if (settings.getStringEquivalent(Setnames.BLIND_CHAMP_NAME.name).length() > 1) {
-      click(PixelOffset.Blind_SearchChampion);
-      sleep(20L);
-
-      window.typeString(settings.getStringEquivalent(Setnames.BLIND_CHAMP_NAME.name));
-      sleep(200L);
-      click(PixelOffset.LobbyChampionSlot1);
-      sleep(10L);
-      click(PixelOffset.LobbyChampionSlot1);
-      sleep(100L);
-      click(PixelOffset.LobbyChampionSlot1);
+    // Create parallel action for selecting champion
+    SleepAction selectChampion = new SleepAction.NoAction();
+    String chname;
+    if ((chname=settings.getStringEquivalent(Setnames.BLIND_CHAMP_NAME.name)).length() > 1) {
+      selectChampion = new SleepActionLambda(()->{
+        dbgmsg("  Setting champion name in between scripts.");
+        selectChampion(chname);
+        return true;
+      }, 750);
+    }
+    this.callText(settings.getStringEquivalent(Setnames.BLIND_CALL_TEXT.name), new SleepAction[] {
+      selectChampion
+    });
+    // If champion wasn't selected while calling text, now it's the time
+    if(!selectChampion.done()) {
+      selectChampion(chname);
     }
     //Set summoner spells
     String[] spells = {
@@ -438,17 +454,53 @@ public class Automat
     int rune = settings.getInt(Setnames.BLIND_RUNE.name, 0);
     setRunes(rune);
   }
+  private void ban_lobby() throws InterruptedException {
+    BufferedImage screenshot = window.screenshot();
+    this.callText(settings.getStringEquivalent(Setnames.BLIND_CALL_TEXT.name));
+    while(LobbyType.NORMAL_BAN.test(screenshot)) {
+      if(WindowTools.checkPoint(screenshot, PixelOffset.BAN_BANNING_ACTIVE)) {
+        dbgmsg("You are banning!"); 
+      }
+      sleep(1000);
+      screenshot = window.screenshot();
+    }
+    dbgmsg("Banning over, time to pick champion!");
+    selectChampion(Setnames.BLIND_CHAMP_NAME.getString(settings));
+  }
+  public void selectChampion(final String name) throws InterruptedException {
+    if(name == null || name.length()==0) {
+      dbgmsg("Error: empty champion anme given.");
+      return;
+    }
+    dbgmsg("Selecting champion "+name);
+    slowClick(PixelOffset.Blind_SearchChampion, 30);
+    sleep(80L);
+
+    window.typeString(name);
+    sleep(200L);
+    click(PixelOffset.LobbyChampionSlot1);
+    sleep(10L);
+    click(PixelOffset.LobbyChampionSlot1);
+    sleep(100L);
+    click(PixelOffset.LobbyChampionSlot1);
+    sleep(50L);
+    click(PixelOffset.LobbyTopBar);
+  }
+  
+  public void callText(final String message) throws InterruptedException {
+    callText(message, null);
+  }
   /**
    * Call text to chat in standard lobby. Supports scripts.
    *
    * @param message text to call or script to process
+   * @param actions actions to perform when sleeping if message is script
    * @throws InterruptedException
    */
-  public void callText(final String message) throws InterruptedException {
+  public void callText(final String message, SleepAction[] actions) throws InterruptedException {
     if (message == null || message.length() == 0) {
       return;
     }
-    //sleep(this.gui.getDelay());
     click(PixelOffset.LobbyChat);
     click(PixelOffset.LobbyChat);
     // Test for scripts
@@ -456,6 +508,8 @@ public class Automat
       dbgmsg("Compiling " + message + " for chat messaging.");
       try {
         OneLineScript say = OneLineScript.parse(message);
+        if(actions!=null && actions.length>0)
+          say.getEnvironment().addSleepActions(actions);
         say.compile();
         say.setenv("window", window);
         click(PixelOffset.LobbyChat);
@@ -704,10 +758,10 @@ public class Automat
     }
   }
 
-  private void click(ColorPixel pos) {
+  private void click(ComparablePixel pos) {
     try {
       Rect rect = window.getRect();
-      window.click((int) (rect.width * pos.x), (int) (rect.height * pos.y));
+      window.click((int) (rect.width * pos.getX()), (int) (rect.height * pos.getY()));
     } catch (APIException e) {
       errmsg("Can't click because no window is available for clicking :(");
     }
@@ -727,5 +781,16 @@ public class Automat
       errmsg("Can't click because no window is available for clicking :(");
     }
   }
+  
+  private void slowClick(ComparablePixel pos, int delay) throws InterruptedException {
+    try {
+      Rect rect = window.getRect();
+      window.slowClick((int) (rect.width * pos.getX()), (int) (rect.height * pos.getY()), delay);
+    } catch (APIException e) {
+      errmsg("Can't click because no window is available for clicking :(");
+    }
+  }
+
+
 }
 // [^/ ][^/ ]\s*DebugDrawing.displayImage

@@ -38,7 +38,7 @@ public enum PixelOffset implements ComparablePixel {
     PlayButton_SearchingForGame_Approx (0.42531457289624774D, 0.06710726787193565D, new Color(255, 255, 255, 1), 10),
     // Top right corner of the box with searching game indicator
     PlayButton_SearchingCorner (0.5700032263395995D, 0.009224855573073414D, new Color(0, 64, 77, 1), 5),
-    StoreButton (0.7179852949059728D, 0.05839416058394161D, new Color(189, 97, 0, 1), 10),
+    StoreButton (0.6709000912712176D, 0.059961561224977186D, new Color(170, 80, 0, 1), 10),
     /** GAME SELECTION **/
     //The button you can press after game mode has been selected
     Play_Solo(0.5306054028901105D, 0.8869954957698297D, new Color(200, 81, 0, 1)),
@@ -59,6 +59,7 @@ public enum PixelOffset implements ComparablePixel {
     //LobbySummonerSpellsHeader(0.4441223758058664D, 0.590262641502635D, new Color(251, 150, 1, 1),50),
     //Green checkmark seen above the rune selectbox
     LobbyRunesCheckmark (0.3441864333974065D, 0.6302370156526198D,new Color(0, 135, 55, 1),10),
+    LobbyLockGray (0.6737828588406924D, 0.6532991545853033D, new Color(124, 124, 124, 1), 1),
 
     //Button for editing masteries in lobby
     Masteries_Edit(0.38550610189321205D, 0.6609865342295311D, new Color(34, 75, 125, 1),10),
@@ -84,6 +85,9 @@ public enum PixelOffset implements ComparablePixel {
     ARAM_REROLL_BLUE (0.6689782462249011D, 0.6440742990122299D, new Color(37, 81, 134, 1), 10),
     ARAM_REROLL_WHITE (0.690118541734383D, 0.6655989620160678D, new Color(255, 255, 255, 1), 10),
     ARAM_REROLL_GRAY (0.665134556132268D, 0.647149250869921D, new Color(127, 127, 127, 1), 10),
+    /** Bans in normal lobby **/
+    BAN_BANNING (0.42778669291217586D, 0.047661753794212634D, new Color(21, 62, 123, 1), 5),
+    BAN_BANNING_ACTIVE (0.14815823867311986D, 0.13991030952494676D, new Color(203, 101, 25, 1), 5),
     /** DRAFT **/
     Draft_Accept_1 (0.4076073199258522D, 0.5581037621709415D, new Color(226, 112, 0, 1), 10),
     Draft_Accept_2 (0.4969731145795711D, 0.5564381710680324D, new Color(228, 114, 0, 1), 10),
@@ -112,7 +116,7 @@ public enum PixelOffset implements ComparablePixel {
     //Patcher's orange launch button
     Patcher_Launch (0.49697311457957116D, 0.06457398901151389D,new Color(138, 41, 8, 1)),
     Patcher_SetServer (0.9572550031723815D, 0.08763612794419742D),
-    Patcher_Eula_Button (0.36244396133741363D, 0.8454836456909994D),
+    Patcher_Eula_Button (0.3643658063837302D, 0.8333119534342984D, new Color(21, 21, 21, 1)),
     Patcher_Eula_Heading (0.5046604947648373D, 0.08148622422881516D, new Color(24, 117, 143, 1),5),
     Patcher_Eula_BlackBottom (0.4993459613385627D, 0.8505740227715557D, new Color(0, 0, 0, 1), 2),
     
@@ -200,5 +204,10 @@ public enum PixelOffset implements ComparablePixel {
   @Override
   public double distance(Rect r) {
     return Math.sqrt(distanceSq(r));
+  }
+  
+  @Override
+  public String getName() {
+    return name(); 
   }
 }

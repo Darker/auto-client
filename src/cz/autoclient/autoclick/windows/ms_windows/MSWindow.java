@@ -362,6 +362,49 @@ public class MSWindow extends Common implements Window  {
    UserExt.ReleaseDC(hwnd, hdcWindow);
    return image;
   }
+  
+  public BufferedImage print() throws APIException
+   {
+   //bounds contains .width, .height, .top, .left, .bottom and .right
+   Rect bounds = getRect();
+   if(bounds.width == 0 || bounds.height == 0) {
+     throw new APIException("One or both of the window dimensions is zero. Can't make screenshot for such dimensions.");
+   }
+   //Wtf is this, seriously? Random number?
+   WinDef.DWORD SRCCOPY = new WinDef.DWORD(13369376L);
+   //I guess here we retrieve the drawing context of the window...
+   WinDef.HDC hdcWindow = User32Ext.INSTANCE.GetDC(hwnd);
+   //But what is this then? Why two HDC objects?
+   WinDef.HDC hdcMemDC = GDI32.INSTANCE.CreateCompatibleDC(hdcWindow);
+   //And this is some kind of image representation?
+   WinDef.HBITMAP hBitmap = GDI32.INSTANCE.CreateCompatibleBitmap(hdcWindow, (int)bounds.width, (int)bounds.height);
+   //This is another total mystery
+   WinNT.HANDLE hOld = GDI32.INSTANCE.SelectObject(hdcMemDC, hBitmap);
+   //And what is the last parameter?!
+   GDIExt.BitBlt(hdcMemDC, 0, 0, (int)bounds.width, (int)bounds.height, hdcWindow, 0, 0, SRCCOPY);
+   //Select and then delete? Why did we even bother?
+   GDIExt.SelectObject(hdcMemDC, hOld);
+   GDIExt.DeleteDC(hdcMemDC);
+   hOld = hdcMemDC = null;
+   
+   WinGDI.BITMAPINFO bmi = new WinGDI.BITMAPINFO();
+   bmi.bmiHeader.biWidth = (int)bounds.width;
+   bmi.bmiHeader.biHeight = (int)(-bounds.height);
+   bmi.bmiHeader.biPlanes = 1;
+   bmi.bmiHeader.biBitCount = 32;
+   bmi.bmiHeader.biCompression = 0;
+   //This makes sense - allocate 4 bytes for every RGBA pixel
+   Memory buffer = new Memory((long)(bounds.width * bounds.height * 4));
+   //Probably copying the data to memory
+   GDI32.INSTANCE.GetDIBits(hdcWindow, hBitmap, 0, (int)bounds.height, buffer, bmi, 0);
+   
+   BufferedImage image = new BufferedImage((int)bounds.width, (int)bounds.height, 1);
+   image.setRGB(0, 0, (int)bounds.width, (int)bounds.height, buffer.getIntArray(0L, (int)(bounds.width * bounds.height)), 0, (int)bounds.width);
+   GDI32.INSTANCE.DeleteObject(hBitmap);
+   //Release? Does this mean we were blocking window rendering until now?
+   UserExt.ReleaseDC(hwnd, hdcWindow);
+   return image;
+  }
   public static BufferedImage screenshotAll() {
     //Wtf is this, seriously? Random number?
     WinDef.DWORD SRCCOPY = new WinDef.DWORD(13369376L);
@@ -481,7 +524,7 @@ public class MSWindow extends Common implements Window  {
   }
   public static User32Ext UserExt = User32Ext.INSTANCE;
   public static GDI32Ext GDIExt = GDI32Ext.INSTANCE;
-  public static MSWindow windowFromName(String name,final boolean strict) {
+  public static MSWindow windowFromName(String name, final boolean strict) {
     if(strict) {
       WinDef.HWND hwnd = UserExt.FindWindow(null, name);
       if(hwnd==null)
