@@ -45,14 +45,16 @@ public class ConfigurationManager {
   private HashMap<String, Settings> settings;
   
   private Settings main_settings;
+
+  public Settings getSettings() {
+      return main_settings;
+  }
   
   private static int instID = 0;
   
   public final String setting_name;
   protected String currentSetup = null;
   protected String currentChampion = null;
-  
-  private static List<String> champion_names;
   
   public ConfigurationManager(JComboBox input, Settings main) {
     setting_name = "ConfigurationManager";
