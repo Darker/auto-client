@@ -285,6 +285,10 @@ public class Settings implements java.io.Serializable {
     boundInputs.put(setting_name, in);
     useVerifier(in, verif);
   }
+  public void bindToInput(final String setting_name, final Input input, final SettingsInputVerifier<Object> verif) {    
+    boundInputs.put(setting_name, input);
+    useVerifier(input, verif);
+  }
   public void bindToInputSecure(final String setting_name, final JComponent input, final SettingsInputVerifier<Object> verif) {    
     //boundInputs.put(setting_name, input);
     Input in;
@@ -416,12 +420,12 @@ public class Settings implements java.io.Serializable {
     assignEncryptorToAllEncryptedSettings();
     
     OutputStream file = new FileOutputStream(path);
-    OutputStream buffer = new BufferedOutputStream(file);
-    ObjectOutput output = new ObjectOutputStream(buffer);
-    System.out.println("Saving settings HashMap - "+settings.size()+" fields.");
-    output.writeObject(settings);
-    
-    buffer.close();
+    ObjectOutput output;
+    try (OutputStream buffer = new BufferedOutputStream(file)) {
+      output = new ObjectOutputStream(buffer);
+      System.out.println("Saving settings HashMap - "+settings.size()+" fields.");
+      output.writeObject(settings);
+    }
     output.close();
   }
   public void saveToFile(String path) throws IOException {

@@ -111,7 +111,7 @@ public class RobotManager extends Thread {
             }*/
           }
           if(rur.isErrorDisabled()) {
-            //System.out.println("    "+rur.getClass().getName()+" was disabled and will be removed.");
+            System.out.println("    "+rur.getClass().getName()+" was disabled and will be removed.");
             removeRobot(rur);
           }
           /*else {

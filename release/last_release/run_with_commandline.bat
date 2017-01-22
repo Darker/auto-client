@@ -1,3 +1,0 @@
-
-
-java -jar "AutoClient.jar"

@@ -8,10 +8,6 @@ package cz.autoclient.autoclick;
 import com.sun.jna.platform.win32.WinDef;
 //Used for exporting rect class as normal rectangle
 import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.PathIterator;
-import java.awt.geom.Rectangle2D;
-import java.awt.geom.RectangularShape;
 import java.util.ArrayList;
 
 /**
@@ -245,6 +241,35 @@ public class Rect implements RectInterface {
   public int height() {
     return height;
   }
+  /**
+   * Squared distance between LEFT TOP corners. Use middle() to get
+   * midpoints and calculate mid point distance
+   * @param r
+   * @return 
+   */
+  public double distanceSq(Rect r) {
+    return (r.left-this.left)*(r.left-this.left)+(r.top-this.top)*(r.top-this.top);
+  }
+  /**
+   * Distance between LEFT TOP corners. Use middle() to get
+   * midpoints and calculate mid point distance
+   * @param r
+   * @return 
+   */
+  public double distance(Rect r) {
+    return Math.sqrt(distanceSq(r));
+  }
 
+  @Override
+  public Rect crop(int howMuch) {
+    return new Rect(top+howMuch, right-howMuch, bottom-howMuch, left+howMuch);
+  }
 
+  @Override
+  public Rect merge(RectInterface r) {
+    return Rect.byWidthHeight(Math.min(top, r.top()),
+                    Math.min(left, r.left()),
+                    Math.max(width, r.width()),
+                    Math.max(height, r.height()));
+  }
 }

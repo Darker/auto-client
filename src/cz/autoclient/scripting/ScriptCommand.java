@@ -29,9 +29,9 @@ public abstract class ScriptCommand {
    * @param args
    * @throws cz.autoclient.scripting.exception.IllegalCmdArgumentException if the string array is not valid
    */
-  public abstract void parseArguments(Iterable<String> args) throws IllegalCmdArgumentException;
+  public abstract void parseArguments(ArrayList<String> args) throws IllegalCmdArgumentException;
   
-  public abstract boolean execute();
+  public abstract boolean execute() throws Exception;
 
   public void setEnvironment(ScriptEnvironment environment) {
     this.environment = environment;
@@ -77,7 +77,7 @@ public abstract class ScriptCommand {
   public static class CommandEcho extends ScriptCommand {
     private final List<String> strings = new ArrayList();
     @Override
-    public void parseArguments(Iterable<String> args) throws IllegalCmdArgumentException {
+    public void parseArguments(ArrayList<String> args) throws IllegalCmdArgumentException {
       for(String s:args) {
         strings.add(s);
       }

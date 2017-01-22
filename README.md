@@ -2,25 +2,26 @@
 
 # PVP.bot - Client automation for lazy players
 **Auto call, auto accept and other automatic features for League of Legends (LoL) PVP.net Client launcher**
+ - Autoaccept - automatically accept draft and normal games
  - Autocall your lane
  - Autopick - automatically pick a champion, summoner spells runes and masteries
- - Autoaccept - teambuilder games automatically accept players when captain
- - Autoready - automatically press ready in teambuilder
+ - ARAM bot - automatically select masteries for champion in ARAM
+ - Auto-login, auto launch and autoqueue
  - **Works when client is behind another window**
  - **Doesn't move your mouse**
 
-##[Download](https://github.com/Darker/auto-client/raw/master/release/AutoClient_stable.zip)
-###[Latest unstable release](https://github.com/Darker/auto-client/raw/master/release/AutoClient_unstable.zip)
- 
- - [Latest stable version](https://github.com/Darker/auto-client/raw/master/release/AutoClient_stable.zip)
- - [Latest unstable build](https://github.com/Darker/auto-client/raw/master/release/AutoClient_latest.zip)
- - [All versions](https://github.com/Darker/auto-client/tree/master/release)
+## [Visit homepage](http://darker.github.io/auto-client/)
+On the homepage, latest versions and updates will be allways available.
+
+##[Download latest version](http://darker.github.io/auto-client/download/)
+###[Download beta](http://darker.github.io/auto-client/download-beta/)
+ - [All versions](https://github.com/Darker/auto-client/releases)
 
 For detailed information, [please refer to wiki](https://github.com/Darker/auto-client/wiki). On this page I'll
 rather post some technical info and SEO meaningless texts.
 
 ## Help
-You can get help on [wiki](https://github.com/Darker/auto-client/wiki) or on my youtube channel.
+You can get help on [wiki](https://github.com/Darker/auto-client/wiki) or on my youtube channel. There is now also [Facebook page](https://www.facebook.com/autoclient/).
 
 ## [Videos and tutorials](https://www.youtube.com/channel/UCKBWfX3cbOy9xeBKPGwsx-g/videos)
 
@@ -44,16 +45,15 @@ auto calls your lane and automaticaly accepts players in team-builder
 **Ordered by descending probability of being ever implemented**
 
  - ~~Disable/enable start button depending on whether the launcher is available or not~~ **- done**
- - Sound notifications
- - More flexible solution for dll injection
+ - ~~Sound notifications~~ **- done**
  - Auto-requeue
  - ~~Automatically pick runes, masteries and summoner spells for given champion and map~~ **- done**
  - Automatically fetch runes and masteries names and replace the indexes with them
- - [*Technical*] cache screenshot before multiple pixels are being queried
- - automatically kick certain champions in team-builder
+ - ~~[*Technical*] cache screenshot before multiple pixels are being queried~~ **- done**
  - Automatically accept game invite
    - have a blacklist/whitelist for accepts
- - Teambuilder templates that can be auto-filled to save you some clicking.
  - Possibility to edit pixel coordinates externally
- - Version with auto updates
+ - ~~Version with auto updates~~ **- done but requires user confirmation**
  - Converting the automation into scriptable language (Javascript)
+
+[edit readme](https://github.com/Darker/auto-client/edit/master/README.md)

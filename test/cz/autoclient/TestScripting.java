@@ -12,6 +12,9 @@ import cz.autoclient.scripting.exception.CommandException;
 import cz.autoclient.scripting.exception.IllegalCmdArgumentException;
 import cz.autoclient.scripting.exception.ScriptParseException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.junit.Test;
 import org.junit.Before;
 import static org.junit.Assert.*;
@@ -40,7 +43,11 @@ public class TestScripting {
   public void TestParseEscaping() throws ScriptParseException, CommandException {
     OneLineScript test = OneLineScript.parseAndCompile("S>sbecho,S>;sbecho,\\,\\d\\\\,;");
     test.setenv("sb", new StringBuilder());
-    test.run();
+    try {
+      test.run();
+    } catch (InterruptedException ex) {
+      
+    }
     assertEquals("Escaping doesn't work properly!", "S>,\\d\\", test.getenv("sb", StringBuilder.class).toString());
     //new TestException("Exception thrown by command.")
   }
@@ -52,7 +59,7 @@ public class TestScripting {
   public static class EchoToStringBuilder extends ScriptCommand {
     private String data;
     @Override
-    public void parseArguments(Iterable<String> args) throws IllegalCmdArgumentException {
+    public void parseArguments(ArrayList<String> args) throws IllegalCmdArgumentException {
       StringBuilder s = new StringBuilder();
       for(String str:args) {
         s.append(str);
@@ -74,7 +81,7 @@ public class TestScripting {
   public static class TestException extends RuntimeException {}
   public static class CommandEnvException extends ScriptCommand {
     @Override
-    public void parseArguments(Iterable<String> args) throws IllegalCmdArgumentException {
+    public void parseArguments(ArrayList<String> args) throws IllegalCmdArgumentException {
       new Exception().printStackTrace();
     }
     

@@ -6,13 +6,16 @@
 
 package cz.autoclient.autoclick;
 
+import cz.autoclient.PVP_net.ConstData;
+import cz.autoclient.main_automation.WindowTools;
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 
 /**
  *
  * @author Jakub
  */
-public interface ComparablePixel {
+public interface ComparablePixel extends GraphicPredicate {
 
   public default int realX(int width) {
     return (int)Math.round(getX()*width);
@@ -22,6 +25,13 @@ public interface ComparablePixel {
   }
   public double getX();
   public double getY();
+  
+  public default String getName() {
+    return "";
+  }
+  public default boolean test(BufferedImage i) {
+    return WindowTools.checkPoint(i, this);
+  }
   
   public ComparablePixel offset(double x, double y);
   
@@ -40,6 +50,27 @@ public interface ComparablePixel {
   public default boolean equals(ComparablePixel px) {
     return px.getX()==getX() && px.getY()==getY() && px.getColor().equals(getColor());
   }
+  
+  public default Rect toRect(Rect win_dimensions, Rect offsets, Rect size) {
+    return Rect.byWidthHeight(
+      (int)Math.round(getY()*ConstData.smallestSize.height)-offsets.top,
+      (int)Math.round(getX()*ConstData.smallestSize.width)-offsets.left,
+      size.left,
+      size.top
+    );
+  }
+  /**
+   * Returns distance to rectangle's top left corner
+   * @param r
+   * @return 
+   */
+  public double distance(Rect r);
+  /**
+   * Returns squared distance to rectangle's top left corner
+   * @param r
+   * @return 
+   */
+  public double distanceSq(Rect r);
   
   /** Getter for the point color, if any.
    * 

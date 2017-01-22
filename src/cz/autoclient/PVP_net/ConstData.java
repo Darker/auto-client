@@ -30,6 +30,7 @@ public class ConstData {
     //With cold blood, I'll assume these Riot idiots will never allow you to change Client aspect ratio
     return size.right/(double)smallestSize.right;
   }
+  
   public static double sizeCoeficientInverted(Rect size) {
     //With cold blood, I'll assume these Riot idiots will never allow you to change Client aspect ratio
     return (double)smallestSize.right/size.right;

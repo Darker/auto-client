@@ -9,12 +9,15 @@ package cz.autoclient.scripting;
 import cz.autoclient.scripting.exception.CommandException;
 import cz.autoclient.scripting.exception.ScriptParseException;
 import java.util.ArrayList;
+import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Jakub
  */
-public class OneLineScript {
+public class OneLineScript implements Callable<Boolean> {
   private ArrayList<CommandBuilder> preCompiled;
   private ArrayList<ScriptCommand> compiled;
   private ScriptEnvironment environment;
@@ -42,12 +45,31 @@ public class OneLineScript {
     }
     preCompiled = null;
   }
-  public void run() {
+  @Override
+  public Boolean call() throws InterruptedException {
+    run();
+    return true;
+  }
+  public void run() throws InterruptedException {
     if(compiled==null)
       throw new IllegalStateException("Tried to run uncompiled script.");
     for(ScriptCommand cl : compiled) {
-      cl.execute();
+      try {
+        cl.execute();
+      } catch (Exception ex) {
+        if(ex instanceof InterruptedException)
+          throw (InterruptedException)ex;
+      }
     }
+  }
+  
+  /**
+   * Registers an action to be taken when the 
+   * script is sleeping.
+   * The action given is responsible for not taking longer than given timeout.
+   */
+  public void addSleepAction(Callable action, int maxDuration) {
+    
   }
   /**
    * Configure environmentironment variable in the inner environmentironment.

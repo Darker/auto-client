@@ -11,9 +11,11 @@ import java.io.IOException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 
 /**
  *
@@ -22,37 +24,38 @@ import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 public enum UniqueID implements PasswordInitialiser {
   MAC_ADDRESS {
     @Override
-    public String getPassword() {
+    public String getPassword() throws PasswordFailedException {
        return getMacAddress();
     }
   },
   WINDOWS_USER_SID {
     @Override
-    public String getPassword() {
-      return getSingleMatch("(S\\-[0-9]\\-[0-9]\\-[0-9\\-]+)", getCmdline("whoami /user"));
+    public String getPassword() throws PasswordFailedException {
+      try {
+        return getSingleMatch("(S\\-[0-9]\\-[0-9]\\-[0-9\\-]+)", getCmdline("whoami /user", 2000));
+      } catch (IOException ex) {
+        throw new PasswordFailedException("IO exception occured while trying to fetch UID.", ex);
+        //Logger.getLogger(UniqueID.class.getName()).log(Level.SEVERE, null, ex);
+      } catch (TimeoutException ex) {
+        //Logger.getLogger(UniqueID.class.getName()).log(Level.SEVERE, null, ex);
+        throw new PasswordFailedException("The system process responsible for UID generation timed out.", ex);
+      }
     }
   };
   
   @Override
-  public abstract String getPassword();
-  
-  @Override
-  public boolean equals(PasswordInitialiser p) {
-    return p!=null && (p==this || p.getPassword().equals(this.getPassword()));
-  }
+  public abstract String getPassword() throws PasswordFailedException;
   /*@Override
   public int hashCode() {
     return getPassword().hashCode();
   }*/
-    
-  public static String getCmdline(String command) {
+
+  
+  public static String getCmdline(String command, int timeout) throws IOException, TimeoutException {
     String ret;
-    try {
-      ret = NativeProcess.readWholeOutput(command, 2000);
-    }
-    catch(IOException e) {
-      return ""; 
-    }
+
+    ret = NativeProcess.readWholeOutput(command, timeout);
+
     if(ret!=null)
       return ret;
     else 

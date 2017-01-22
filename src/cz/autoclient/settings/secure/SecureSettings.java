@@ -104,7 +104,7 @@ public class SecureSettings {
     initialized = false;
   }
   
-  public String getMergedPassword() {
+  public String getMergedPassword() throws PasswordFailedException {
     StringBuilder data = new StringBuilder();
     for(PasswordInitialiser intz : passwords) {
       data.append(intz.getPassword());
@@ -112,7 +112,7 @@ public class SecureSettings {
     return data.toString();
   }
   
-  public void init() {
+  public void init() throws PasswordFailedException {
     if(initialized)
       return;
 
@@ -184,6 +184,9 @@ public class SecureSettings {
     } catch (InvalidKeyException | ShortBufferException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
       throw new InvalidPasswordException("Decryption algorithm has failed to decrypt binary data properly.");
     }
+    catch(PasswordFailedException ex) {
+      throw new InvalidPasswordException("Failed to obtain the password!", ex);
+    }
 
     ObjectInputStream is;
     try {
@@ -206,11 +209,14 @@ public class SecureSettings {
     } catch (IOException | InvalidAlgorithmParameterException | InvalidKeyException | ShortBufferException | IllegalBlockSizeException | BadPaddingException ex) {
       System.out.println("ENCRYPT FAILED: "+ex);
       ex.printStackTrace();
+    } catch(PasswordFailedException ex) {
+      System.out.println("Password FAILED: "+ex);
+      ex.printStackTrace();
     }
     return null;
   }
   
-  public byte[] encrypt(byte[] data) throws InvalidAlgorithmParameterException, InvalidKeyException, ShortBufferException, IllegalBlockSizeException, BadPaddingException {
+  public byte[] encrypt(byte[] data) throws InvalidAlgorithmParameterException, InvalidKeyException, ShortBufferException, IllegalBlockSizeException, BadPaddingException, PasswordFailedException {
     init();
     
     cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
@@ -219,7 +225,7 @@ public class SecureSettings {
     enc_len += cipher.doFinal(encrypted, enc_len);
     return encrypted;
   }
-  public byte[] decrypt(byte[] data) throws InvalidKeyException, ShortBufferException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+  public byte[] decrypt(byte[] data) throws InvalidKeyException, ShortBufferException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, PasswordFailedException {
     init();
     
     cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);

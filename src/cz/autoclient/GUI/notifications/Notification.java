@@ -20,6 +20,8 @@ public abstract class Notification {
   protected final JCheckBoxMenuItem menu_item;
   protected final Settings settings;
   protected final Def definition;
+  protected final String settingName;
+  protected boolean defaultValue;
   /**
    * This constructor initiates the notification menu item that allows to toggle this 
    * notification on and off.
@@ -29,12 +31,30 @@ public abstract class Notification {
   protected Notification(Def def, Settings sets) {
     settings = sets;
     definition = def;
+    settingName = "notif_"+definition.path.replace(".", "_")+"_"+this.getClass().getSimpleName().replace("Notification", "").toLowerCase();
+    // Try to lead default value from settings
+    defaultValue = false;
+    try {
+      Setnames setting = Setnames.valueOf(settingName.toUpperCase());
+      if(setting!=null) {
+        if(setting.default_val!=null && setting.default_val instanceof Boolean) {
+          defaultValue = (boolean)setting.default_val;
+        }
+      }
+    }
+    catch(IllegalArgumentException e) {}
     
-    menu_item = new JCheckBoxMenuItem();
-    settings.bindToInput(definition.setting.name, menu_item);
-    menu_item.setState(settings.getBoolean(definition.setting.name, (boolean)definition.setting.default_val));
-    menu_item.setText(definition.name);
-    menu_item.setToolTipText(definition.text);
+    System.out.println("Notification setting name: \""+settingName+"\" (Setnames."+settingName.toUpperCase()+")");
+    if(def.visible) {
+      menu_item = new JCheckBoxMenuItem();
+      settings.bindToInput(settingName, menu_item);
+      menu_item.setState(settings.getBoolean(settingName, defaultValue));
+      menu_item.setText(definition.name);
+      menu_item.setToolTipText(definition.text);
+    }
+    else {
+      menu_item = null; 
+    }
   }
   /**
    * Creates a notification based on implementation. Can use the definition and operate on it.
@@ -45,51 +65,83 @@ public abstract class Notification {
     return menu_item; 
   }
   
+  public boolean isEnabled() {
+    return settings.getBoolean(settingName, defaultValue);
+  }
+  
   
   public enum Def {
     TB_GROUP_JOINED("TB: Group joined",
                  "tb.solo.group_joined",
                  "Teambuilder group was joined, waiting for ready button.",
-                 Setnames.NOTIF_MENU_TB_GROUP_JOINED,
-                 TrayIcon.MessageType.INFO
+                 TrayIcon.MessageType.INFO,
+                 false
     ),
     TB_GAME_CAN_START("TB: Game can start",
                  "tb.captain.game_can_start",
                  "Everybody is ready. It's time to start the game!",
-                 Setnames.NOTIF_MENU_TB_READY_TO_START,
-                 TrayIcon.MessageType.INFO
+                 TrayIcon.MessageType.INFO,
+                 false
     ),
     TB_PLAYER_JOINED("TB: A player joined the group",
                  "tb.captain.player_joined",
                  "A player has joined your group, you might want to check him out.",
-                 Setnames.NOTIF_MENU_TB_PLAYER_JOINED,
-                 TrayIcon.MessageType.INFO
+                 TrayIcon.MessageType.INFO,
+                 false
     ),
     BLIND_TEAM_JOINED("In lobby",
                  "blind.lobby.joined",
                  "You've been put in lobby with your teammates.",
-                 Setnames.NOTIF_MENU_BLIND_IN_LOBBY,
+                 TrayIcon.MessageType.INFO,
+                 "/bell.wav"
+    ),
+    DRAFT_TEAM_JOINED("Draft lobby",
+                 "draft.lobby.joined",
+                 "You've been put in draft lobby!",
+                 TrayIcon.MessageType.INFO,
+                 "/bell.wav"
+    ),
+    UPDATE_AVAILABLE("Update available",
+                 "app.update.exists",
+                 "An update is available. Check Tools->Updates. Configure this notification on Notifications menu.",
+                 TrayIcon.MessageType.INFO
+    ),
+    UPDATE_DOWNLOADED("Update downloaded",
+                 "app.update.downloaded",
+                 "An update is ready to install. Check Tools->Updates.",
                  TrayIcon.MessageType.INFO
     ),
     ;
-    Def(String n, String p, String t, Setnames setting, TrayIcon.MessageType type) {
+    Def(String n, String p, String t, TrayIcon.MessageType type, String audioFile, boolean visible) {
       name = n;  
       text = t;
       path = p;
-      this.setting = setting;
+      this.audioFile = audioFile;
       this.type = type;
+      this.visible = visible;
     }
+    Def(String n, String p, String t, TrayIcon.MessageType type, boolean visible) {
+      this(n,p,t,type, null, visible);
+    }
+    Def(String n, String p, String t, TrayIcon.MessageType type, String audioFile) {
+      this(n,p,t,type, audioFile, true);
+    }
+    Def(String n, String p, String t, TrayIcon.MessageType type) {
+      this(n,p,t,type, null, true);
+    }
+    
     public final String name;
     public final String text;
     public final String path;
-    public final Setnames setting;
+    public final String audioFile;
     public final TrayIcon.MessageType type;
+    public final boolean visible;
     
-    public Notification createInstance(Class<? extends Notification> source, Settings set, Object... params) throws NoSuchMethodException
+    public Notification createInstance(Class<? extends Notification> source, Settings set, Object... params) throws Exception
     {
       return instantiate(source, this, set, params);
     }
-    public static Notification instantiate(Class<? extends Notification> source, Def def, Settings set, Object... params) throws NoSuchMethodException
+    public static Notification instantiate(Class<? extends Notification> source, Def def, Settings set, Object... params) throws Exception
     {
       //Copying ARGUMENT TYPES:
       Class[] argument_types = new Class[2+params.length];
@@ -122,7 +174,11 @@ public abstract class Notification {
       } catch (IllegalArgumentException ex) {
         throw new NoSuchMethodException("Illegal argument exception.");
       } catch (InvocationTargetException ex) {
-        throw new NoSuchMethodException("InvocationTargetException");
+        Throwable exception = ex.getTargetException();
+        if(exception instanceof Exception)
+          throw (Exception)exception;
+        else
+          throw new Exception("Shit goin' down, throwable thrown! WTF run!!!");
       }
 
       /*catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
@@ -135,11 +191,15 @@ public abstract class Notification {
         try {
           target.addNotification(instantiate(source, d, set, params));
         }
-        catch(NoSuchMethodException e) {
+        catch(CantCreateNotification e) {
+          System.out.println("Cannot create "+d.name()+" because: "+e.getMessage());
+        }
+        catch(Exception e) {
+          System.err.println("createAll failed for "+d.name()); 
+          e.printStackTrace();
           //Nothing, just ignore it.
         }
       }
     }
-
   }
 }

@@ -45,6 +45,10 @@ public class ConfigurationManager {
   private HashMap<String, Settings> settings;
   
   private Settings main_settings;
+
+  public Settings getSettings() {
+      return main_settings;
+  }
   
   private static int instID = 0;
   
@@ -52,15 +56,19 @@ public class ConfigurationManager {
   protected String currentSetup = null;
   protected String currentChampion = null;
   
-  private static List<String> champion_names;
-  
   public ConfigurationManager(JComboBox input, Settings main) {
-    setting_name = "ConfigurationManager_"+(instID++);
+    setting_name = "ConfigurationManager";
     //Initialise settings
     main_settings = main;
     
     if(main.exists(setting_name, HashMap.class)) {
       settings = (HashMap)main.getSetting(setting_name); 
+    }
+    // This is used to convert old settings manager to new one
+    else if(main.exists(setting_name+"_0", HashMap.class)) {
+      settings = (HashMap)main.getSetting(setting_name+"_0"); 
+      main.empty(setting_name+"_0");
+      main.setSetting(setting_name, settings, true);
     }
     else {
       settings = new HashMap<String, Settings>();
@@ -159,13 +167,13 @@ public class ConfigurationManager {
     //Component[] comps = input.getComponents();
     String item = (String)input.getEditor().getItem();//(String)input.getSelectedItem();
     
-    if(champion_names==null)
-      champion_names = ConstData.lolData.getChampions().enumValues(Champions.getName, true);
+    //if(champion_names==null)
+    //  champion_names = ConstData.lolData.getChampions().enumValues(Champions.getName, true);
     if(item!=null) {
       //System.out.println("JComboBox.getEditor().getItem() = "+input.getEditor().getItem()+"");
       //System.out.println("JComboBox.getSelectedItem()     = "+input.getSelectedItem()+"");
 
-      if(champion_names.contains(item)) {
+      if(!item.isEmpty()) {
         //Avoid repetitive loading...
         if(currentChampion!=null && currentChampion.equals(item))
           return;
@@ -209,7 +217,7 @@ public class ConfigurationManager {
     if(currentSetup!=null)
       delete.setEnabled(true);
     
-    System.out.println("Saved settings for "+currentChampion+". "+settings.size()+" settings total.");
+    //System.out.println("Saved settings for "+currentChampion+". "+settings.size()+" settings total.");
   }
   protected void loadSettings(String name) {
     Settings set = settings.get(name);
@@ -227,9 +235,9 @@ public class ConfigurationManager {
         main_settings.displaySettingsOnBoundFields(names);
       }
     }
-    System.out.println("Loaded settings for "+name);
-    if(currentSetup==null && name!=null)
-      System.out.println("  Acutally loaded null, settings were unavalable.");
+    //System.out.println("Loaded settings for "+name);
+    //if(currentSetup==null && name!=null)
+    //  System.out.println("  Acutally loaded null, settings were unavalable.");
   }
   protected void loadSettings() {
     loadSettings(currentChampion);

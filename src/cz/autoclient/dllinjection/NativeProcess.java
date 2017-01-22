@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.concurrent.TimeoutException;
 
 /**
  *
@@ -36,7 +37,7 @@ public class NativeProcess {
     catch(IOException e) {}
     return b.toString();
   }
-  public static String readWholeOutput(final Process p, long timeout) {
+  public static String readWholeOutput(final Process p, long timeout) throws TimeoutException {
     ProcessReader rdr = new ProcessReader(p);
     rdr.start();
     try {
@@ -44,14 +45,14 @@ public class NativeProcess {
       rdr.interrupt();
     }
     catch(InterruptedException e) {
-      return null; 
+      throw new TimeoutException("Process reader timed out.");
     }
     if(rdr.hasTerminatedOk())
       return rdr.result;
     else 
       return null;
   }
-  public static String readWholeOutput(final String p, long timeout) throws IOException {
+  public static String readWholeOutput(final String p, long timeout) throws IOException, TimeoutException {
     return readWholeOutput(Runtime.getRuntime().exec(p), timeout);
   }
   

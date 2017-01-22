@@ -8,6 +8,7 @@ package cz.autoclient;
 import cz.autoclient.settings.Settings;
 import cz.autoclient.settings.secure.EncryptedSetting;
 import cz.autoclient.settings.secure.InvalidPasswordException;
+import cz.autoclient.settings.secure.PasswordFailedException;
 import cz.autoclient.settings.secure.SecureSettings;
 import java.io.File;
 import java.io.IOException;
@@ -165,7 +166,7 @@ public class TestSettings {
   }
   
   @Test(expected = NullPointerException.class)
-  public void test13_noEncryptorAfterDeserialize() {
+  public void test13_noEncryptorAfterDeserialize() throws PasswordFailedException {
     assertEquals("The added setting was lost.", 2.0, inputSet.getSetting("VERSION"));
     System.out.println("Single item password: "+inputSet.getSetting("encrypted int", EncryptedSetting.class).getEncryptor().getMergedPassword());
   }
