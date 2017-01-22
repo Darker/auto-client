@@ -229,6 +229,7 @@ import sirius.constants.IWMConsts;
        return robot;
      }
      catch(Exception e) {
+       System.out.println("Error when creating robot: "+e.getMessage());
        throw new NoSuchRobotException("Constructor has failed.");
      }
    }
