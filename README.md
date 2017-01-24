@@ -28,9 +28,8 @@ You can get help on [wiki](https://github.com/Darker/auto-client/wiki) or on my 
 I have created a video [chanel called LoL AutoClient](https://www.youtube.com/channel/UCKBWfX3cbOy9xeBKPGwsx-g/videos) where all features will be eventually explained and discussed. You can contact me using this channel as well.
 
 ## What is this?
-**This text partially exists for search engines, you can skip it if you have the general idea.**
 This repository presents sourcecode for League of Legends PVP.net client bot that automatically accepts games, 
-auto calls your lane and automaticaly accepts players in team-builder
+auto calls your lane. It is League of Legends auto login and auto queue. It auto accepts games, selects champion (without instalock) selects runes and masteries. Auto call your lane.
 
 ## Known problems
 **Issues about anything bellow will be closed without longer reply**
