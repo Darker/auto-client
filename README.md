@@ -11,8 +11,8 @@
  - Auto launch - automatically click 'Launch' button after opening the client
  - Auto queue - automatically start queuing
  - ARAM bot - automatically select masteries for a champion in ARAM
- - **Work in background mode**
- - **Do not move your mouse**
+ - **Works in background mode**
+ - **Doesn't move your mouse**
 
 ## Homepage
 On the [homepage](http://darker.github.io/auto-client/), latest versions and updates will be always available.
@@ -31,10 +31,13 @@ You can get help on [wiki](https://github.com/Darker/auto-client/wiki) or on my 
 ## Tutorials
 I have created a [video channel](https://www.youtube.com/channel/UCKBWfX3cbOy9xeBKPGwsx-g/videos) called 'LoL AutoClient' where all features are explained. You can contact me using this channel as well.
 
+## What is this?
+ This repository presents source code for League of Legends PVP.net client bot that automatically accepts games, calls your lane, selects champion (without instalock), selects runes and masteries. It also supports auto login and auto queue.
+
 ## Known problems
 **Issues about anything bellow will be closed without longer reply**
 
- - For setting to take effect, Your focus must be on another text field
+ - For setting to take effect, your focus must be on another text field
  - The program does not work when the PVP.net window is minimized (**won't fix**)
  - The text is not called properly sometimes
  - Teambuilder captain mode is not 100% reliable
