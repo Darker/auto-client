@@ -2,17 +2,13 @@
 /build/*
 /target/*
 *.exe
+*.bin
 /data/*
 /LOLResources/*
 /LOLResources/*.*
 /test_data/*
 /images/unused/*
 /launcher_screens/*.png
-exclude.txt
-release.bat
-./run_as_admin.bat
-./run_with_commandline.bat
-./update_test_file.bat
 ./AutoClient.jar
 /release/tmp/*
 *.7z
@@ -22,6 +18,6 @@ release.bat
 /release/**
 /release/last_release/data/settings.bin
 /stop_flashing/wrong_return_value.txt
-*.jar
+*.jar                 
 !/release/*/*.jar
-/nbproject/
+/nbproject/**
