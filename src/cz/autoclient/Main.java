@@ -8,6 +8,7 @@ import cz.autoclient.GUI.summoner_spells.ButtonSummonerSpellMaster;
 import cz.autoclient.GUI.summoner_spells.InputSummonerSpell;
 import cz.autoclient.GUI.updates.UpdateProgressWindow;
 import cz.autoclient.PVP_net.Setnames;
+import cz.autoclient.main_automation.AutomatV2;
 import cz.autoclient.robots.Robot;
 import cz.autoclient.robots.exceptions.NoSuchRobotException;
 import cz.autoclient.settings.InputHandlers;
@@ -110,7 +111,7 @@ import sirius.constants.IWMConsts;
      if ((ac == null) || (!ac.isAlive()))
      {
        System.out.println("Starting tool..");
-       ac = new Automat(gui, settings);
+       ac = new AutomatV2(gui, settings);
        ac.start();
      }
    }

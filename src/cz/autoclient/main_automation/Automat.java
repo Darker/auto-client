@@ -41,22 +41,23 @@ import cz.autoclient.scripting.SleepAction;
 import cz.autoclient.scripting.SleepActionLambda;
 import cz.autoclient.scripting.exception.CommandException;
 import cz.autoclient.scripting.exception.ScriptParseException;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Automat
-    extends Thread {
+    extends Thread implements AutomatInterface {
 
   Window window;
    //User32 user32 = this.window.getUser32();
   //Kernel32 kernel = this.window.getKernel32();
   Gui gui;
-  private Settings settings;
-  private ChampionImages championColors = null;
+  protected Settings settings;
+  protected ChampionImages championColors = null;
 
-  private boolean pretendAccepted = false;
+  protected boolean pretendAccepted = false;
 
   //Logger for thread
   {
@@ -112,7 +113,7 @@ public class Automat
     end();
   }
 
-  private void end() {
+  protected void end() {
     gui.displayToolAction(false);
   }
 
@@ -218,6 +219,7 @@ public class Automat
     }
   }
 
+  @Override
   public synchronized void simulateAccepted() {
     pretendAccepted = true;
   }
@@ -317,7 +319,7 @@ public class Automat
       }, 750);
     }
     this.callText(settings.getStringEquivalent(Setnames.BLIND_CALL_TEXT.name), new SleepAction[] {
-      selectChampion
+        selectChampion
     });
     // If champion wasn't selected while calling text, now it's the time
     if(!selectChampion.done()) {
@@ -487,6 +489,7 @@ public class Automat
     click(PixelOffset.LobbyTopBar);
   }
   
+  @Override
   public void callText(final String message) throws InterruptedException {
     callText(message, null);
   }
@@ -497,6 +500,7 @@ public class Automat
    * @param actions actions to perform when sleeping if message is script
    * @throws InterruptedException
    */
+  @Override
   public void callText(final String message, SleepAction[] actions) throws InterruptedException {
     if (message == null || message.length() == 0) {
       return;
@@ -745,11 +749,11 @@ public class Automat
     return false;
   }
 
-  private void Enter() {
-    this.window.keyDown(13);
-    this.window.keyUp(13);
+  protected void Enter() {
+    this.window.keyDown(KeyEvent.VK_ENTER);
+    this.window.keyUp(KeyEvent.VK_ENTER);
   }
-  private void click(PixelOffset pos) {
+  protected void click(PixelOffset pos) {
     try {
       Rect rect = window.getRect();
       window.click((int) (rect.width * pos.x), (int) (rect.height * pos.y));
@@ -758,7 +762,7 @@ public class Automat
     }
   }
 
-  private void click(ComparablePixel pos) {
+  protected void click(ComparablePixel pos) {
     try {
       Rect rect = window.getRect();
       window.click((int) (rect.width * pos.getX()), (int) (rect.height * pos.getY()));
@@ -773,7 +777,7 @@ public class Automat
    *
    * @param pos rectangle to click on.
    */
-  private void click(Rect pos) {
+  protected void click(Rect pos) {
     try {
       Rect rect = window.getRect();
       window.click((int) (rect.width * pos.left), (int) (rect.height * pos.top));
@@ -782,7 +786,7 @@ public class Automat
     }
   }
   
-  private void slowClick(ComparablePixel pos, int delay) throws InterruptedException {
+  protected void slowClick(ComparablePixel pos, int delay) throws InterruptedException {
     try {
       Rect rect = window.getRect();
       window.slowClick((int) (rect.width * pos.getX()), (int) (rect.height * pos.getY()), delay);

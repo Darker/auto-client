@@ -21,11 +21,6 @@ import cz.autoclient.autoclick.windows.cache.title.CacheByTitle;
  * @author Jakub
  */
 public class LaunchBot extends Robot {
-
-  @Override
-  public String getWindowName() {
-    return ConstData.patcher_window_title;
-  }
   /**
    * Remembers whether the last go() went with errors or not
    */

@@ -13,8 +13,8 @@
    public static final Kernel32Ext INSTANCE = (Kernel32Ext)Native.loadLibrary("kernel32.dll", Kernel32Ext.class, W32APIOptions.DEFAULT_OPTIONS);
    
    public abstract Pointer VirtualAllocEx(WinNT.HANDLE paramHANDLE, Pointer paramPointer, int paramInt, WinDef.DWORD paramDWORD1, WinDef.DWORD paramDWORD2);
-   
    public abstract boolean VirtualFreeEx(WinNT.HANDLE paramHANDLE, Pointer paramPointer, int paramInt, WinDef.DWORD paramDWORD);
+   public abstract DWORD GetModuleFileNameExW(WinNT.HANDLE hProcess, WinNT.HMODULE hModule, char[] pathName, WinNT.DWORD pathNameSize);
  }
 
 

@@ -17,6 +17,7 @@ import cz.autoclient.autoclick.comvis.DebugDrawing;
 import cz.autoclient.autoclick.comvis.ScreenWatcher;
 import cz.autoclient.autoclick.exceptions.APIException;
 import java.awt.Color;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 
 /**
@@ -237,8 +238,8 @@ public class WindowTools {
        return;
      w.slowClick(field, 30);
      w.typeString(text);
-     w.keyDown(13);
-     w.keyUp(13);
+     w.keyDown(KeyEvent.VK_ENTER);
+     w.keyUp(KeyEvent.VK_ENTER);
    }
    public static void say(Window w, String text, PixelOffset field) throws APIException, InterruptedException {
      if(text==null || text.isEmpty())

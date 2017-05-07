@@ -6,6 +6,7 @@
 
 package cz.autoclient.autoclick.windows.cache;
 
+import com.sun.jna.platform.win32.WinDef;
 import cz.autoclient.autoclick.windows.Window;
 
 /**
@@ -31,7 +32,7 @@ public interface CachedWindow<T> {
    * @return 
    */
   public boolean isMatch(T valueToCompare, boolean strict);
-  
+
   public default boolean hasValidWindow() {
     Window w = getCache();
     return w!=null && w.isValid();
@@ -47,6 +48,5 @@ public interface CachedWindow<T> {
     public void deleteCache() {}
     @Override
     public boolean isMatch(Object valueToCompare, boolean strict) {return false;}
-    
   };
 }

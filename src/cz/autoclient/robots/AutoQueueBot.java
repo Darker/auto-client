@@ -32,10 +32,6 @@ public class AutoQueueBot extends Robot {
   public AutoQueueBot(Settings s) {
     settings = s;
   }
-  @Override
-  public String getWindowName() {
-    return ConstData.window_title_part;
-  }
   /**
    * Remembers whether the last go() went with errors or not
    */
@@ -49,6 +45,10 @@ public class AutoQueueBot extends Robot {
    */
   @Override
   protected void go() throws InterruptedException {
+    disableDueToException(new RuntimeException("Auto queue not supported in new client yet!"));
+    if(true)
+      return;
+    
     IterationLimiter limit = new IterationLimiter();
     watchLoLExit.resetChanged();
     //System.out.println("Start waiting for launch button.");

@@ -120,9 +120,9 @@ public enum PixelOffset implements ComparablePixel {
     Patcher_Eula_Heading (0.5046604947648373D, 0.08148622422881516D, new Color(24, 117, 143, 1),5),
     Patcher_Eula_BlackBottom (0.4993459613385627D, 0.8505740227715557D, new Color(0, 0, 0, 1), 2),
     
-    Login_UsernameField (0.30478860994791757D, 0.3982062655710023D, new Color(242, 243, 243, 1), 4),
-    Login_PasswordField (0.10107303503836476D, 0.47648942276806283D, new Color(242, 243, 243, 1), 4),
-    Login_ButtonDisabled (0.28557015948475223D, 0.5254193957017744D, new Color(140, 140, 140, 1), 5)
+    Login_UsernameField (0.9092088770144681D, 0.2664996150416531D, new Color(12, 20, 28, 1), 30),
+    Login_PasswordField (0.9092088770144681D, 0.34508283486162766D, new Color(0, 3, 6, 1), 30),
+    Login_ButtonDisabled (0.8736547436576121D, 0.7379989339615008D, new Color(30, 35, 40, 1), 5)
     ;
     
     

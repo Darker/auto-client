@@ -7,7 +7,6 @@
 package cz.autoclient.autoclick.windows.cache;
 
 import cz.autoclient.autoclick.windows.Window;
-import cz.autoclient.autoclick.windows.WindowValidator;
 import java.util.regex.Pattern;
 
 /**

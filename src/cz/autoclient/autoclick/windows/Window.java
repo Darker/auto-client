@@ -29,26 +29,26 @@ public interface Window {
    * @param x x coordinate form the top-left corner of the window client area
    * @param y y coordinate form the top-left corner of the window client area
    */
-  public void mouseDown(int x, int y);
+  default public void mouseDown(int x, int y)  {mouseDown(x, y, MouseButton.Left);}
   /**
    * Simulates mouse botton down event in the target window.
    * @param x x coordinate form the top-left corner of the window client area
    * @param y y coordinate form the top-left corner of the window client area
    * @param button button picked from supplied enum {@link MouseButton}
    */
-  public void mouseDown(int x, int y, MouseButton button) throws WindowAccessDeniedException;
+  default public void mouseDown(int x, int y, MouseButton button) throws WindowAccessDeniedException {mouseDown(x, y, button, false, false, false);}
   public void mouseDown(int x, int y, MouseButton button, boolean isControl, boolean isAlt, boolean isShift) throws WindowAccessDeniedException;
   
-  public void mouseUp(int x, int y) throws WindowAccessDeniedException;
-  public void mouseUp(int x, int y, MouseButton button) throws WindowAccessDeniedException;
+  default public void mouseUp(int x, int y) throws WindowAccessDeniedException {mouseUp(x, y, MouseButton.Left);}
+  default public void mouseUp(int x, int y, MouseButton button) throws WindowAccessDeniedException {mouseUp(x, y, button, false, false, false);}
   public void mouseUp(int x, int y, MouseButton button, boolean isControl, boolean isAlt, boolean isShift) throws WindowAccessDeniedException;
   
-  public void click(int x, int y) throws WindowAccessDeniedException;
-  public void click(int x, int y, MouseButton button) throws WindowAccessDeniedException;
+  default public void click(int x, int y) throws WindowAccessDeniedException {click(x, y, MouseButton.Left);}
+  default public void click(int x, int y, MouseButton button) throws WindowAccessDeniedException {click(x, y, button, false, false, false);}
   public void click(int x, int y, MouseButton button, boolean isControl, boolean isAlt, boolean isShift) throws WindowAccessDeniedException;
 
-  public void doubleclick(int x, int y) throws WindowAccessDeniedException;
-  public void doubleclick(int x, int y, MouseButton button) throws WindowAccessDeniedException;
+  default public void doubleclick(int x, int y) throws WindowAccessDeniedException {doubleclick(x, y, MouseButton.Left);}
+  default public void doubleclick(int x, int y, MouseButton button) throws WindowAccessDeniedException {doubleclick(x, y, button, false, false, false);}
   public void doubleclick(int x, int y, MouseButton button, boolean isControl, boolean isAlt, boolean isShift) throws WindowAccessDeniedException;
   
   /**
@@ -127,7 +127,11 @@ public interface Window {
    * The user may interact with dfferent window however.
    * @return true if the window can be seen on screen**/
   public boolean isVisible();
-  
+  /**
+   * If true, this is the foreground window on user's desktop.
+   * @return false if another window is focused
+   */
+  public boolean isForeground();
   /** Check whether this Window object still links to some real valid window
    * @return true if window related to this object still exists in the system
    */
@@ -173,6 +177,8 @@ public interface Window {
   public boolean isAdmin();
   
   public Process getProcess();
+  
+  public String getProcessName();
   /** OTHER WINDOWS **/
   
   /**
@@ -224,7 +230,7 @@ public interface Window {
   public static List<Window> FindWindows(WindowValidator validator) throws UnsupportedOperationException {
     String sysname = System.getProperty("os.name");
     if(sysname.contains("Windows")) {
-      return MSWindow.windows(validator);
+      return MSWindow.windows(validator, -1);
     }
     else {
       throw new UnsupportedOperationException("Window API not supported on this OS.");

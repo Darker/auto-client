@@ -20,11 +20,6 @@ import cz.autoclient.autoclick.exceptions.APIException;
  * @author Jakub
  */
 public class ContinueBot extends Robot {
-
-  @Override
-  public String getWindowName() {
-    return ConstData.game_window_title;
-  }
   /**
    * Remembers whether the last go() went with errors or not
    */

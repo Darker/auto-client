@@ -7,6 +7,9 @@
 package cz.autoclient.PVP_net;
 
 import cz.autoclient.autoclick.Rect;
+import cz.autoclient.autoclick.windows.Window;
+import cz.autoclient.autoclick.windows.WindowValidator;
+import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
 import cz.autoclient.league_of_legends.LoLVersion;
 import java.io.File;
 
@@ -15,9 +18,10 @@ import java.io.File;
  * @author Jakub
  */
 public class ConstData {
-  public static final String window_title = "PVP.net Client";
-  public static final String window_title_part = "PVP.net";
-  public static final String process_name = "LolClient.exe";
+  public static final String window_title = "League of Legends";
+  public static final String window_title_part = "League of Legends";
+  public static final String process_name = "LeagueClientUx.exe";
+  public static final String game_process_name = "";
   public static final String test_process_name = "Annoyance.exe";
  
   public static final String patcher_window_title = "LoL Patcher";
@@ -26,6 +30,14 @@ public class ConstData {
   public static final Rect normalSize = new Rect(0, 1152, 720, 0);
   public static final Rect smallestSize = new Rect(0, 1024, 640, 0);
   public static final LoLVersion lolData = new LoLVersion(LoLVersion.Realm.NA, new File("LOLResources"), true);
+  
+  public static final Window getClientWindow() {
+    return MSWindow.findWindow(new WindowValidator.CompositeValidatorAND(new WindowValidator[] {
+      new WindowValidator.ExactTitleValidator("League of Legends"),
+      new WindowValidator.ProcessNameValidator(ConstData.process_name)
+    })
+    );
+  }
   public static double sizeCoeficient(Rect size) {
     //With cold blood, I'll assume these Riot idiots will never allow you to change Client aspect ratio
     return size.right/(double)smallestSize.right;

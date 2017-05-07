@@ -6,8 +6,11 @@
 
 package cz.autoclient.robots;
 
+import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.autoclick.windows.Window;
-import cz.autoclient.autoclick.windows.cache.title.CacheByTitle;
+import cz.autoclient.autoclick.windows.WindowRobot;
+import cz.autoclient.autoclick.windows.WindowValidator;
+import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
 import cz.autoclient.robots.exceptions.RobotDisabledException;
 import cz.autoclient.robots.helpers.DummyLogger;
 import org.apache.logging.log4j.Logger;
@@ -231,7 +234,11 @@ public abstract class Robot implements Runnable {
   
   public Window getWindow() {
     if(window==null || !window.isValid()) {
-      window = CacheByTitle.initalInst.getWindow(getWindowName());//MSWindow.windowFromName(getWindowName(), true);
+      window = MSWindow.findWindow(getWindowValidator());
+      if(window == null)
+        return null;
+      // TODO: make this configurable!!!
+      window = new WindowRobot(window);
     }
     return window;
   }
@@ -292,7 +299,9 @@ public abstract class Robot implements Runnable {
    */
   protected void init() {}
   
-  public abstract String getWindowName();
+  public WindowValidator getWindowValidator() {
+    return new WindowValidator.ProcessNameValidator(ConstData.process_name);
+  }
   
   protected abstract void go() throws InterruptedException;
 }

@@ -39,6 +39,8 @@
    
    public abstract WinDef.HWND GetParent(WinDef.HWND paramHWND);
    
+   public abstract WinDef.HWND GetActiveWindow();
+   
    public abstract WinDef.HMENU GetSubMenu(WinDef.HMENU paramHMENU, int paramInt);
    
    public abstract WinDef.HMENU GetSystemMenu(WinDef.HWND paramHWND, boolean paramBoolean);
@@ -60,6 +62,8 @@
    public abstract boolean IsWindowUnicode(WinDef.HWND paramHWND);
    
    public abstract int SendMessage(WinDef.HWND paramHWND, int paramInt, WinDef.WPARAM paramWPARAM, WinDef.LPARAM paramLPARAM);
+   
+   public abstract int SendInput(int numberOfInputs, INPUT[] inputs, int sizeOfInputStructure);
    
    public abstract boolean SetWindowText(WinDef.HWND paramHWND, char[] paramArrayOfChar);
    

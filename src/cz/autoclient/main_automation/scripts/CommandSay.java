@@ -7,9 +7,11 @@
 package cz.autoclient.main_automation.scripts;
 
 import cz.autoclient.PVP_net.PixelOffset;
+import cz.autoclient.PVP_net.PixelOffsetV2;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.scripting.ScriptCommand;
 import cz.autoclient.scripting.exception.IllegalCmdArgumentException;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
 /**
@@ -40,14 +42,13 @@ public class CommandSay extends ScriptCommand {
     Object window = environment.get("window", Window.class);
     if(window!=null && window instanceof Window) {
       Window w = (Window)window;
-      w.click(PixelOffset.LobbyChat.toRect(w.getRect()));
+      w.click(PixelOffsetV2.Lobby_Chat.toRect(w.getRect()));
       for(int i=0; i<repeat; i++) {
-        if(i!=0 && timeout!=0)
+        if(i!=0 && timeout>0)
           Thread.sleep(timeout);
 
         w.typeString(sentence);
-        w.keyDown(13);
-        w.keyUp(13);
+        w.keyPress(KeyEvent.VK_ENTER);
       }
       return true;
     }

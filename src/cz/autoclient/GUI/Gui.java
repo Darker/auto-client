@@ -875,16 +875,17 @@ import javax.swing.SwingUtilities;
     private void initRobotMenu() {
       GUIAppendList list = new GUIAppendList();
       //======== Auto Launch ========
-      {
-        try {
-          PAMenu auto_launch = new PAMenu(ac.findRobot(LaunchBot.class), settings, "Auto launch");
-          auto_launch.setRobots(robots);
-          auto_launch.setAboutLink("https://github.com/Darker/auto-client/wiki/Passive-automation#auto-launch");
-          auto_launch.root.setToolTipText("Automatically press launch in patcher.");
-          list.addAt(menuAutomation, auto_launch.root, 0);
-        }
-        catch(NoSuchRobotException e) {}
-      }
+      // Removed, auto launch no longer necesary
+//      {
+//        try {
+//          PAMenu auto_launch = new PAMenu(ac.findRobot(LaunchBot.class), settings, "Auto launch");
+//          auto_launch.setRobots(robots);
+//          auto_launch.setAboutLink("https://github.com/Darker/auto-client/wiki/Passive-automation#auto-launch");
+//          auto_launch.root.setToolTipText("Automatically press launch in patcher.");
+//          list.addAt(menuAutomation, auto_launch.root, 0);
+//        }
+//        catch(NoSuchRobotException e) {}
+//      }
 
       //======== Auto queue ========
       {
@@ -1044,6 +1045,11 @@ import javax.swing.SwingUtilities;
         field.attachToSettings(settings);
         win.addLine(field);
         
+        field = new FieldDef("SETTINGS BELOW NOT SUPPORTED YET!", "", "");
+        field.addField(new JLabel(""));
+        field.label.setForeground(Color.RED);
+        win.addLine(field);
+        
         System.out.println("Creating summoner spells.");
         multifield = new MultiFieldDef("Summoner spells:");
         ButtonSummonerSpellMaster spell1 = new ButtonSummonerSpellMaster(null, settings);
@@ -1053,9 +1059,10 @@ import javax.swing.SwingUtilities;
         multifield.addField(spell2, settings, Setnames.BLIND_SUMMONER2);
         win.addLine(multifield);
         System.out.println("Creating summoner Masteries.");
-        
+                
         field = new FieldDef("Mastery page (0=ignore):", "Index of mastery page to be selected:", Setnames.BLIND_MASTERY.name);
         JSpinner masteries = new JSpinner();
+        masteries.setEnabled(false);
         masteries.setModel(new SpinnerNumberModel(0.0, 0.0, 20.0, 1.0));
         field.addField(masteries);
         field.attachToSettings(settings);
@@ -1092,21 +1099,21 @@ import javax.swing.SwingUtilities;
         win.addLine(field);
         */
         
-        win.newTab("ARAM (beta)", "Aram settings");
-        
-        win.addLine(Dialogs.makeTextPane("<a href=\"https://github.com/Darker/auto-client/wiki/Automation-description#aram\">Help</a>"));
-        
-        field = new FieldDef("Enabled:", "Enable or disable this function.", Setnames.ARAM_ENABLED.name);
-        field.addField(new JCheckBox());
-        field.attachToSettings(settings);
-        win.addLine(field);
-        
-        win.newTab("Invite friends", "Start automatically when everybody accepts.");
-        
-        field = new FieldDef("Auto start:", "Enable or disable this function.", Setnames.INVITE_ENABLED.name);
-        field.addField(new JCheckBox());
-        field.attachToSettings(settings);
-        win.addLine(field);
+//        win.newTab("ARAM (beta)", "Aram settings");
+//        
+//        win.addLine(Dialogs.makeTextPane("<a href=\"https://github.com/Darker/auto-client/wiki/Automation-description#aram\">Help</a>"));
+//        
+//        field = new FieldDef("Enabled:", "Enable or disable this function.", Setnames.ARAM_ENABLED.name);
+//        field.addField(new JCheckBox());
+//        field.attachToSettings(settings);
+//        win.addLine(field);
+//        
+//        win.newTab("Invite friends", "Start automatically when everybody accepts.");
+//        
+//        field = new FieldDef("Auto start:", "Enable or disable this function.", Setnames.INVITE_ENABLED.name);
+//        field.addField(new JCheckBox());
+//        field.attachToSettings(settings);
+//        win.addLine(field);
 
         pane.add(win.container);
         win.close();   

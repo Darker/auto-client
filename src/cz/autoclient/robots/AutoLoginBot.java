@@ -13,6 +13,7 @@ import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.PVP_net.Setnames;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.exceptions.APIException;
+import cz.autoclient.autoclick.windows.WindowValidator;
 import cz.autoclient.robots.exceptions.RobotNotConfiguredException;
 import cz.autoclient.robots.helpers.ValueChangeToWatcher;
 import cz.autoclient.settings.Settings;
@@ -29,10 +30,6 @@ public class AutoLoginBot extends Robot {
   private final Settings settings;
   public AutoLoginBot(Settings s) {
     settings = s;
-  }
-  @Override
-  public String getWindowName() {
-    return ConstData.window_title_part;
   }
   private boolean initializing = false;
   
@@ -88,18 +85,47 @@ public class AutoLoginBot extends Robot {
           PixelOffset.Login_PasswordField,
           PixelOffset.Login_UsernameField
         };
-        /*BufferedImage debugClone = DebugDrawing.cloneImage(img);
-        WindowTools.drawCheckPoint(debugClone, points);
-        int results = 0;
-        DebugDrawing.displayImage(debugClone, "Hello", true);*/
+        //BufferedImage debugClone = DebugDrawing.cloneImage(img);
+        //WindowTools.drawCheckPoint(debugClone, points);
+        //DebugDrawing.displayImage(debugClone, "Hello", true);
         
         if(WindowTools.checkPoint(img, points)>=3) {
           Rect size = window.getRect();
-          
+          //System.out.println("Starting debug loop."+size);
+//          java.awt.Robot robot = null;
+//          try {
+//            robot = new java.awt.Robot();
+//          } catch (AWTException ex) {
+//            System.out.println("Cannot create robot!");
+//            throw new IllegalStateException("Robot cannot be initialized.");
+//          }
+//
+//          while(true) {
+//              /*window.keyDown(0x45);
+//              Thread.sleep(200);
+//              window.keyUp(0x45);
+//              Thread.sleep(200);
+//              window.slowClick(PixelOffset.Login_UsernameField.toRect(size), 30);*/
+//              //robot.keyPress(KeyEvent.VK_F);
+//              System.out.println("Window is "+(window.isForeground()?"focused":"not focused")+".");
+//              //robot.mouseMove(size.left()+PixelOffset.Login_UsernameField.toRect(size).left,
+//              //    size.top()+PixelOffset.Login_UsernameField.toRect(size).top);
+//              Thread.sleep(800);
+//              if(false)
+//                  break;
+//          }
+//          Thread.sleep(4000);
+//          window.mouseOver(0,0);
+//          for(double i=0.0; i<1; i+=0.01) {
+//            window.mouseOver((int)(i*size.width),(int)(i*size.height));
+//            Thread.sleep(40);
+//          }
+//          window.mouseOver(size.width,size.height);
+//          Thread.sleep(4000);
+          //window.mouseOver(0,0);
           WindowTools.say(window,
                          (String)settings.getEncrypted(Setnames.REMEMBER_PASSWORD.name),
                          PixelOffset.Login_PasswordField.toRect(size));
-     
           //Click ok
           Thread.sleep(400);
           window.click(PixelOffset.Login_ButtonDisabled.toRect(size));
@@ -140,55 +166,23 @@ public class AutoLoginBot extends Robot {
   }
   
   @Override
-  protected void init() {
-   
-  }
+  protected void init() {}
   /**
    * The bot will also claim it can run if the encryption framework needs to be initialized.
    * @return true if encryption initialization is needed or window is available and was not available before
    */
   @Override
   public boolean canRunEx() {
-    //If the bot is initializing it cannot do anything else
-    //if(initializing)
-    //  return false;
-    
     if(!initialized) {
-      //System.out.println("Initializing - run once.");
       initializing = true;
       return true;
     }
-    
 
-
-    
-    //boolean windowState = super.canRunEx();
     return PVPAppeared.checkValueChangedSometime(super.canRunEx());
-    /*
-    //If true was detected last time
-    if(windowStateChangedToTrue&&windowState) {
-      return true; 
-    }
-    //If the state is same all the time
-    else if(windowState == lastWindowState) {
-      //No longer try to run if the window dissapeared
-      windowStateChangedToTrue = false;
-      //System.out.println("Window is "+(windowState?"available":"unavailable")+" just as before. Do not run.");
-      return false;
-    }
-    else {
-      //System.out.print("Window state changed to "+(windowState?"available":"unavailable")+".");
-      //System.out.println(((lastWindowState = windowState)?" Run.":" Do not run."));
-      return windowStateChangedToTrue = lastWindowState = windowState; 
-    }*/
   }
-  
-  /*@Override
-  public Window getWindow() {
-    if(window==null || !window.isValid()) {
-      window = MSWindow.windowFromName(getWindowName(), false);
-    }
-    return window;
-  }*/
-  
+
+  @Override
+  public WindowValidator getWindowValidator() {
+    return new WindowValidator.ProcessNameValidator(ConstData.process_name);
+  }
 }

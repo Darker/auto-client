@@ -12,8 +12,10 @@ import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.GDI32;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinDef;
+import com.sun.jna.platform.win32.WinDef.DWORD;
 import com.sun.jna.platform.win32.WinGDI;
 import com.sun.jna.platform.win32.WinNT;
+import com.sun.jna.platform.win32.WinNT.HANDLE;
 import com.sun.jna.platform.win32.WinUser;
 import com.sun.jna.ptr.IntByReference;
 import cz.autoclient.autoclick.ColorRef;
@@ -32,6 +34,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import sirius.core.GDI32Ext;
+import sirius.core.Kernel32Ext;
+import sirius.core.Psapi;
 import sirius.core.User32Ext;
 import sirius.core.types.WinDefExt;
 
@@ -272,7 +276,8 @@ public class MSWindow extends Common implements Window  {
 
   @Override
   public void focus() {
-    throw new UnsupportedOperationException("Not supported yet.");
+    restore();
+    UserExt.SetForegroundWindow(hwnd);
   }
   @Override
   public void move(int x, int y) throws APIException {
@@ -494,7 +499,7 @@ public class MSWindow extends Common implements Window  {
   {
    WinDef.RECT result = new WinDef.RECT();
    
-   if(!UserExt.GetClientRect(hwnd, result)) {
+   if(!UserExt.GetWindowRect(hwnd, result)) {
      throw new APIException("API failed to retrieve valid window rectangle!"); 
    }
    return new Rect(result);
@@ -512,6 +517,7 @@ public class MSWindow extends Common implements Window  {
   private int sendMsg(int msg, int wparam, int lparam) throws WindowAccessDeniedException {
     clearLastError();
     int retval = UserExt.SendMessage(hwnd, msg, new WinDef.WPARAM(wparam), new WinDef.LPARAM(lparam));
+    System.out.println("MESSAGE: "+msg+" "+wparam+" "+lparam);
     if(getLastError()==5) {
       throw new WindowAccessDeniedException("The message was blocked by UIPI."); 
     }
@@ -619,8 +625,9 @@ public class MSWindow extends Common implements Window  {
      return WindowID[0]==null?null:new MSWindow(WindowID[0]);
     }
   }
-  
-  public static List<Window> windows(WindowValidator valid) {
+  // use max length to limit the number of windows returned
+  // -1 == unlimited
+  public static List<Window> windows(WindowValidator valid, int maxLength) {
    
      //I'm not entirely sure why we use array here, but
      //my guess is, that normal non-final variable would not be
@@ -638,11 +645,21 @@ public class MSWindow extends Common implements Window  {
          if(valid==null || valid.isValid(w)) {
            windows.add(w);
          }
+         // return if max no. of windows was found
+         if(maxLength>=0 && windows.size() > maxLength) 
+           return false;
          //User32 provides us with window title
          return true;
        }
      }, null);
      return windows;   
+  }
+  public static List<Window> windows(WindowValidator valid) {
+    return windows(valid, -1);
+  }
+  public static Window findWindow(WindowValidator valid) {
+    final List<Window> windows = windows(valid, 1);
+    return windows.size()>0?windows.get(0):null;
   }
   @Deprecated
   public static MSWindow windowFromPID(final int required_pid) {
@@ -741,6 +758,35 @@ public class MSWindow extends Common implements Window  {
   @Override
   public Process getProcess() {
     throw new UnsupportedOperationException("Not supported yet.");
+  }
+  
+  @Override
+  public String getProcessName() {
+    // Refference to int that will later be filled 
+    IntByReference pid = new IntByReference(0); 
+    // This function gives pid number to the second parameter passed by refference
+    UserExt.GetWindowThreadProcessId(hwnd, pid);
+    // Now get handle to the process 
+    // 0x0400 | 0x0010 stands for reading info
+    // if you pass 0 you will get error 5 which stands for access denied
+    int pidVal = pid.getValue();
+    HANDLE process = Kernel32.INSTANCE.OpenProcess(0x0400 | 0x0010, false, pidVal);
+    if(process==null)
+      throw new APIException("Winapi error: "+(Kernel32.INSTANCE.GetLastError()));
+    // Prepare buffer for characters, just as you would 
+    // in goold 'ol C program
+    char[] path = new char[150];
+    DWORD buffSize = new DWORD(path.length);
+    // The W at the end of the function name stands for WIDE - 2byte chars
+    Psapi.INSTANCE.GetModuleFileNameExW(process, null, path, buffSize);
+    // convert buffer to java string
+    return new String(path).split("\0")[0];
+  }
+
+  @Override
+  public boolean isForeground() {
+    final WinDef.HWND window = UserExt.GetForegroundWindow();
+    return window==this.hwnd || (window!=null && window.equals(this.hwnd));
   }
   
 }
