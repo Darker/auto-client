@@ -21,7 +21,7 @@ public class ConstData {
   public static final String window_title = "League of Legends";
   public static final String window_title_part = "League of Legends";
   public static final String process_name = "LeagueClientUx.exe";
-  public static final String game_process_name = "";
+  public static final String game_process_name = "League of Legends.exe";
   public static final String test_process_name = "Annoyance.exe";
  
   public static final String patcher_window_title = "LoL Patcher";
@@ -33,8 +33,8 @@ public class ConstData {
   
   public static final Window getClientWindow() {
     return MSWindow.findWindow(new WindowValidator.CompositeValidatorAND(new WindowValidator[] {
-      new WindowValidator.ExactTitleValidator("League of Legends"),
-      new WindowValidator.ProcessNameValidator(ConstData.process_name)
+      new WindowValidator.ExactTitleValidator(window_title),
+      new WindowValidator.ProcessNameValidator(process_name)
     })
     );
   }

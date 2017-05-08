@@ -71,9 +71,6 @@ public interface WindowValidator {
         //System.out.println("Error getting process handle of window "+w.getTitle());
         return false;
       }
-      if(filename.indexOf("Client")!=-1) {
-        System.out.println(filename + "   "+ w.getTitle());
-      }
       if(!filename.endsWith(processFilename))
         return false;
       String[] separators = new String[] {"\\", "/"};

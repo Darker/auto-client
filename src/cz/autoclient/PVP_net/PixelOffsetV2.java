@@ -25,10 +25,15 @@ public enum PixelOffsetV2 implements ComparablePixel {
     Accept_ProgressBar(0.58633890923329D, 0.7516655808867138D, new Color(71, 252, 246, 1), 20),
     
     Lobby_Chat(0.141431781011012D, 0.9498319613023019D, new Color(1, 10, 19, 1), 3),
-    Lobby_Search(0.6516816408080522D, 0.09908319020779409D, new Color(2, 5, 12, 1), 3),
-    Lobby_ClientChatButton(0.9678251509271224D, 0.9481236304366503D, new Color(205, 190, 145, 1), 1),
-    Lobby_ClientChatButtonOutside(0.9582159256955398D, 0.963498608227515D, new Color(30, 35, 40, 1), 1),
+    Lobby_Search(0.6716816408080522D, 0.09908319020779409D, new Color(2, 5, 12, 1), 15),
+    Lobby_ClientChatButton(0.9678251509271224D, 0.9481236304366503D, new Color(205, 190, 145, 1), 3),
+    Lobby_ClientChatButtonOutside(0.9582159256955398D, 0.963498608227515D, new Color(30, 35, 40, 1), 3),
     Lobby_ChanpionSlot1(0.29229661714686006D, 0.19474971868428495D, new Color(36, 135, 246, 1), 1),
+    Lobby_EditRunesLight(0.32208521536476636D, 0.9515402921679534D, new Color(205, 190, 145, 1), 15),
+    Lobby_EditRunesDark(0.3192024477952916D, 0.9447069687053471D, new Color(30, 35, 40, 1), 10),
+    Lobby_Locked_GoldFrame(0.25578156126684587D, 0.41683273121899583D, new Color(200, 167, 95, 1), 10),
+    Lobby_Locked_GoldFrame2(0.7429692805080876D, 0.40487441515943445D, new Color(200, 168, 101, 1), 10),
+    Lobby_NotLocked_GoldFrame(0.7919763291891594D, 0.39974942256247964D, new Color(200, 169, 105, 1), 10),
     
     NOOP(0.9582159256955398D, 0.963498608227515D)
     ;

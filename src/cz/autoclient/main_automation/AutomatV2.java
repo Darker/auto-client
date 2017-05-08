@@ -12,10 +12,13 @@ import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.PixelOffsetV2;
 import cz.autoclient.PVP_net.Setnames;
 import cz.autoclient.autoclick.ComparablePixel;
+import cz.autoclient.autoclick.PixelGroupSimple;
 import cz.autoclient.autoclick.Rect;
+import cz.autoclient.autoclick.RecursiveGroupOR;
 import cz.autoclient.autoclick.exceptions.APIException;
-import cz.autoclient.autoclick.windows.MouseButton;
+import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.windows.WindowRobot;
+import cz.autoclient.autoclick.windows.WindowValidator;
 import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
 import static cz.autoclient.main_automation.Automat.dbgmsg;
 import static cz.autoclient.main_automation.Automat.errmsg;
@@ -42,7 +45,7 @@ public class AutomatV2 extends Automat {
   public void run() {
     dbgmsg("Automation started!");
     accepted = false;
-    window = MSWindow.windowFromName(ConstData.window_title_part, false);
+    window = ConstData.getClientWindow();
     //window = MSWindow.
     if (window == null) {
       errmsg("No PVP.net window found!");
@@ -101,19 +104,22 @@ public class AutomatV2 extends Automat {
    */
   public boolean handleStandardLobby() throws InterruptedException {
       long waitStart = System.currentTimeMillis();
-      ComparablePixel[] lobbyPixels = new ComparablePixel[] {
+      final ComparablePixel[] lobbyPixels = new ComparablePixel[] {
           PixelOffsetV2.Lobby_Chat,
           PixelOffsetV2.Lobby_ClientChatButton,
           PixelOffsetV2.Lobby_ClientChatButtonOutside,
           PixelOffsetV2.Lobby_Search,
+          PixelOffsetV2.Lobby_NotLocked_GoldFrame,
+          PixelOffsetV2.Lobby_EditRunesLight,
+          PixelOffsetV2.Lobby_EditRunesDark,
       };
       boolean inLobby = false;
-      while(System.currentTimeMillis()- waitStart < 12000) {
+      while(System.currentTimeMillis()- waitStart < 13000) {
           if(WindowTools.checkPoint(window, lobbyPixels)>=4) {
               inLobby = true;
               break;
           }
-          sleep(40);
+          sleep(30);
       }
       if(!inLobby) {
           dbgmsg("Lobby didn't open, waiting for another game.");
@@ -136,10 +142,43 @@ public class AutomatV2 extends Automat {
     if(!selectChampion.done() || (selectChampion instanceof SleepAction.NoAction)) {
       selectChampion(chname);
     }
-    // Wait for game to start
     
-    
-    return true;
+    final ComparablePixel[] lockedPixels = new ComparablePixel[] {
+      PixelOffsetV2.Lobby_Chat,
+      PixelOffsetV2.Lobby_Locked_GoldFrame,
+      PixelOffsetV2.Lobby_Locked_GoldFrame,
+      PixelOffsetV2.Lobby_ClientChatButton,
+      PixelOffsetV2.Lobby_EditRunesLight,
+      PixelOffsetV2.Lobby_EditRunesDark,
+    };
+    RecursiveGroupOR requiredPixels = new RecursiveGroupOR(
+        new PixelGroupSimple(lobbyPixels),
+        new PixelGroupSimple(lockedPixels)
+    );
+    // Wait for lobby to dissapear
+    while(true) {
+      while(requiredPixels.test(window)) {
+        sleep(500L);
+      }
+      //DebugDrawing.displayImage(DebugDrawing.lastDebugImage);
+      dbgmsg("Lobby gone, has the game started?");
+      long startTime = System.currentTimeMillis();
+      while(!requiredPixels.test(window)) {
+        Window gameWindow = MSWindow.findWindow(new WindowValidator.CompositeValidatorAND(new WindowValidator[] {
+          new WindowValidator.ProcessNameValidator(ConstData.game_process_name)
+        }));
+        if(gameWindow != null) {
+          dbgmsg("Game started, ending.");
+          return true;
+        }
+        if(System.currentTimeMillis()-startTime>8000) {
+          dbgmsg("Lobby still gone, assuming that someone dodged the game.");
+          return false;
+        }
+        sleep(300);
+      }
+      dbgmsg("Lobby reappeared, waiting for game to start.");
+    }
   }
   @Override
   public void selectChampion(final String name) throws InterruptedException {
@@ -159,14 +198,14 @@ public class AutomatV2 extends Automat {
     Rect coords = PixelOffsetV2.Lobby_ChanpionSlot1.toRect(wrect);
     //window.click(coords.left, coords.top, MouseButton.Right);
     //sleep(32L);
-    for(int y=0; y<8; ++y)
-      for(int x=0; x<8; ++x) {
-        window.mouseOver(coords.left+x, coords.top+y);
-        sleep(10L);
+    for(int y=0; y<10; ++y)
+      for(int x=0; x<0; ++x) {
+        window.mouseOver(coords.left+x-5, coords.top+y-5);
+        window.click(coords.left+x-5, coords.top+y-5);
+        sleep(8L);
       }
     
     slowClick(PixelOffsetV2.Lobby_ChanpionSlot1, 40);
-    sleep(50L);
   }
   
   

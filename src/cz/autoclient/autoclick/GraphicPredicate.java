@@ -6,6 +6,7 @@
 
 package cz.autoclient.autoclick;
 
+import cz.autoclient.autoclick.comvis.DebugDrawing;
 import cz.autoclient.autoclick.windows.Window;
 import java.awt.image.BufferedImage;
 
@@ -14,8 +15,13 @@ import java.awt.image.BufferedImage;
  * @author Jakub
  */
 public interface GraphicPredicate {
+  
   public default boolean test(Window window) {
-    return test(window.screenshot());
+    // debug only
+    //@TODO: remove when not debugging
+    BufferedImage img = window.screenshot();
+    DebugDrawing.lastDebugImage = DebugDrawing.cloneImage(img);
+    return test(img);
   }
   public boolean test(BufferedImage i);
 }

@@ -33,6 +33,8 @@ import javax.swing.JPanel;
  * @author Jakub
  */
 public class DebugDrawing {
+  // nasty shit, just saving last image  here...
+  public static BufferedImage lastDebugImage = null;
    public static void drawResult(BufferedImage target, Rect rect, Color color) {
      //silent fail for invalid result
      if(rect==null)

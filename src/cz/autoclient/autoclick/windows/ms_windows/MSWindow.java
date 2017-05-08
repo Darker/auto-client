@@ -241,7 +241,6 @@ public class MSWindow extends Common implements Window  {
   private ShowWindow getWindowPlacement() {
    WinDefExt.WINDOWPLACEMENT placement = new WinDefExt.WINDOWPLACEMENT();
    UserExt.GetWindowPlacement(hwnd, placement);
-   //System.out.println("Window placement: "+placement.showCmd);
    return ShowWindow.byCode(placement.showCmd);
   }
   /**
@@ -525,8 +524,6 @@ public class MSWindow extends Common implements Window  {
   }
   private void sendMsg(Messages msg, int wparam, int lparam) {
     sendMsg(msg.code, wparam, lparam);
-    //System.out.println("Message "+msg.name()+" result: "+sendMsg(msg.code, wparam, lparam));
-    //System.out.println("   ERRORLEVEL: "+getLastError());
   }
   public static User32Ext UserExt = User32Ext.INSTANCE;
   public static GDI32Ext GDIExt = GDI32Ext.INSTANCE;
@@ -681,7 +678,7 @@ public class MSWindow extends Common implements Window  {
         
          
          int pid = UserExt.GetWindowThreadProcessId(handle, new IntByReference(0));
-         System.out.println(getWindowTitle(handle)+" : "+pid);
+         //System.out.println(getWindowTitle(handle)+" : "+pid);
          if(pid==required_pid) {
            //And if we gained one, put it in our array
            WindowID[0] = handle;

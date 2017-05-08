@@ -6,7 +6,9 @@
 
 package cz.autoclient.autoclick;
 
+import cz.autoclient.autoclick.comvis.DebugDrawing;
 import cz.autoclient.main_automation.WindowTools;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 /**
@@ -19,14 +21,20 @@ public class PixelGroupSimple implements PixelGroupWithPixels {
   public PixelGroupSimple(ComparablePixel... pixels) {
     this.pixels = pixels;
   }
-
+  
   @Override
   public boolean test(BufferedImage i) {
+    boolean result = true;
     for(ComparablePixel p:pixels) {
-      if(!WindowTools.checkPoint(i, p))
-        return false;
+      if(!WindowTools.checkPoint(i, p)) {
+        result = false;
+        DebugDrawing.drawPoint(DebugDrawing.lastDebugImage, p, Color.red);
+      }
+      else {
+        DebugDrawing.drawPoint(DebugDrawing.lastDebugImage, p, Color.green);
+      }      
     }
-    return true;
+    return result;
   }
 
   @Override

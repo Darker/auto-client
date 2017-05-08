@@ -6,25 +6,14 @@
 
 package cz.autoclient.autoclick;
 
-import java.awt.image.BufferedImage;
-
 /**
  *
  * @author Jakub
  */
-public class RecursiveGroup implements PixelGroup {
+public abstract class RecursiveGroup implements PixelGroup {
   protected final PixelGroup[] groups;
 
   public RecursiveGroup(PixelGroup... groups) {
     this.groups = groups;
   }
-  @Override
-  public boolean test(BufferedImage i) {
-    for(PixelGroup g:groups) {
-      if(!g.test(i))
-        return false;
-    }
-    return true;
-  }
-  
 }
