@@ -1,7 +1,7 @@
 
 
 # PVP.bot - Client automation for lazy players
-**Auto call, auto accept and other automatic features for League of Legends (LoL)**
+**Auto call, auto accept and other automatic features for League of Legends (LoL)**  
 **[DOWNLOAD](http://darker.github.io/auto-client/download/)**
 ## Features
  - Auto accept - automatically accept draft and normal games
