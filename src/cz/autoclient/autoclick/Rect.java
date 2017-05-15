@@ -98,6 +98,16 @@ public class Rect implements RectInterface {
     //return Rect.byWidthHeight(top+y, left+x, width, height);
     return new Rect(top+y, right+x, bottom+y, left+x);
   }
+  /**
+   * Moves the rectangle relative to given rectangles top left corner. Size of 
+   * the passed rectangle has no effect, only the top/left coordinates matter
+   * @param coords the rectangle to move relative to
+   * @return 
+   */
+  public Rect move(Rect coords) {
+    //return Rect.byWidthHeight(top+y, left+x, width, height);
+    return new Rect(top+coords.top, right+coords.left, bottom+coords.top, left+coords.left);
+  }
   /** Check if two rectangles overlap (have nonempty intersection)
    * @param a forst rectangle
    * @param b second rectangle

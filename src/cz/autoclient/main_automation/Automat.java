@@ -15,9 +15,7 @@ import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.PVP_net.Images;
 import cz.autoclient.PVP_net.PxGroup;
 import cz.autoclient.PVP_net.Setnames;
-import cz.autoclient.PVP_net.TeamBuilderPlayerSlot;
 import cz.autoclient.autoclick.exceptions.APIException;
-import cz.autoclient.autoclick.ColorPixel;
 import java.awt.Color;
 
 import cz.autoclient.autoclick.comvis.RectMatch;
@@ -44,11 +42,10 @@ import cz.autoclient.scripting.exception.ScriptParseException;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.Callable;
 
 public class Automat
-    extends Thread implements AutomatInterface {
+    extends AutomatInterface {
 
   Window window;
    //User32 user32 = this.window.getUser32();
@@ -65,25 +62,25 @@ public class Automat
     ScriptCommand.setCommand("d", CommandDelay.class);
   }
 
-  public static void dbgmsg(final String data) {
-    System.out.println("[MAIN BOT] " + data);
-  }
-
-  public static void errmsg(final String data) {
-    System.err.println("[MAIN BOT] Error: " + data);
-  }
-
   public Automat(Gui acgui, Settings settings) {
     super("LoLClientAutomation");
     this.settings = settings;
     this.gui = acgui;
   }
-
+  @Override
+  public Window getWindow() {
+    if(window == null) {
+      window = MSWindow.windowFromName(ConstData.window_title_part, false); 
+    }
+    return window;
+  }
   @Override
   public void run() {
     dbgmsg("Automation started!");
+    
+    window = null;
     //Get PVP.net window
-    window = MSWindow.windowFromName(ConstData.window_title_part, false);
+    window = getWindow();
     if (window == null) {
       errmsg("No PVP.net window found!");
       end();
@@ -749,52 +746,9 @@ public class Automat
     return false;
   }
 
-  protected void Enter() {
-    this.window.keyDown(KeyEvent.VK_ENTER);
-    this.window.keyUp(KeyEvent.VK_ENTER);
-  }
-  protected void click(PixelOffset pos) {
-    try {
-      Rect rect = window.getRect();
-      window.click((int) (rect.width * pos.x), (int) (rect.height * pos.y));
-    } catch (APIException e) {
-      errmsg("Can't click because no window is available for clicking :(");
-    }
-  }
 
-  protected void click(ComparablePixel pos) {
-    try {
-      Rect rect = window.getRect();
-      window.click((int) (rect.width * pos.getX()), (int) (rect.height * pos.getY()));
-    } catch (APIException e) {
-      errmsg("Can't click because no window is available for clicking :(");
-    }
-  }
 
-  /**
-   * Clicks at the top left corner of the rectangle. Use Rect.middle() to click
-   * in the middle.
-   *
-   * @param pos rectangle to click on.
-   */
-  protected void click(Rect pos) {
-    try {
-      Rect rect = window.getRect();
-      window.click((int) (rect.width * pos.left), (int) (rect.height * pos.top));
-    } catch (APIException e) {
-      errmsg("Can't click because no window is available for clicking :(");
-    }
-  }
   
-  protected void slowClick(ComparablePixel pos, int delay) throws InterruptedException {
-    try {
-      Rect rect = window.getRect();
-      window.slowClick((int) (rect.width * pos.getX()), (int) (rect.height * pos.getY()), delay);
-    } catch (APIException e) {
-      errmsg("Can't click because no window is available for clicking :(");
-    }
-  }
-
 
 }
 // [^/ ][^/ ]\s*DebugDrawing.displayImage

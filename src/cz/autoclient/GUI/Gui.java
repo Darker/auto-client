@@ -30,6 +30,7 @@ import cz.autoclient.settings.Settings;
 import cz.autoclient.dllinjection.DLLInjector;
 import cz.autoclient.dllinjection.InjectionResult;
 import cz.autoclient.league_of_legends.maps.Champions;
+import cz.autoclient.main_automation.macros.MacroMakeCustomGame;
 import cz.autoclient.robots.AutoLoginBot;
 import cz.autoclient.robots.AutoQueueBot;
 import cz.autoclient.robots.LaunchBot;
@@ -450,7 +451,7 @@ import javax.swing.SwingUtilities;
                });
            }
        });
-       menuTools.add(menuItem2);
+       //menuTools.add(menuItem2);
        menu_dll_additions = menuItem2;
        /** Run as administrator**/
        {
@@ -671,6 +672,20 @@ import javax.swing.SwingUtilities;
                  catch(IllegalStateException er) {
                    Gui.this.dialogErrorAsync(er.getMessage(), "Cannot create the click proxy.");
                  }
+               }
+             }
+         });
+         menu.add(item);
+         
+         item = new JMenuItem();
+         item.setText("MACRO: create custom game");
+         item.setToolTipText("Creates custom game.");
+         item.setEnabled(true);
+         item.addActionListener(new ActionListener() {
+             @Override
+             public void actionPerformed(ActionEvent e) {
+               if(ac.ToolRunning()) {
+                 ac.ac.runMacro(new MacroMakeCustomGame());
                }
              }
          });
@@ -1044,12 +1059,12 @@ import javax.swing.SwingUtilities;
         field.addField(new JTextField());
         field.attachToSettings(settings);
         win.addLine(field);
-        
-        field = new FieldDef("SETTINGS BELOW NOT SUPPORTED YET!", "", "");
-        field.addField(new JLabel(""));
-        field.label.setForeground(Color.RED);
-        win.addLine(field);
-        
+     // Commented out until implemented!   
+//        field = new FieldDef("SETTINGS BELOW NOT SUPPORTED YET!", "", "");
+//        field.addField(new JLabel(""));
+//        field.label.setForeground(Color.RED);
+//        win.addLine(field);
+//        
         System.out.println("Creating summoner spells.");
         multifield = new MultiFieldDef("Summoner spells:");
         ButtonSummonerSpellMaster spell1 = new ButtonSummonerSpellMaster(null, settings);
@@ -1058,22 +1073,22 @@ import javax.swing.SwingUtilities;
         multifield.addField(spell1, settings, Setnames.BLIND_SUMMONER1);
         multifield.addField(spell2, settings, Setnames.BLIND_SUMMONER2);
         win.addLine(multifield);
-        System.out.println("Creating summoner Masteries.");
-                
-        field = new FieldDef("Mastery page (0=ignore):", "Index of mastery page to be selected:", Setnames.BLIND_MASTERY.name);
-        JSpinner masteries = new JSpinner();
-        masteries.setEnabled(false);
-        masteries.setModel(new SpinnerNumberModel(0.0, 0.0, 20.0, 1.0));
-        field.addField(masteries);
-        field.attachToSettings(settings);
-        win.addLine(field);
         
-        field = new FieldDef("Rune page (0=ignore):", "Index of rune page to be selected:", Setnames.BLIND_RUNE.name);
-        JSpinner runes = new JSpinner();
-        runes.setModel(new SpinnerNumberModel(0.0, 0.0, 20.0, 1.0));
-        field.addField(runes);
-        field.attachToSettings(settings);
-        win.addLine(field);
+//        System.out.println("Creating summoner Masteries.");
+//        field = new FieldDef("Mastery page (0=ignore):", "Index of mastery page to be selected:", Setnames.BLIND_MASTERY.name);
+//        JSpinner masteries = new JSpinner();
+//        masteries.setEnabled(false);
+//        masteries.setModel(new SpinnerNumberModel(0.0, 0.0, 20.0, 1.0));
+//        field.addField(masteries);
+//        field.attachToSettings(settings);
+//        win.addLine(field);
+//        
+//        field = new FieldDef("Rune page (0=ignore):", "Index of rune page to be selected:", Setnames.BLIND_RUNE.name);
+//        JSpinner runes = new JSpinner();
+//        runes.setModel(new SpinnerNumberModel(0.0, 0.0, 20.0, 1.0));
+//        field.addField(runes);
+//        field.attachToSettings(settings);
+//        win.addLine(field);
 
         /*
         win.newTab("Team builder", "All teambuilder automation");

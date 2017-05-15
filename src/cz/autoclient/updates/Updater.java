@@ -10,12 +10,14 @@ import cz.autoclient.PVP_net.Setnames;
 import cz.autoclient.event.EventCallback;
 import cz.autoclient.event.EventEmitter;
 import cz.autoclient.github.constructs.BasicRepositoryId;
+import cz.autoclient.github.exceptions.DataException;
 import cz.autoclient.github.html.GitHubHtml;
 import cz.autoclient.github.interfaces.GitHub;
 import cz.autoclient.github.interfaces.Release;
 import cz.autoclient.github.interfaces.Releases;
 import cz.autoclient.github.interfaces.Repository;
 import cz.autoclient.github.interfaces.RepositoryId;
+import cz.autoclient.github.json.GitHubJson;
 import cz.autoclient.github.local.GitHubLocal;
 import cz.autoclient.settings.Settings;
 import java.io.File;
@@ -184,36 +186,20 @@ public class Updater implements EventEmitter {
       dbgmsg("Connecting to GitHub.");
       
       GitHub git;
-      if(Setnames.DEBUG_UPDATES_LOCAL.getBoolean(settings))
+      if(Setnames.DEBUG_UPDATES_LOCAL.getBoolean(settings)) {
         git = new GitHubLocal(new File(Setnames.DEBUG_UPDATES_LOCAL_PATH.getString(settings)));
-      else
-        git = new GitHubHtml(); 
-      Repository repo = git.getRepository(repository);
-      Releases releases = repo.releases();
-      dbgmsg("Source of updates: "+repo.getURL());
-      if(releases.fetch()) {
-        dbgmsg("Downloaded.");
-        for(Release r: releases) {
-          VersionId id = new VersionId(r.tag());
-  
-          if(updates.findVersion(id)==null) {
-            dbgmsg("Adding release: "+r.tag());
-            UpdateInfo info = new UpdateInfo(r, cacheDir);
-            if(info.valid)
-              updates.add(info);
-            else
-              dbgmsg("  Release "+id+" skipped because it doesn't have expected download file.");
-          }
-          else {
-            dbgmsg("Release already exists: "+r.tag());
+        updateUsingGit(git);
+      }
+      else {
+        git = new GitHubHtml();
+        if(!updateUsingGit(git)) {
+          dbgmsg("Cannot update using github HTML, skipping to GitHub JSON.");
+          git = new GitHubJson();
+          if(!updateUsingGit(git)) {
+            dbgmsg("Cannot update using github JSON either, no updates.");
           }
         }
       }
-      else {
-        dbgmsg("Cannot fetch releases.");
-      }
-      dbgmsg("Connected...");
-      updates.checkedRightNow();
     }
     else {
       dbgmsg("No need to download updates, everything is cached."); 
@@ -272,6 +258,52 @@ public class Updater implements EventEmitter {
       updates.installStep(InstallStep.NOT_INSTALLING);
     }
   }
+  protected boolean updateUsingGit(GitHub git) {
+    try {
+      Repository repo = git.getRepository(repository);
+      Releases releases = repo.releases();
+      dbgmsg("Source of updates: "+repo.getURL());
+      if(releases.fetch()) {
+        dbgmsg("Downloaded.");
+        for(Release r: releases) {
+          VersionId id = new VersionId(r.tag());
+  
+          if(updates.findVersion(id)==null) {
+            dbgmsg("Adding release: "+r.tag());
+            UpdateInfo info = new UpdateInfo(r, cacheDir);
+            if(info.valid)
+              updates.add(info);
+            else
+              dbgmsg("  Release "+id+" skipped because it doesn't have expected download file.");
+          }
+          else {
+            dbgmsg("Release already exists: "+r.tag());
+          }
+        }
+      }
+      else {
+        dbgmsg("Cannot fetch releases.");
+        throw new Exception("Cannot fetch releases, try another download source.");
+      }
+      dbgmsg("Connected...");
+      updates.checkedRightNow();
+      return true;
+    }
+    catch(DataException e) {
+      dbgmsg(" GIT ERROR: "+e.toString());
+      updates.clear();
+      updates.installStep(InstallStep.NOT_INSTALLING);
+      return false;
+    }
+    catch(Exception anything) {
+      dbgmsg(" UNKNOWN UPDATE ERROR: "+anything.toString());
+      anything.printStackTrace();
+      updates.clear();
+      updates.installStep(InstallStep.NOT_INSTALLING);
+      return false; 
+    }
+  }
+  
   public void downloadUpdate() {
     if(runInExecutorIfNeeded(()->downloadUpdate()))
       return;

@@ -151,6 +151,7 @@ class ReleasesJson implements Releases {
     return getReleases().subList(fromIndex, toIndex);
   }
 
+  @Override
   public void forEach(Consumer<? super Release> action) {
     getReleases().forEach(action);
   }

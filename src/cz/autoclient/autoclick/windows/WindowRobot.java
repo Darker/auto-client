@@ -35,6 +35,22 @@ public class WindowRobot implements Window {
   public FocusMode focusMode = FocusMode.FORCE_FOCUS;
   protected Window innerWindow;
   protected Robot robot;
+  
+  
+  protected Rect cachedRect = null;
+  protected long lastRectUpdate = 0;
+  protected Rect getCachedRect() {
+    if(innerWindow!=null) {
+      long now = System.currentTimeMillis();
+      if(cachedRect==null || now-lastRectUpdate>1000) {
+        return cachedRect = getRect(); 
+      }
+      else {
+        return cachedRect; 
+      }
+    }
+    return new Rect(0,0);
+  }
   /** This enum describes how should program behave based on the 
    * window focus state.
    */
@@ -99,7 +115,7 @@ public class WindowRobot implements Window {
     return true;
   }
   Rect transposeCoordinates(int x, int y) {
-    Rect rect = innerWindow.getRect();
+    Rect rect = getCachedRect();
     return new Rect(rect.left+x, rect.top+y);
   }
   

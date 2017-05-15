@@ -138,9 +138,9 @@ public class Dialogs {
      * @param message
      * @param title
      * @param parentComponent
-     * @param name
+     * @param name name of the setting that should hold setting for this dialog
      * @param settings
-     * @param defaultSetting 
+     * @param defaultSetting whether, initally, should the "Do not show again" checkbox be ticked
      */
     protected static void dialogInfoOnceShowDialog(
             final String message,

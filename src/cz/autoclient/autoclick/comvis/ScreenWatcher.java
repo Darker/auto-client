@@ -582,6 +582,46 @@ public class ScreenWatcher {
       throw new IllegalArgumentException("Image width cannot be 0!");
     return drawIntegralImage(image, image[image.length-1][image[0].length-1]);
   }
+  /**
+   * 
+   * @param image
+   * @param S change in saturation
+   * @param B change in brihtness
+   */
+  public static void changeHSB(BufferedImage image, float S, float B) {
+    final int height = image.getHeight();
+    final int width = image.getWidth();
+    float[] hsb = new float[] {0,0,0};
+    for(int y = 0; y < height; y++) {
+        for(int x = 0; x < width; x++) {
+            int pixel = image.getRGB(x, y);
+            int red = (pixel >> 16) & 0xFF;
+            int green = (pixel >> 8) & 0xFF;
+            int blue = (pixel) & 0xFF;
+
+            //Adjust saturation:
+            Color.RGBtoHSB(red, green, blue, hsb);
+            //System.out.println("dd"+hsb[1]);
+            
+            hsb[1] += S;
+            hsb[2] += B;
+            
+            if(hsb[1]>1.0F)
+              hsb[1] = 1.0F;
+            if(hsb[1]<0F)
+              hsb[1] = 0F;
+            
+            if(hsb[2]>1.0F)
+              hsb[2] = 1.0F;
+            if(hsb[2]<0F)
+              hsb[2] = 0F;
+            
+            int rgb = Color.HSBtoRGB(hsb[0], hsb[1], hsb[2]);            
+            image.setRGB(x, y, rgb);
+        }
+    }
+  }
+  
   public static String arrayToStr(int[] ar) {
     return "["+ar[0]+", "+ar[1]+", "+ar[2]+"]";
   }

@@ -11,6 +11,7 @@ import cz.autoclient.PVP_net.ImageFrame;
 import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.autoclick.ColorPixel;
 import cz.autoclient.autoclick.ComparablePixel;
+import cz.autoclient.autoclick.GraphicPredicate;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.comvis.DebugDrawing;
@@ -195,6 +196,38 @@ public class WindowTools {
          break;
      }
      dbg("T: "+ (System.currentTimeMillis()-timeStarted)+" - timeout returning false for "+pixelOffset.toSource());
+     return false;
+   }
+   
+   public static boolean waitForPredicate(Window window, GraphicPredicate predicate, int timeout)
+   throws InterruptedException
+   {
+     long timeStarted = System.currentTimeMillis();
+     long time = timeStarted;
+     final int sleepBaseTime = 30;
+     
+     while(timeout<0 || time-timeStarted<timeout) {
+       //BufferedImage screenshot = window.screenshot();
+       if(predicate.test(window)) {
+         return true;
+       }
+       else {
+         //dbg("T: "+ (System.currentTimeMillis()-timeStarted)+" - pixel failed.");
+         //drawCheckPoint(screenshot, pixelOffset);
+         //DebugDrawing.displayImage(screenshot);
+       }
+       time = System.currentTimeMillis();
+       // Calculate time to sleep so that it never goes over timeout
+       long sleep = time+sleepBaseTime-timeStarted<timeout?sleepBaseTime:timeout-(time-timeStarted);
+       //dbg("T: "+ (System.currentTimeMillis()-timeStarted)+" - sleep for "+sleep+"ms");
+       if(sleep>0) {
+         Thread.sleep(sleep);
+         time = System.currentTimeMillis();
+       }
+       else
+         break;
+     }
+     dbg("T: "+ (System.currentTimeMillis()-timeStarted)+" - timeout returning false for predicate.");
      return false;
    }
    public static void drawCheckPoint(BufferedImage img, ComparablePixel pixelOffset) throws APIException {

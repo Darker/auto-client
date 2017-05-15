@@ -6,6 +6,7 @@
 
 package cz.autoclient.GUI;
 
+import cz.autoclient.autoclick.Rect;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.geom.AffineTransform;
@@ -145,6 +146,9 @@ public class LazyLoadedImage {
   public static BufferedImage crop(BufferedImage in, int top, int right, int bottom, int left) {
     return in!=null?in.getSubimage(left, top, in.getWidth()-left-right, in.getHeight()-top-bottom):null;
   }
+  public static BufferedImage crop(BufferedImage in, Rect rect) {
+    return in!=null?in.getSubimage(rect.left, rect.top, rect.width, rect.height):null;
+  }
   public static BufferedImage crop(BufferedImage in, int margin) {
     return in!=null?in.getSubimage(margin, margin, in.getWidth()-2*margin, in.getHeight()-2*margin):null;
   }
@@ -188,7 +192,7 @@ public class LazyLoadedImage {
    * @return rescaled image, just as with normal getScaled
    */
   public BufferedImage getScaledDiscardOriginal(int width, int height) {
-    BufferedImage result = getScaled(width, height, true);
+    BufferedImage result = getScaled(width, height, false);
     delete_b_image();
     delete_image();
     return result;

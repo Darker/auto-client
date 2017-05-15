@@ -27,9 +27,15 @@ public class ConstData {
   public static final String patcher_window_title = "LoL Patcher";
   
   public static final String game_window_title = "League of Legends";
-  public static final Rect normalSize = new Rect(0, 1152, 720, 0);
-  public static final Rect smallestSize = new Rect(0, 1024, 640, 0);
+  public static final Rect normalSize = new Rect(0, 1280, 720, 0);
+  public static final Rect smallestSize = new Rect(0, 1280, 720, 0);
   public static final LoLVersion lolData = new LoLVersion(LoLVersion.Realm.NA, new File("LOLResources"), true);
+  
+  /*** Summoner spell info ***/
+  // Size of the button that creates the summoner spell dialog
+  public static final int summonerSpellButtonSize = 51;
+  // Size of the buttons in summoner spell dialog
+  public static final int summonerSpellChoseButtonSize = 47;
   
   public static final Window getClientWindow() {
     return MSWindow.findWindow(new WindowValidator.CompositeValidatorAND(new WindowValidator[] {

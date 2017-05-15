@@ -13,7 +13,6 @@ import cz.autoclient.autoclick.*;
 import cz.autoclient.autoclick.comvis.DebugDrawing;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
-import static cz.autoclient.main_automation.Automat.errmsg;
 import cz.autoclient.main_automation.WindowTools;
 import java.awt.BorderLayout;
 import java.awt.Color;

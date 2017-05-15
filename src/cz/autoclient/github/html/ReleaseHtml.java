@@ -6,6 +6,8 @@
 
 package cz.autoclient.github.html;
 
+import cz.autoclient.github.exceptions.DataException;
+import cz.autoclient.github.exceptions.DataParseException;
 import cz.autoclient.github.interfaces.Release;
 import cz.autoclient.github.interfaces.ReleaseFile;
 import cz.autoclient.github.interfaces.Releases;
@@ -31,19 +33,27 @@ public class ReleaseHtml implements Release {
   protected ArrayList<ReleaseFileHtml> downloads;
   public final RepositoryHtml parent;
   //protected final Element rootElm;
+
   public ReleaseHtml(RepositoryHtml parent, Element elm) {
-    this.tag = elm.select("div.release-meta span.css-truncate-target").get(0).text();
-    this.description = elm.select("div.release-body div.markdown-body").get(0).html();
-    //https://github.com/twbs/bootstrap/releases/tag/v1.4.0
     this.parent = parent;
-    this.url = url_or_null_java_is_retarded(parent.getURL(), "releases/tag/"+tag); 
+    this.tag = getElementTextValue("div.release-meta span.css-truncate-target", elm);
+    String desc = "";
+    try {
+      desc = getElementTextValue("div.release-body div.markdown-body", elm, (element)->{return element.html();});
+    }
+    catch(DataException e) {}
+    this.description = desc;
+
+    this.url = url_or_null_java_is_retarded(parent.getURL(), "releases/tag/"+tag);
+    //https://github.com/twbs/bootstrap/releases/tag/v1.4.0
+
+    
     loadDownloads(elm);
     // The release label
     Element label = null;
     try {label = elm.select("span.release-label").get(0);} catch(Exception e){}
     this.isPre = label!=null && label.hasClass("prerelease");
     this.isLatest = label!=null && label.hasClass("latest");
-    
   }
   private static URL url_or_null_java_is_retarded(URL baseUrl, String relativeUrl) {
     try {
@@ -52,6 +62,39 @@ public class ReleaseHtml implements Release {
     catch(MalformedURLException e) {
       return null;
     }
+  }
+  public String getElementTextValue(String selector, Element topElm) {
+    return getElementTextValue(selector, topElm, null, selector);
+  }
+  public String getElementTextValue(String selector, Element topElm, GetStringFromNode handler) {
+    return getElementTextValue(selector, topElm, handler, selector);
+  }
+  public String getElementTextValue(String selector, Element topElm, GetStringFromNode handler, String nameForErrors) {
+    Element elm = null;
+    try {
+      elm = topElm.select(selector).get(0);
+      if(elm==null)
+        throw new NullPointerException("No elm");
+    }
+    catch(IndexOutOfBoundsException | NullPointerException e) {
+      throw new DataParseException("Cannot get "+nameForErrors+"!", parent.url, "");
+    }
+    try {
+      return handler!=null?handler.get(elm):elm.text();
+    }
+    catch(IndexOutOfBoundsException | NullPointerException e) {
+      throw new DataParseException("Cannot get text value for "+nameForErrors+"!", parent.url, "");
+    }
+  }
+  // Lambda to get the strings from node
+  public static interface GetStringFromNode {
+    public String get(Element elm);
+  }
+  public static class GetStringFromNodeText implements GetStringFromNode {
+    @Override
+    public String get(Element elm) {
+      return elm.text();
+    } 
   }
   @Override
   public Repository parent() {

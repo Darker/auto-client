@@ -191,7 +191,15 @@ import sirius.constants.IWMConsts;
            if(settings.getBoolean(Setnames.UPDATES_AUTOCHECK.name, (Boolean)Setnames.UPDATES_AUTOCHECK.default_val))
              updater.checkForUpdates();
          }
-         //Dialogs.dialogInfoOnceAsync("Hello :)", "First fun", gui, "DIALOG_FIRST_RUN", settings, true);
+         Dialogs.dialogInfoOnceAsync("Welcome to Auto Client designed "
+             + "for the new LoL Client. Please take notice, that this release is <b>very "
+             + "experimental and unreliable</b>! Please report any issues to our github account of facebook.<br />"
+             + "<br />"
+             + "Notable changes:<ul>"
+             + "<li>The program will now move your mouse cursor. This is sad but unavoidable.</li>"
+             + "<li>Runes, ARAM and masteries were all removed and are not finished yet</li>"
+             + "<li>We now use process name to detect client and game, so more languages will be supported.</li></ol>",
+             "New client info", gui, "DIALOG_NEW_CLIENT_BETA", settings, true);
        }
      });
      // If the application is configured to allways start as admin it will restart now

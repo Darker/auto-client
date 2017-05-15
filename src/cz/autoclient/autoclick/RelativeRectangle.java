@@ -28,7 +28,12 @@ public interface RelativeRectangle {
   public double getBottom();
   public double getRight();
   
-  public Rect rect(Window win);
+  public default Rect rect(Window win) {
+    return multiplyBySize(win.getRect());
+  }
+  public default Rect rect(Rect win) {
+    return multiplyBySize(win);
+  }
   public Rect multiplyBySize(Rect windowSize);
   
   public static class Basic implements RelativeRectangle {
