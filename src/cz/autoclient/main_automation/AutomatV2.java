@@ -72,8 +72,18 @@ public class AutomatV2 extends Automat {
     try {
       while(true) {
         waitForGame();
-        if(handleStandardLobby())
-          break;
+        if(handleStandardLobby()) {
+          while(true) {
+            sleep(5000);
+            Window gameWindow = MSWindow.findWindow(new WindowValidator.CompositeValidatorAND(new WindowValidator[] {
+              new WindowValidator.ProcessNameValidator(ConstData.game_process_name)
+            }));
+            if(gameWindow == null) {
+              dbgmsg("Game ended.");
+              break;
+            }
+          }
+        }
         handleMacros(1000);
       }
     } catch (InterruptedException e) {
