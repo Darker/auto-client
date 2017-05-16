@@ -38,9 +38,9 @@ public abstract class AutomatInterface extends Thread {
    * @param actions actions to perform when sleeping if message is script
    * @throws InterruptedException
    */
-  abstract void callText(final String message, SleepAction[] actions) throws InterruptedException;
+  public abstract void callText(final String message, SleepAction[] actions) throws InterruptedException;
 
-  abstract void simulateAccepted();
+  public abstract void simulateAccepted();
   
   public abstract Window getWindow();
   
@@ -90,7 +90,8 @@ public abstract class AutomatInterface extends Thread {
         macro.setMyAutomat(this);
         macro.call();
       } catch (Exception ex) {
-        errmsg("Macro failed!");
+        errmsg("Macro failed: "+ex.getMessage());
+        ex.printStackTrace();
       }
     }
     macros.clear();

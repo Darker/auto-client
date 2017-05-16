@@ -207,7 +207,6 @@ public class WindowTools {
      final int sleepBaseTime = 30;
      
      while(timeout<0 || time-timeStarted<timeout) {
-       //BufferedImage screenshot = window.screenshot();
        if(predicate.test(window)) {
          return true;
        }

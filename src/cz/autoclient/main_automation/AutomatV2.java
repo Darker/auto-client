@@ -148,7 +148,7 @@ public class AutomatV2 extends Automat {
         dbgmsg("  Setting champion name in between scripts.");
         selectChampion(chname);
         return true;
-      }, 750);
+      }, 1200);
     }
     this.callText(settings.getStringEquivalent(Setnames.BLIND_CALL_TEXT.name), new SleepAction[] {
       selectChampion
@@ -208,7 +208,7 @@ public class AutomatV2 extends Automat {
     sleep(80L);
 
     window.typeString(name);
-    sleep(600L);
+    sleep(800L);
     //click(PixelOffsetV2.Lobby_ChanpionSlot1);
     //sleep(30L);
     Rect wrect = window.getRect();
@@ -277,17 +277,22 @@ public class AutomatV2 extends Automat {
       ScreenWatcher.changeHSB(icon, -0.01F, -0.25F);
       if (icon != null) {
 
-        click(i == 0 ? PixelOffsetV2.Lobby_SumSpellButton1:PixelOffsetV2.Lobby_SumSpellButton2);
+        slowClick(i == 0 ? PixelOffsetV2.Lobby_SumSpellButton1:PixelOffsetV2.Lobby_SumSpellButton2, 30);
+        if(i==1) {
+          moveClick(PixelOffsetV2.Lobby_SumSpellButton2.toRect(winRect));
+        }
         //Wait till the launcher screen redraws
         if(!WindowTools.waitForPredicate(window,
             new PixelGroupSimple(
                 PixelOffsetV2.Lobby_SumSpellDialog_Bg1,
-                PixelOffsetV2.Lobby_SumSpellDialog_Bg2
+                PixelOffsetV2.Lobby_SumSpellDialog_Bg2,
+                PixelOffsetV2.Lobby_SumSpellDialog_Bg3
             ),
-            1000)) {
+            2000)) {
           errmsg("Cannot open dialog for summoner spells!");
           return;
         }
+        //DebugDrawing.displayImage(DebugDrawing.lastDebugImage);
         sleep(300L);
         
         //Calculate crop rectangle 
@@ -299,13 +304,14 @@ public class AutomatV2 extends Automat {
         Rect pos = findSummonerSpell(s, spellDialog, 3);
 
         if (pos != null) {
-           dbgmsg("Original result: "+pos);
            BufferedImage clone = DebugDrawing.cloneImage(spellDialog);
-           DebugDrawing.drawResult(clone, pos, Color.RED);
-           DebugDrawing.displayImage(clone, "Non-normalized");
+           //DebugDrawing.drawResult(clone, pos, Color.RED);
+           //DebugDrawing.displayImage(clone, "Non-normalized");
            // recalculate the relative position to the screen position
            Rect realPosition = normalizeRect(pos,  ImageFrameV2.Lobby_SpellDialog.rect(winRect), winSizeCoef);
            click(realPosition.middle());
+           moveClick(realPosition.middle());
+           sleep(200);
 //           clone = DebugDrawing.cloneImage(testScreen);
 //           DebugDrawing.drawResult(clone, realPosition, Color.RED);
 //           DebugDrawing.displayImage(clone, "Non-normalized");
@@ -313,7 +319,7 @@ public class AutomatV2 extends Automat {
           dbgmsg("  Spell #" + (i + 1) + " image corrupted.");
           BufferedImage clone = DebugDrawing.cloneImage(spellDialog);
           //DebugDrawing.drawResult(clone, pos, Color.RED);
-          DebugDrawing.displayImage(clone, "Non-normalized");
+          //DebugDrawing.displayImage(clone, "Non-normalized");
         }
       }
     }
@@ -384,5 +390,11 @@ public class AutomatV2 extends Automat {
    */
   public static Rect normalizeRect(Rect relativeRect, Rect cropRect, double resampleRatio) {
     return relativeRect.multiply(1.0/resampleRatio).move(cropRect);
+  }
+  
+  public void moveClick(Rect coords) throws InterruptedException {
+    window.mouseOver(coords.left+2, coords.top+2);
+    Thread.sleep(10L);
+    window.click(coords.left, coords.top);
   }
 }

@@ -21,7 +21,7 @@ public abstract class AutomatCallable implements Callable<Boolean> {
   public AutomatCallable() {
     myAutomat = null;
   }
-  protected AutomatInterface myAutomat;
+  public AutomatInterface myAutomat;
   public void setMyAutomat(AutomatInterface myAutomat) {
     this.myAutomat = myAutomat;
   }

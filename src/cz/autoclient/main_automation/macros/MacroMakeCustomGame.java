@@ -54,6 +54,8 @@ public class MacroMakeCustomGame extends AutomatCallable {
     if(!WindowTools.waitForPredicate(w, dialogPixels, 5000))
       throw new IllegalStateException("Cannot start the custom game!");
     click(PixelOffsetV2.Play_Custom_Lobby_NoXPDialog_Yes);
+    
+    this.myAutomat.simulateAccepted();
     return null;
   }
 }
