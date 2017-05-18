@@ -1,18 +1,17 @@
 
 
-# PVP.bot - Client automation for lazy players
-**Auto call, auto accept and other automatic features for League of Legends (LoL)**
+# Lol AutoCLient - Client automation for lazy players
+# **[DOWNLOAD](http://darker.github.io/auto-client/download/)**
+**Auto call, auto accept and other automatic features for League of Legends (LoL)**  
 
 ## Features
+ - New LoL Client is supported!
  - Auto accept - automatically accept draft and normal games
  - Auto call - automatically call your lane
  - Auto pick - automatically pick a champion, summoner spells, runes, and masteries
  - Auto login - automatically enter password for you to login into the game
- - Auto launch - automatically click 'Launch' button after opening the client
- - Auto queue - automatically start queuing
- - ARAM bot - automatically select masteries for a champion in ARAM
  - **Works in background mode**
- - **Doesn't move your mouse**
+ - Does not isntalock!
 
 ## Homepage
 On the [homepage](http://darker.github.io/auto-client/), latest versions and updates will be always available.
