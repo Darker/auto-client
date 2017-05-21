@@ -7,6 +7,9 @@
 package cz.autoclient.GUI.summoner_spells;
 
 import cz.autoclient.GUI.ToolTipTimer;
+import cz.autoclient.PVP_net.ConstData;
+import cz.autoclient.league_of_legends.SummonerSpell;
+import cz.autoclient.league_of_legends.maps.SummonerSpells;
 import cz.autoclient.settings.Settings;
 import java.awt.Container;
 import java.awt.GridLayout;
@@ -18,12 +21,9 @@ import java.awt.event.WindowEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import cz.autoclient.PVP_net.ConstData;
-import cz.autoclient.league_of_legends.SummonerSpell;
-import cz.autoclient.league_of_legends.maps.SummonerSpells;
-import javax.swing.JLabel;
 
 /**
  *
@@ -144,7 +144,7 @@ public class FrameSummonerSpells extends JDialog {
           contentPane.add(but); 
         }
         FrameSummonerSpells.this.pack();
-        //System.out.println("Buttons in FrameSummonerSpells were populated.");
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Buttons in FrameSummonerSpells were populated.");
       }
     });
 

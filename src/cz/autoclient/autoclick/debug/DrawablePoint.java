@@ -6,7 +6,6 @@
 
 package cz.autoclient.autoclick.debug;
 
-import cz.autoclient.autoclick.ColorPixel;
 import cz.autoclient.autoclick.ComparablePixel;
 import cz.autoclient.autoclick.Rect;
 import java.awt.image.BufferedImage;

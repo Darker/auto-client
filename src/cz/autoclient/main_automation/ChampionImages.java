@@ -150,7 +150,7 @@ public class ChampionImages implements
       download.start();
       while(!interrupted() && download!=null) {
         if(download.isAlive()) {
-          //System.out.println("[ChampionImages] Waiting for image "+current.name);
+          //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "[ChampionImages] Waiting for image "+current.name);
           download.join();
         }
         BufferedImage img = download.image;
@@ -166,11 +166,11 @@ public class ChampionImages implements
         // While downloading the next image, we calculate average color
         // of the current image
         if(img != null) {
-          //System.out.println("[ChampionImages] Started generating color for  "+img_champ.name);
+          //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "[ChampionImages] Started generating color for  "+img_champ.name);
           //Color average = ScreenWatcher.averageColor(
           //    img, 0, 0, img.getWidth(), img.getHeight());
           colors.put(img_champ.name, getColorInfo(img));
-          //System.out.println("[ChampionImages] Done generating color for  "+img_champ.name);
+          //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "[ChampionImages] Done generating color for  "+img_champ.name);
         }
       }
       // Ensure the child thread is also killed
@@ -207,10 +207,10 @@ public class ChampionImages implements
     }
     @Override
     public void run() {
-      //System.out.println("[ChampionImageDownload] Started downloading "+ch.name);
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "[ChampionImageDownload] Started downloading "+ch.name);
       BufferedImage im = ch.img.getBufferedImage();
       image = im.getSubimage(2, 2, im.getWidth()-4, im.getHeight()-4);
-      //System.out.println("[ChampionImageDownload] Finished downloading "+ch.name);
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "[ChampionImageDownload] Finished downloading "+ch.name);
     }
     public BufferedImage getImage() {
       return image;
@@ -271,12 +271,12 @@ public class ChampionImages implements
         ObjectInput input = new ObjectInputStream (buffer);
     ) {
       Map set = (Map)input.readObject();
-      System.out.println(set.size()+" champions loaded from file.");
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, set.size()+" champions loaded from file.");
       if(set.size()>0)
         this.colors.putAll(set);
     }
     catch(ClassNotFoundException | IOException e) {
-      System.out.println("Some class was not found when loading champion colors: "+e.getMessage());
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Some class was not found when loading champion colors: "+e.getMessage());
       e.printStackTrace();
       return false;
     }
@@ -301,7 +301,7 @@ public class ChampionImages implements
       ObjectOutput output;
       try (OutputStream buffer = new BufferedOutputStream(file)) {
         output = new ObjectOutputStream(buffer);
-        System.out.println("Saving champ color HashMap - "+colors.size()+" fields.");
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Saving champ color HashMap - "+colors.size()+" fields.");
         output.writeObject(colors);
       }
       output.close();

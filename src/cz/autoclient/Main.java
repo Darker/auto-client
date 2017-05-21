@@ -1,28 +1,33 @@
 package cz.autoclient;
 
-import cz.autoclient.updates.Updater;
+ // Call templates
 import cz.autoclient.GUI.Dialogs;
-import cz.autoclient.main_automation.Automat;
 import cz.autoclient.GUI.Gui;
 import cz.autoclient.GUI.summoner_spells.ButtonSummonerSpellMaster;
 import cz.autoclient.GUI.summoner_spells.InputSummonerSpell;
 import cz.autoclient.GUI.updates.UpdateProgressWindow;
 import cz.autoclient.PVP_net.Setnames;
+import cz.autoclient.logging.ConsoleLoggerBase;
+import cz.autoclient.main_automation.Automat;
 import cz.autoclient.main_automation.AutomatV2;
 import cz.autoclient.robots.Robot;
 import cz.autoclient.robots.exceptions.NoSuchRobotException;
 import cz.autoclient.settings.InputHandlers;
 import cz.autoclient.settings.Settings;
-import cz.autoclient.settings.input_handlers.*;
+import cz.autoclient.settings.input_handlers.InputJCheckBox;
+import cz.autoclient.settings.input_handlers.InputJCheckBoxMenuItem;
+import cz.autoclient.settings.input_handlers.InputJComboBox;
+import cz.autoclient.settings.input_handlers.InputJSpinner;
+import cz.autoclient.settings.input_handlers.InputJTextField;
 import cz.autoclient.settings.secure.PasswordFailedException;
 import cz.autoclient.settings.secure.SecureSettings;
 import cz.autoclient.settings.secure.UniqueID;
+import cz.autoclient.updates.Updater;
 import cz.autoclient.updates.VersionId;
 import java.awt.Frame;
 import java.beans.Expression;
 import java.io.File;
 import java.io.FileNotFoundException;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -32,8 +37,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 import java.util.prefs.Preferences;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
@@ -46,8 +53,8 @@ import javax.swing.SwingUtilities;
 import org.apache.logging.log4j.LogManager;
 import sirius.constants.IMKConsts;
 import sirius.constants.IWMConsts;
- 
- // Call templates
+
+
 // S>s,top,3,400;d,2000;s,Hello everyone\, I go top :)
 // S>s,top,3,400;d,2000;s,Hello everyone\, I go top :)
 // S>s,top,3,400;d,2000;s,Hello everyone\, I go top :)
@@ -75,8 +82,21 @@ import sirius.constants.IWMConsts;
    public Main()
    {
      updater = new Updater("Darker/auto-client", getVersion(), new File("./updates/"));
+     // Init logger
+     {
+        // get the global logger to configure it
+        Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+        logger.setLevel(Level.ALL);
+        // Remove all old/default loggers
+        Logger rootLogger = Logger.getLogger("");
+        java.util.logging.Handler[] handlers = rootLogger.getHandlers();
+        for(java.util.logging.Handler h: handlers)
+            rootLogger.removeHandler(h);
+        
+        rootLogger.addHandler(new ConsoleLoggerBase());
+     }
      
-     System.out.println("Running auto client "+getVersion());
+     Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Running auto client "+getVersion());
      //Normal program
      startGUI();
    }
@@ -98,11 +118,11 @@ import sirius.constants.IWMConsts;
    {
      if ((ac != null) && (ac.isAlive()) && (!ac.isInterrupted()))
      {
-       System.out.println("Stopping tool..");
+       Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Stopping tool..");
        ac.interrupt();
      }
      else {
-       System.out.println("Tried to stop tool while it wasn't running!");
+       Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Tried to stop tool while it wasn't running!");
      }
    }
    
@@ -110,7 +130,7 @@ import sirius.constants.IWMConsts;
    {
      if ((ac == null) || (!ac.isAlive()))
      {
-       System.out.println("Starting tool..");
+       Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Starting tool..");
        ac = new AutomatV2(gui, settings);
        ac.start();
      }
@@ -124,7 +144,7 @@ import sirius.constants.IWMConsts;
      }
      catch(FileNotFoundException e) {
        //Do nothing, this is expected for first run, before the settings file is created 
-       System.out.println("No settings loaded, they will be re-created. Error:"+e);
+       Logger.getLogger(this.getClass().getName()).log(Level.INFO, "No settings loaded, they will be re-created. Error:"+e);
      }
      catch(IOException e) {
        //This means the settings probably exist but are corrupted
@@ -205,12 +225,12 @@ import sirius.constants.IWMConsts;
      // If the application is configured to allways start as admin it will restart now
      // It's slow but it works without creating some other kind of settings
      if(settings.getBoolean(Setnames.START_AS_ADMIN.name, (boolean)Setnames.START_AS_ADMIN.default_val)) {
-       System.out.println("Starting as admin because of settings.");
+       Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Starting as admin because of settings.");
        tryRestartAsAdmin(false);
        return;
      }
      
-     //System.out.println("PW: "+settings.getSetting(Setnames.REMEMBER_PASSWORD.name));
+     //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "PW: "+settings.getSetting(Setnames.REMEMBER_PASSWORD.name));
      //Fill empty fields with default values
      Setnames.setDefaults(settings);
      //Initialise encryption
@@ -225,8 +245,8 @@ import sirius.constants.IWMConsts;
      encryptor.addPassword(UniqueID.WINDOWS_USER_SID);
      try {
        encryptor.getMergedPassword();
-       //System.out.println("Password key: "+encryptor.getMergedPassword());
-       //System.out.println("Encryption password: "+encryptor.getMergedPassword());
+       //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Password key: "+encryptor.getMergedPassword());
+       //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Encryption password: "+encryptor.getMergedPassword());
      } catch (PasswordFailedException ex) {
        Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
      }
@@ -238,7 +258,7 @@ import sirius.constants.IWMConsts;
        return robot;
      }
      catch(Exception e) {
-       System.out.println("Error when creating robot: "+e.getMessage());
+       Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Error when creating robot: "+e.getMessage());
        throw new NoSuchRobotException("Constructor has failed.");
      }
    }
@@ -312,7 +332,7 @@ import sirius.constants.IWMConsts;
        }
      }
      else {
-       System.out.println("Settings is null!");
+       Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Settings is null!");
      }
      if(updater!=null)
        updater.saveAll();
@@ -327,9 +347,9 @@ import sirius.constants.IWMConsts;
            gui = null;
          }
          for(Frame frame : JFrame.getFrames()) {
-           //System.out.println("Frame " + frame.getTitle());
+           //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Frame " + frame.getTitle());
            if(frame.isDisplayable()) {
-             //System.out.println("  Destroying frame " + frame.getTitle());
+             //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "  Destroying frame " + frame.getTitle());
              frame.dispose();
            }
          }
@@ -341,7 +361,7 @@ import sirius.constants.IWMConsts;
        if(updater.getUpdates().installStepIs(Updater.InstallStep.CAN_COPY_FILES, Updater.InstallStep.CAN_UNPACK)) {
          updater.installUpdate();
          updater.terminateAfterAction();
-         System.out.println("Installing updates, will terminate after that.");
+         Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Installing updates, will terminate after that.");
        }
        else
          throw new IllegalStateException("Tried to install update but this is no time to install.");
@@ -364,9 +384,9 @@ import sirius.constants.IWMConsts;
      try {
        Runtime.getRuntime().exec("javaw -jar \""+getSelfPath()+"\" >restart.log");
      } catch (FileNotFoundException ex) {
-       System.out.println("Cannot find the jar file.");
+       Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Cannot find the jar file.");
      } catch (IOException ex) {
-       System.out.println("Cannot execute the command.");
+       Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Cannot execute the command.");
      }
      Terminate(force);
    }
@@ -406,9 +426,9 @@ import sirius.constants.IWMConsts;
            try {
              Runtime.getRuntime().exec("javaw -jar \""+getSelfPath()+"\" >restart.log");
            } catch (FileNotFoundException ex) {
-             System.out.println("Cannot find the jar file.");
+             Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Cannot find the jar file.");
            } catch (IOException ex) {
-             System.out.println("Cannot execute the command.");
+             Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Cannot execute the command.");
            }
          });
          //updater.setUpdateListener(wnd);
@@ -496,7 +516,7 @@ import sirius.constants.IWMConsts;
      }
      // If exception was not thrown the program can be launched
      String command = "cscript \""+runAsAdmin.getAbsolutePath()+"\" "+jarPath;
-     System.out.println("Executing '"+command+"'");
+     Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Executing '"+command+"'");
      //Note that .exec is asynchronous
      //After it starts, you must terminate your program ASAP, or you'll have 2 instances running
      Runtime.getRuntime().exec(command);
@@ -506,7 +526,7 @@ import sirius.constants.IWMConsts;
      //Our 
      String jarPath;
 
-     //System.out.println("Current relative path is: " + s);
+     //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Current relative path is: " + s);
      
      try {
        jarPath = "\""+new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getAbsolutePath()+"\"";

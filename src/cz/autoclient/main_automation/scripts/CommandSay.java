@@ -6,7 +6,6 @@
 
 package cz.autoclient.main_automation.scripts;
 
-import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.PVP_net.PixelOffsetV2;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.scripting.ScriptCommand;

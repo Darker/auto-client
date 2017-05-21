@@ -17,7 +17,6 @@ import cz.autoclient.main_automation.WindowTools;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -33,10 +32,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 
 /**
@@ -61,7 +58,7 @@ public class PointTesterDialog extends JFrame {
     list.addMouseListener(new MouseAdapter() {
         public void mouseClicked(MouseEvent e) {
             if (e.getClickCount() == 2) {
-                System.out.println("Doubleclick: "+list.getSelectedValue().toString());
+                Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Doubleclick: "+list.getSelectedValue().toString());
                 PointTesterDialog.this.test();
             }
         }

@@ -9,6 +9,8 @@ package cz.autoclient.settings.secure;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -30,7 +32,7 @@ public class EncryptedSetting implements Serializable {
 
   public void setEncryptor(SecureSettings encryptor) {
     if(encryptor==null) {
-      System.out.println("NUL ENCRYPTOR OH NO");
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "NUL ENCRYPTOR OH NO");
       new Exception().printStackTrace(System.out);
     }
     this.encryptor = encryptor;
@@ -69,7 +71,7 @@ public class EncryptedSetting implements Serializable {
         //throw new IllegalStateException("Neither encrypted or decrypted values are known. Can't get encrypted value.");
       }
       encryptedValue = encryptor.encrypt(decryptedValue);
-      //System.out.println("Encrypted value: "+encryptedValue);
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Encrypted value: "+encryptedValue);
     }
     return encryptedValue;
   }

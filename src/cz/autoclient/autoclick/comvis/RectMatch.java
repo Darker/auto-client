@@ -6,8 +6,8 @@
 
 package cz.autoclient.autoclick.comvis;
 
-import cz.autoclient.autoclick.Rect;
 import com.sun.jna.platform.win32.WinDef;
+import cz.autoclient.autoclick.Rect;
 
 /**
  *

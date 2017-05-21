@@ -158,7 +158,7 @@ public class LazyLoadedImage {
     if(scaledInstances!=null) {
       d = new Dimensions(width, height);
       if(scaledInstances.containsKey(d)) {
-        //System.out.println("Already cached. Returning cache.");
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Already cached. Returning cache.");
         return scaledInstances.get(d);
       }
     }
@@ -166,12 +166,12 @@ public class LazyLoadedImage {
     BufferedImage src = getBufferedImage();
 
     if(src!=null) {
-      //System.out.println("Scaling icon.");
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Scaling icon.");
 
       BufferedImage scaled = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
       AffineTransform at = new AffineTransform();
       at.scale((double)width/(double)src.getWidth(), (double)height/(double)src.getHeight());
-      //System.out.println("["+xscale+", "+yscale+"]");
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "["+xscale+", "+yscale+"]");
       AffineTransformOp scaleOp = 
          new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
       scaled = scaleOp.filter(src, scaled);
@@ -180,7 +180,7 @@ public class LazyLoadedImage {
           scaledInstances = new HashMap();
         if(d==null)
           d = new Dimensions(width, height);
-        //System.out.println("Saving to cache.");
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Saving to cache.");
         scaledInstances.put(d, scaled);
       }
       return scaled;
@@ -282,7 +282,7 @@ public class LazyLoadedImage {
           //Remember the image is unavailable
           if(image_failed)
             return null;
-          //System.out.println("  LoadImage(\""+leclass.getResource(".")+"\")");
+          //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "  LoadImage(\""+leclass.getResource(".")+"\")");
           //Use whatever is stored in Icon if we have it
           if(icon!=null) {
             image = icon.getImage();

@@ -6,7 +6,6 @@
 
 package cz.autoclient.GUI.tabs;
 
-import cz.autoclient.GUI.tabs.FieldDef;
 import java.awt.Component;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;

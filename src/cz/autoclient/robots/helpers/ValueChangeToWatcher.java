@@ -6,6 +6,9 @@
 
 package cz.autoclient.robots.helpers;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * This extends basic watcher but additionally requires the value to be changed to something.
  * @author Jakub
@@ -35,7 +38,7 @@ public class ValueChangeToWatcher<T> extends ValueChangeWatcher<T> {
   
   public boolean checkValueChangedDebug(T value) {
     if((oldvalue!=null && value==null) || (value!=null && !value.equals(oldvalue))) {
-      System.out.println("Value "+(value==null?oldvalue.getClass().getName():value.getClass().getName())+" changed from "+oldvalue+" to "+value);
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Value "+(value==null?oldvalue.getClass().getName():value.getClass().getName())+" changed from "+oldvalue+" to "+value);
     }
     
     boolean state = (oldvalue!=null && value==null && requiredValue==null)

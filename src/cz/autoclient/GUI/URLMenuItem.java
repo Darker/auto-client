@@ -6,17 +6,12 @@
 
 package cz.autoclient.GUI;
 
-import static cz.autoclient.GUI.passive_automation.PAMenu.displayAboutPage;
 import cz.autoclient.GUI.urls.AcURL;
 import cz.autoclient.GUI.urls.BasicURL;
 import cz.autoclient.GUI.urls.LazyURL;
 import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JMenuItem;
 
 /**

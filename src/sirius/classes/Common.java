@@ -5,7 +5,6 @@
  import com.sun.jna.platform.win32.WinDef;
  import sirius.constants.IICCConsts;
  import sirius.core.CommCtl;
- import sirius.core.CommCtl.INITCOMMONCONTROLSEX;
  import sirius.core.DlgWin32API;
  import sirius.core.GDI32Ext;
  import sirius.core.Kernel32Ext;

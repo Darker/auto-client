@@ -20,6 +20,8 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -83,7 +85,7 @@ public class UpdateCache extends TreeSet<UpdateInfo> implements java.io.Serializ
   }
   // does tne necessary comparison to calculate date difference for last check
   boolean shouldCheck(long maxDiff) {
-    //System.out.println(maxDiff+" > "+lastCheckDelay()+" => "+(maxDiff>lastCheckDelay()));
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, maxDiff+" > "+lastCheckDelay()+" => "+(maxDiff>lastCheckDelay()));
     return maxDiff<lastCheckDelay();
   }
   
@@ -105,7 +107,7 @@ public class UpdateCache extends TreeSet<UpdateInfo> implements java.io.Serializ
       output = new ObjectOutputStream(buffer);
       output.writeObject(this);
     }
-    System.out.println("Cache saved in "+path.getAbsolutePath());
+    Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Cache saved in "+path.getAbsolutePath());
     output.close();
   }
   public static UpdateCache loadFromFile(File path) throws IOException {    

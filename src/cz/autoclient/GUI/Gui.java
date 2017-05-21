@@ -1,12 +1,9 @@
 package cz.autoclient.GUI;
 
-import cz.autoclient.GUI.updates.UpdateVisual;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.swing.AutoCompleteSupport;
 import cz.autoclient.GUI.champion.ConfigurationManager;
 import cz.autoclient.GUI.dialogs.champions.ChampionSettingsDialog;
-import cz.autoclient.GUI.tabs.TabbedWindow;
-import cz.autoclient.GUI.tabs.FieldDef;
 import cz.autoclient.GUI.notifications.Notification;
 import cz.autoclient.GUI.notifications.NotificationSound;
 import cz.autoclient.GUI.notifications.NotificationTrayBaloon;
@@ -14,8 +11,11 @@ import cz.autoclient.GUI.notifications.Notifications;
 import cz.autoclient.GUI.passive_automation.PAConfigWindow;
 import cz.autoclient.GUI.passive_automation.PAMenu;
 import cz.autoclient.GUI.summoner_spells.ButtonSummonerSpellMaster;
+import cz.autoclient.GUI.tabs.FieldDef;
 import cz.autoclient.GUI.tabs.MultiFieldDef;
+import cz.autoclient.GUI.tabs.TabbedWindow;
 import cz.autoclient.GUI.updates.UpdateMenuItem;
+import cz.autoclient.GUI.updates.UpdateVisual;
 import cz.autoclient.GUI.urls.BasicURL;
 import cz.autoclient.GUI.urls.LazyURL;
 import cz.autoclient.Main;
@@ -26,16 +26,14 @@ import cz.autoclient.autoclick.exceptions.APIException;
 import cz.autoclient.autoclick.windows.ClickProxy;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.windows.cache.title.CacheByTitle;
-import cz.autoclient.settings.Settings;
 import cz.autoclient.dllinjection.DLLInjector;
 import cz.autoclient.dllinjection.InjectionResult;
 import cz.autoclient.league_of_legends.maps.Champions;
 import cz.autoclient.main_automation.macros.MacroMakeCustomGame;
 import cz.autoclient.robots.AutoLoginBot;
 import cz.autoclient.robots.AutoQueueBot;
-import cz.autoclient.robots.LaunchBot;
 import cz.autoclient.robots.RobotManager;
-import cz.autoclient.robots.exceptions.NoSuchRobotException;
+import cz.autoclient.settings.Settings;
 import cz.autoclient.settings.SettingsInputVerifier;
 import cz.autoclient.settings.SettingsValueChanger;
 import cz.autoclient.settings.secure.EncryptedSetting;
@@ -60,12 +58,13 @@ import java.awt.event.WindowEvent;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.ParallelGroup;
 import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -78,10 +77,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
-import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
  
  public class Gui
@@ -175,19 +172,19 @@ import javax.swing.SwingUtilities;
         @Override
         public void windowOpened(WindowEvent event)
         {
-          System.out.println("Window opened.");
+          Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Window opened.");
         }
         @Override
         public void windowClosing(WindowEvent event)
         {
-          System.out.println("Window is closing!");
+          Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Window is closing!");
           //Terminate the program
           ac.TerminateAsync();
         }
         @Override
         public void windowClosed(WindowEvent event)
         {
-          //System.out.println("This function is never called.");
+          //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "This function is never called.");
         }
         @Override
         public void windowIconified(WindowEvent event) {
@@ -556,7 +553,7 @@ import javax.swing.SwingUtilities;
          updateMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-              System.out.println("Update clicked!");
+              Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Update clicked!");
               if(updater.getUpdates().installStepIs(Updater.InstallStep.CAN_COPY_FILES, Updater.InstallStep.CAN_UNPACK))
                 ac.UpdateAndRestart();
               else
@@ -771,7 +768,7 @@ import javax.swing.SwingUtilities;
 
         //A menuAutomation item with link to help
         {
-          //System.out.println(ImageResources.PA_BOT_ENABLED.path);
+          //Logger.getLogger(this.getClass().getName()).log(Level.INFO, ImageResources.PA_BOT_ENABLED.path);
           menuAutomation.add(new URLMenuItem(
                       "What's this?",
                       "Link to help page on github",
@@ -834,7 +831,7 @@ import javax.swing.SwingUtilities;
           }
       });
       menuBar1.add(buttonStartStop);
-      System.out.println("Menu created!");
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Menu created!");
     }
 
    public void setUpdateManager(final Updater updater) {
@@ -850,7 +847,7 @@ import javax.swing.SwingUtilities;
       private String password;
       @Override
       public Object value(JComponent comp) {
-        System.out.println("Password: "+new String(((JPasswordField)comp).getPassword()));
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Password: "+new String(((JPasswordField)comp).getPassword()));
         return new String(((JPasswordField)comp).getPassword());
       }
 
@@ -970,7 +967,7 @@ import javax.swing.SwingUtilities;
             else {
               pw.setText("****");
               settings.setEncrypted(Setnames.REMEMBER_PASSWORD.name, PW);
-              //System.out.println("DECRYPTED: "+settings.getEncrypted(Setnames.REMEMBER_PASSWORD.name));
+              //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "DECRYPTED: "+settings.getEncrypted(Setnames.REMEMBER_PASSWORD.name));
               new Thread() {
                 @Override
                 public void run() {
@@ -1065,7 +1062,7 @@ import javax.swing.SwingUtilities;
 //        field.label.setForeground(Color.RED);
 //        win.addLine(field);
 //        
-        System.out.println("Creating summoner spells.");
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Creating summoner spells.");
         multifield = new MultiFieldDef("Summoner spells:");
         ButtonSummonerSpellMaster spell1 = new ButtonSummonerSpellMaster(null, settings);
         ButtonSummonerSpellMaster spell2 = new ButtonSummonerSpellMaster(null, settings); 
@@ -1074,7 +1071,7 @@ import javax.swing.SwingUtilities;
         multifield.addField(spell2, settings, Setnames.BLIND_SUMMONER2);
         win.addLine(multifield);
         
-//        System.out.println("Creating summoner Masteries.");
+//        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Creating summoner Masteries.");
 //        field = new FieldDef("Mastery page (0=ignore):", "Index of mastery page to be selected:", Setnames.BLIND_MASTERY.name);
 //        JSpinner masteries = new JSpinner();
 //        masteries.setEnabled(false);
@@ -1132,7 +1129,7 @@ import javax.swing.SwingUtilities;
 
         pane.add(win.container);
         win.close();   
-        System.out.println("Inner window created.");
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Inner window created.");
    }
    protected void initChampField(final JComboBox field) {
      SwingUtilities.invokeLater(new Runnable()
@@ -1142,7 +1139,7 @@ import javax.swing.SwingUtilities;
        {
          //Object[] elements = new Object[] {"Cat", "Dog", "Lion", "Mouse"};
          String[] elements = ConstData.lolData.getChampions().enumValues(Champions.getName, true).toArray(new String[0]);
-         //System.out.println("Champions_old loaded: "+elements.length);
+         //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Champions_old loaded: "+elements.length);
          //Safe to unload all JSON data now
          ConstData.lolData.getChampions().unloadData();
          
@@ -1185,7 +1182,7 @@ import javax.swing.SwingUtilities;
     private static void debugInspectElement(Container c, int recur) {
       Component[] comps = c.getComponents();
       if(recur==0)
-        System.out.println("Inspecting "+c.getClass().getName()+": ");
+        Logger.getLogger(Gui.class.getName()).log(Level.INFO, "Inspecting "+c.getClass().getName()+": ");
       for(Component comp:comps) {
         System.out.print("  ");
         if(recur>0) {
@@ -1196,9 +1193,9 @@ import javax.swing.SwingUtilities;
           for(int i=0;i<recur; i++)
             System.out.print(" ");
         }
-        System.out.println(comp.getClass().getName());
+        Logger.getLogger(Gui.class.getName()).log(Level.INFO, comp.getClass().getName());
         if(comp instanceof Container) {
-          //System.out.println(" );
+          //Logger.getLogger(this.getClass().getName()).log(Level.INFO, " );
           debugInspectElement((Container)comp, recur+2); 
         }
       }

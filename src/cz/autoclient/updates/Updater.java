@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.lingala.zip4j.exception.ZipException;
 
 /**
@@ -140,7 +142,7 @@ public class Updater implements EventEmitter {
     return updates;
   }
   public static void dbgmsg(String msg) {
-    System.out.println("[UPDATES] " + msg);
+    Logger.getLogger(Updater.class.getName()).log(Level.INFO, "[UPDATES] " + msg);
   }
   /**
    * Call when the filtering on used updates is changed

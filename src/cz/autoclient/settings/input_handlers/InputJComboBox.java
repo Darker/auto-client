@@ -13,8 +13,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import javax.swing.JComponent;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 
 /**
  *
@@ -86,7 +86,7 @@ public class InputJComboBox implements Input {
     else
       System.out.println("Setting "+field.getClass().getName()+
                          " value to null");
-    System.out.println(" -> Value: "+getValue());*/
+    Logger.getLogger(this.getClass().getName()).log(Level.INFO, " -> Value: "+getValue());*/
   }
 
   @Override

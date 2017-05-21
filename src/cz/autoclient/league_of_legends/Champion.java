@@ -8,6 +8,8 @@ package cz.autoclient.league_of_legends;
 
 import cz.autoclient.GUI.LazyLoadedRemoteImage;
 import cz.autoclient.league_of_legends.maps.Champions;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -30,7 +32,7 @@ public class Champion extends GameObjectWithImage {
     try {
       name_tmp = src.getString("name");
     } catch (JSONException ex) {
-      System.out.println("JSON data: "+src.toString());
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "JSON data: "+src.toString());
       throw new IllegalArgumentException("Invalid json data. Got error when fetching name: "+ex);
     }
     name = name_tmp;

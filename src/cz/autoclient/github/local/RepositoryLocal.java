@@ -6,18 +6,12 @@
 
 package cz.autoclient.github.local;
 
-import cz.autoclient.github.html.*;
-import cz.autoclient.github.interfaces.Release;
 import cz.autoclient.github.interfaces.Releases;
 import cz.autoclient.github.interfaces.Repository;
 import cz.autoclient.github.interfaces.RepositoryId;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
-import java.lang.IllegalArgumentException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *

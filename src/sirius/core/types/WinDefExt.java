@@ -4,8 +4,6 @@
  import com.sun.jna.Structure;
  import com.sun.jna.platform.win32.BaseTSD;
  import com.sun.jna.platform.win32.WinDef;
- import com.sun.jna.platform.win32.WinDef;
-
  import com.sun.jna.platform.win32.WinNT;
  import java.util.Arrays;
  import java.util.List;

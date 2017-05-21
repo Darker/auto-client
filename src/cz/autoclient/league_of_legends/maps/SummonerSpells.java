@@ -10,10 +10,6 @@ import cz.autoclient.league_of_legends.LoLVersion;
 import cz.autoclient.league_of_legends.SummonerSpell;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 

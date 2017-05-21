@@ -6,9 +6,9 @@
 
 package cz.autoclient.GUI;
 import cz.autoclient.Main;
-import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.Setnames;
+import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.windows.cache.title.CacheByTitle;
 import cz.autoclient.threads.Pauseable;
 /**
@@ -46,11 +46,11 @@ public class StateGuard extends Pauseable {
       if(win==null) {
         win = CacheByTitle.initalInst.getWindow(ConstData.window_title_part);
         //if(win==null)
-        //  System.out.println("Window from name failed...");
+        //  Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Window from name failed...");
       }
       else if(!win.isValid()) {
         win = null;
-        //System.out.println("Window is invalid...");
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Window is invalid...");
       }
       else if(
               main.ToolRunning() && 
@@ -81,7 +81,7 @@ public class StateGuard extends Pauseable {
 
   private void pvp_net_changed(boolean newState) {
     pvp_net_running = newState;
-    //System.out.println("New state: "+newState);
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "New state: "+newState);
     gui.displayClientAvailableAsync(newState);
     if(newState) {
       

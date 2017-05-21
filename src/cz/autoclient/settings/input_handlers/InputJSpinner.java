@@ -9,10 +9,8 @@ package cz.autoclient.settings.input_handlers;
 import cz.autoclient.settings.Input;
 import cz.autoclient.settings.SettingsInputVerifier;
 import cz.autoclient.settings.ValueChanged;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.swing.JSpinner;
 import javax.swing.JComponent;
+import javax.swing.JSpinner;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 

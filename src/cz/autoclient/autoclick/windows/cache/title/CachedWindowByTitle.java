@@ -40,7 +40,7 @@ public class CachedWindowByTitle implements CachedWindow<String> {
   }
   
   private void windowGetterFullTitle() {
-    //System.out.println("Seeking window by exact title \""+cachedTitle+"\".");
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Seeking window by exact title \""+cachedTitle+"\".");
     cachedWindow = Window.FindWindowByName(cachedTitle, true);
     //Invalid window is to be set to null
     if(cachedWindow!=null && !cachedWindow.isValid())

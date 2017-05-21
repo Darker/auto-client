@@ -12,6 +12,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -80,10 +81,10 @@ public enum UniqueID implements PasswordInitialiser {
       //mac = .nextElement().getHardwareAddress();
       for (;infs.hasMoreElements();) {
         NetworkInterface d = infs.nextElement();
-        /*System.out.println("Network inf: ");
-        System.out.println("             Name: "+d.getDisplayName());
-        System.out.println("             Virtual: "+d.isVirtual());
-        System.out.println("             MAC: "+MAC2String(d.getHardwareAddress()));*/
+        /*Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Network inf: ");
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "             Name: "+d.getDisplayName());
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "             Virtual: "+d.isVirtual());
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "             MAC: "+MAC2String(d.getHardwareAddress()));*/
         byte[] addr = d.getHardwareAddress();
         if(addr!=null) {
           mac = addr;
@@ -91,17 +92,17 @@ public enum UniqueID implements PasswordInitialiser {
         }
       }
     } catch (SocketException ex) {
-      System.out.println(ex);
+      Logger.getLogger(UniqueID.class.getName()).log(Level.INFO, (Supplier<String>) ex);
       return "";
       //Logger.getLogger(SecureSettings.class.getName()).log(Level.SEVERE, null, ex);
     } catch(NullPointerException e) {
-      System.out.println(e);
+      Logger.getLogger(UniqueID.class.getName()).log(Level.INFO, (Supplier<String>) e);
       e.printStackTrace();
       return ""; 
     }
     
     if(mac==null) {
-      System.out.println("MAC is null.");
+      Logger.getLogger(UniqueID.class.getName()).log(Level.INFO, "MAC is null.");
       return "";
     }
     return MAC2String(mac);

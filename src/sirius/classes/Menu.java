@@ -2,11 +2,9 @@
  
  import com.sun.jna.Pointer;
  import com.sun.jna.platform.win32.WinDef;
-
  import javax.jws.WebService;
  import sirius.constants.IMenuFlag;
  import sirius.constants.IWMConsts;
- import sirius.core.User32Ext;
  import sirius.core.types.WinDefExt;
 
  

@@ -15,6 +15,8 @@ import cz.autoclient.updates.UpdateInfo;
 import cz.autoclient.updates.Updater;
 import cz.autoclient.updates.VersionId;
 import java.net.UnknownHostException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipError;
 import javax.swing.SwingUtilities;
 
@@ -94,7 +96,7 @@ public class UpdateVisual {
           SwingUtilities.invokeLater(()->item.setDownloaded(inProgress().version));
         break;
         default:
-          System.out.println("Error: invalid install step: "+updater.getUpdates().installStep().name());
+          Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Error: invalid install step: "+updater.getUpdates().installStep().name());
       }
     }
   }
@@ -166,7 +168,7 @@ public class UpdateVisual {
       public void process(double current, double max) {}
       @Override
       public void status(String status) {
-        System.out.println(status);
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, status);
       }
       @Override
       public void started() {}

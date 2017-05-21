@@ -12,6 +12,8 @@ import java.beans.Expression;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -52,7 +54,7 @@ public abstract class ScriptCommand {
     else {
       Object[] args = e!=null?new Object[]{e}:new Object[]{};
       try {
-        System.out.println("Generating command '"+commandName+"'.");
+        Logger.getLogger(ScriptCommand.class.getName()).log(Level.INFO, "Generating command '"+commandName+"'.");
         return (ScriptCommand)new Expression(c, "new", args).getValue(); 
       }
       catch(Exception ex) {
@@ -86,7 +88,7 @@ public abstract class ScriptCommand {
     @Override
     public boolean execute() {
       for(String str:strings) {
-        System.out.println(str);
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, str);
       }
       return true;
     }

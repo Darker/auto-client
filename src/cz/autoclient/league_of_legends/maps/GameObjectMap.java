@@ -20,6 +20,9 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -98,7 +101,7 @@ public abstract class GameObjectMap<T extends GameObject>
         version=getJSONData().getString("version");
       }
       catch(JSONException e) {
-        System.out.println(e);
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, (Supplier<String>) e);
         return "error"; 
       }
     }
@@ -142,7 +145,7 @@ public abstract class GameObjectMap<T extends GameObject>
           return cachedValueLists.get(code);
       }
     }
-    //System.out.println("Enumerating values using "+reader.getClass().getName());
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Enumerating values using "+reader.getClass().getName());
     List<V> vals = new ArrayList();
     
     for(T o : this) {

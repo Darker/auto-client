@@ -116,7 +116,7 @@ public class NativeProcess {
         //In case something changed,  just check for the first two columns.
         //But in windows, result should be 5 columns, 3 other are not needed
         if(nextLine.length>=2) {
-          //System.out.println("Checking process '"+nextLine[0]+"' with PID "+nextLine[1]);
+          //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Checking process '"+nextLine[0]+"' with PID "+nextLine[1]);
           if(strict&&nextLine[0].equalsIgnoreCase(name) || !strict&&nextLine[0].contains(name)) {
             if(breakOnFirst) {
               return new int[] {Integer.parseInt(nextLine[1])};

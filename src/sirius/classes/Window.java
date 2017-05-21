@@ -3,10 +3,8 @@
  import com.sun.jna.Memory;
  import com.sun.jna.Pointer;
  import com.sun.jna.platform.win32.GDI32;
- import com.sun.jna.platform.win32.Shell32;
  import com.sun.jna.platform.win32.User32;
  import com.sun.jna.platform.win32.WinDef;
-
  import com.sun.jna.platform.win32.WinGDI;
  import com.sun.jna.platform.win32.WinNT;
  import com.sun.jna.platform.win32.WinUser;
@@ -16,9 +14,10 @@
  import java.io.File;
  import java.io.FileWriter;
  import java.io.InputStreamReader;
- import java.io.PrintStream;
- import sirius.constants.IMKConsts;
- import sirius.constants.IWMConsts;
+ import java.util.logging.Level;
+ import java.util.logging.Logger;
+import sirius.constants.IMKConsts;
+import sirius.constants.IWMConsts;
  import sirius.core.GDI32Ext;
  import sirius.core.User32Ext;
  import sirius.core.types.WinDefExt;
@@ -365,7 +364,7 @@
            return true;
          }
          WindowID[0] = hWnd.hashCode();
-         System.out.println("Found");
+         Logger.getLogger(Window.class.getName()).log(Level.INFO, "Found");
          return true;
        }
      }, null);

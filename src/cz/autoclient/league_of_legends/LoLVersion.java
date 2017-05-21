@@ -11,6 +11,9 @@ import cz.autoclient.league_of_legends.maps.SummonerSpells;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -53,7 +56,7 @@ public class LoLVersion extends DataLoader {
         version=data.getString("v");
       }
       catch(JSONException e) {
-        System.out.println(e);
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, (Supplier<String>) e);
         return "error"; 
       }
       if(version!=null) {
@@ -70,7 +73,7 @@ public class LoLVersion extends DataLoader {
         language=data.getString("l");
       }
       catch(JSONException e) {
-        //System.out.println(e);
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, e);
         return "en_US"; 
       }
     }

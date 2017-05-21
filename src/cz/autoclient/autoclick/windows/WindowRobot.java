@@ -16,6 +16,8 @@ import java.awt.Robot;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -29,7 +31,7 @@ public class WindowRobot implements Window {
       this.robot = new Robot();
       robot.setAutoDelay(1);
     } catch (AWTException ex) {
-      System.out.println("Robot cannot be created!");
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Robot cannot be created!");
     }
   }
   public FocusMode focusMode = FocusMode.FORCE_FOCUS;
@@ -178,7 +180,7 @@ public class WindowRobot implements Window {
         robot.keyPress(key);
       }
       catch(IllegalArgumentException e) {
-        System.out.println("WARNING - illegal char code: "+key);
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "WARNING - illegal char code: "+key);
       }
     }
   }
@@ -192,7 +194,7 @@ public class WindowRobot implements Window {
         robot.keyRelease(key);
       }
       catch(IllegalArgumentException e) {
-        System.out.println("WARNING - illegal char code: "+key);
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "WARNING - illegal char code: "+key);
       }
     }
   }
@@ -204,7 +206,7 @@ public class WindowRobot implements Window {
         robot.keyRelease(key);
       }
       catch(IllegalArgumentException e) {
-        System.out.println("WARNING - illegal char code: "+key);
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "WARNING - illegal char code: "+key);
       }
     }
   }
@@ -243,7 +245,7 @@ public class WindowRobot implements Window {
           }
         }
         catch(IllegalArgumentException e) {
-          System.out.println("WARNING - illegal char code: "+character);
+          Logger.getLogger(this.getClass().getName()).log(Level.INFO, "WARNING - illegal char code: "+character);
         }
       }
     }

@@ -126,7 +126,7 @@ public class ScriptEnvironment {
     }
   }
   public void sleep(long millis) throws InterruptedException {
-    //System.out.println("[Script] Sleep for: "+millis);
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "[Script] Sleep for: "+millis);
     long start = System.currentTimeMillis();
     long now = start;
     long end = now+millis;

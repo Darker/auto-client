@@ -7,9 +7,7 @@
 package cz.autoclient.league_of_legends.maps;
 
 import cz.autoclient.league_of_legends.Champion;
-import cz.autoclient.league_of_legends.GameObject;
 import cz.autoclient.league_of_legends.LoLVersion;
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import org.json.JSONException;

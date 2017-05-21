@@ -5,7 +5,6 @@
  */
 
 package cz.autoclient.settings.secure;
-import static cz.autoclient.settings.secure.UniqueID.getMacAddress;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -19,7 +18,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -45,7 +45,7 @@ public class SecureSettings {
     return initialized;
   }
   public SecureSettings() {
-    //System.out.println("Creating new encryptor: " + hashCode());
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Creating new encryptor: " + hashCode());
   }
   public SecureSettings(String password) {
     this();
@@ -129,7 +129,7 @@ public class SecureSettings {
         bytes[i] = bytes2[i];
       }
     }
-    //System.out.println("Key size: "+bytes.length);
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Key size: "+bytes.length);
     
     key = new SecretKeySpec(bytes, "AES");
     ivSpec = new IvParameterSpec(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
@@ -140,7 +140,7 @@ public class SecureSettings {
       cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
       
     } catch (NoSuchAlgorithmException | NoSuchPaddingException ex) {
-      System.out.println("Cipher is null!");
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Cipher is null!");
       cipher = null; 
     }
     initialized = true;
@@ -172,7 +172,7 @@ public class SecureSettings {
       else
         return null;
     } catch (IOException | ClassNotFoundException ex) {
-      System.out.println("DECRYPT FAILED!");
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "DECRYPT FAILED!");
     }
     return null;
   }
@@ -194,7 +194,7 @@ public class SecureSettings {
       Serializable o = (Serializable)is.readObject();
       return o;
     } catch (IOException | ClassNotFoundException ex) {
-      System.out.println("DECRYPT FAILED: "+ex);
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "DECRYPT FAILED: "+ex);
       ex.printStackTrace();
       throw new InvalidPasswordException("The decrypted stream was mapformed - your key is invalid. Original error: "+ex);
     }
@@ -207,10 +207,10 @@ public class SecureSettings {
       os.writeObject(obj);
       return encrypt(out.toByteArray());
     } catch (IOException | InvalidAlgorithmParameterException | InvalidKeyException | ShortBufferException | IllegalBlockSizeException | BadPaddingException ex) {
-      System.out.println("ENCRYPT FAILED: "+ex);
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "ENCRYPT FAILED: "+ex);
       ex.printStackTrace();
     } catch(PasswordFailedException ex) {
-      System.out.println("Password FAILED: "+ex);
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Password FAILED: "+ex);
       ex.printStackTrace();
     }
     return null;

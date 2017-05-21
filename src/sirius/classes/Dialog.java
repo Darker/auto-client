@@ -3,7 +3,6 @@
  import com.sun.jna.Pointer;
  import com.sun.jna.platform.win32.WinDef;
  import javax.jws.WebService;
- import sirius.core.DlgWin32API;
  
  @WebService
  public class Dialog

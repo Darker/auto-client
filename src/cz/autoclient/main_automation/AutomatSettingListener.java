@@ -8,8 +8,6 @@ package cz.autoclient.main_automation;
 
 import cz.autoclient.settings.Input;
 import cz.autoclient.settings.SettingsInputVerifier;
-import cz.autoclient.settings.ValueChanged;
-import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 
 /**

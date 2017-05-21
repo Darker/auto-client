@@ -68,7 +68,7 @@ public interface WindowValidator {
         filename = w.getProcessName();
       }
       catch(APIException e) {
-        //System.out.println("Error getting process handle of window "+w.getTitle());
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Error getting process handle of window "+w.getTitle());
         return false;
       }
       if(!filename.endsWith(processFilename))

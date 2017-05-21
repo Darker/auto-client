@@ -12,7 +12,6 @@ import cz.autoclient.settings.SettingsValueChanger;
 import cz.autoclient.settings.ValueChanged;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 

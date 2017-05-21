@@ -6,7 +6,6 @@
 
 package cz.autoclient.autoclick.windows.ms_windows;
 
-import cz.autoclient.autoclick.exceptions.APIException;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.GDI32;
@@ -19,13 +18,13 @@ import com.sun.jna.platform.win32.WinNT.HANDLE;
 import com.sun.jna.platform.win32.WinUser;
 import com.sun.jna.ptr.IntByReference;
 import cz.autoclient.autoclick.ColorRef;
-import cz.autoclient.autoclick.windows.MouseButton;
 import cz.autoclient.autoclick.Rect;
+import cz.autoclient.autoclick.exceptions.APIException;
 import cz.autoclient.autoclick.exceptions.WindowAccessDeniedException;
+import cz.autoclient.autoclick.windows.MouseButton;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.windows.WindowValidator;
 import cz.autoclient.dllinjection.NativeProcess;
-import sirius.classes.Common;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -33,8 +32,10 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import sirius.classes.Common;
 import sirius.core.GDI32Ext;
-import sirius.core.Kernel32Ext;
 import sirius.core.Psapi;
 import sirius.core.User32Ext;
 import sirius.core.types.WinDefExt;
@@ -516,7 +517,7 @@ public class MSWindow extends Common implements Window  {
   private int sendMsg(int msg, int wparam, int lparam) throws WindowAccessDeniedException {
     clearLastError();
     int retval = UserExt.SendMessage(hwnd, msg, new WinDef.WPARAM(wparam), new WinDef.LPARAM(lparam));
-    System.out.println("MESSAGE: "+msg+" "+wparam+" "+lparam);
+    Logger.getLogger(this.getClass().getName()).log(Level.INFO, "MESSAGE: "+msg+" "+wparam+" "+lparam);
     if(getLastError()==5) {
       throw new WindowAccessDeniedException("The message was blocked by UIPI."); 
     }
@@ -570,7 +571,7 @@ public class MSWindow extends Common implements Window  {
          if(text.isEmpty())
            result = false;
          else {
-           //System.out.println("Trying window '"+text+"'.");
+           //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Trying window '"+text+"'.");
            result=text.toLowerCase().contains(name_small);
          }
          //If the window didn't match, return true to continue enumeration 
@@ -605,14 +606,14 @@ public class MSWindow extends Common implements Window  {
        if(text.isEmpty())
          result = false;
        else {
-         //System.out.println("Trying window '"+text+"'.");
+         //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Trying window '"+text+"'.");
          result=text.toLowerCase().contains(name_small);
        }
        //If the window didn't match, return true to continue enumeration 
        if (!result) {
          continue;
        }
-       System.out.println("Found window: "+text);
+       Logger.getLogger(MSWindow.class.getName()).log(Level.INFO, "Found window: {0}", text);
        //And if we gained one, put it in our array
        WindowID[0] = handle;
        //Returning false ends the enumeration
@@ -678,7 +679,7 @@ public class MSWindow extends Common implements Window  {
         
          
          int pid = UserExt.GetWindowThreadProcessId(handle, new IntByReference(0));
-         //System.out.println(getWindowTitle(handle)+" : "+pid);
+         //Logger.getLogger(this.getClass().getName()).log(Level.INFO, getWindowTitle(handle)+" : "+pid);
          if(pid==required_pid) {
            //And if we gained one, put it in our array
            WindowID[0] = handle;

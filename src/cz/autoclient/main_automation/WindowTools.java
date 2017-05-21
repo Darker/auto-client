@@ -13,13 +13,15 @@ import cz.autoclient.autoclick.ColorPixel;
 import cz.autoclient.autoclick.ComparablePixel;
 import cz.autoclient.autoclick.GraphicPredicate;
 import cz.autoclient.autoclick.Rect;
-import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.comvis.DebugDrawing;
 import cz.autoclient.autoclick.comvis.ScreenWatcher;
 import cz.autoclient.autoclick.exceptions.APIException;
+import cz.autoclient.autoclick.windows.Window;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -88,7 +90,7 @@ public class WindowTools {
        if(checkPoint(img, point))
          matches++;
        //else 
-       //  System.out.println("Point "+point+" failed.");
+       //  Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Point "+point+" failed.");
      }
      return matches;
    }
@@ -280,6 +282,6 @@ public class WindowTools {
    }
    
    public static void dbg(String str) {
-     System.out.println("[WINDOW-TOOLS] "+str); 
+     Logger.getLogger(WindowTools.class.getName()).log(Level.INFO, "[WINDOW-TOOLS] "+str); 
    }
 }

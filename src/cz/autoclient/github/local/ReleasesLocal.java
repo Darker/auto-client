@@ -12,7 +12,6 @@ import cz.autoclient.github.interfaces.Repository;
 import cz.autoclient.league_of_legends.DataLoader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -30,10 +29,6 @@ import java.util.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 /**
  *
@@ -76,7 +71,7 @@ public class ReleasesLocal implements Releases {
   public boolean fetch() {
     try {
       ArrayList<Release> rels = new ArrayList();
-      System.out.println("Getting releases from: "+file.getAbsolutePath());
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Getting releases from: "+file.getAbsolutePath());
       JSONArray releases_json = DataLoader.arrayFromFile(file);
       
       /*Iterator<String> iter = releases_json.keys();

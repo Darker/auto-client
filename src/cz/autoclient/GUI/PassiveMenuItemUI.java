@@ -6,14 +6,9 @@
 
 package cz.autoclient.GUI;
 
-import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
-import javax.swing.ButtonModel;
 import javax.swing.JComponent;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 import javax.swing.MenuSelectionManager;
 import javax.swing.event.MenuDragMouseListener;
 import javax.swing.event.MenuKeyListener;

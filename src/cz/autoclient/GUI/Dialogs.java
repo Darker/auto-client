@@ -10,10 +10,11 @@ import cz.autoclient.GUI.dialogs.DoNotAskAgainPanel;
 import cz.autoclient.settings.Settings;
 import java.awt.Component;
 import java.awt.Desktop;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
 import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 
 /**
  *
@@ -158,7 +159,7 @@ public class Dialogs {
             title,
             JOptionPane.INFORMATION_MESSAGE
         );
-        System.out.println("Setting dialog "+name+" show status to: "+(panel.dontAskMeAgain()?"do not show":"show"));
+        Logger.getLogger(Dialogs.class.getName()).log(Level.INFO, "Setting dialog {0} show status to: {1}", new Object[]{name, panel.dontAskMeAgain()?"do not show":"show"});
         settings.setSetting(name, panel.dontAskMeAgain());
     }
     public static void dialogInfoOnce(final String message, final String name, Settings settings) {
@@ -179,7 +180,7 @@ public class Dialogs {
       // This allows hyperlinks to be clicked
       f.addHyperlinkListener((HyperlinkEvent hle)->{
               if (HyperlinkEvent.EventType.ACTIVATED.equals(hle.getEventType())) {
-                  System.out.println(hle.getURL());
+                  Logger.getLogger(Dialogs.class.getName()).log(Level.INFO, hle.getURL().toString());
                   Desktop desktop = Desktop.getDesktop();
                   try {
                       desktop.browse(hle.getURL().toURI());

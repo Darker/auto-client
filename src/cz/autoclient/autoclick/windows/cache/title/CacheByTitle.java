@@ -7,9 +7,9 @@
 package cz.autoclient.autoclick.windows.cache.title;
 
 import cz.autoclient.autoclick.windows.Window;
+import cz.autoclient.autoclick.windows.WindowValidator.TitlePatternWindowValidator;
 import cz.autoclient.autoclick.windows.cache.CachedWindow;
 import cz.autoclient.autoclick.windows.cache.WindowCacheString;
-import static cz.autoclient.autoclick.windows.WindowValidator.TitlePatternWindowValidator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -64,7 +64,7 @@ public class CacheByTitle implements WindowCacheString {
 
   @Override
   public Window getWindowNocache(String searchCriteria) {
-    //System.out.println("Seeking window by non strict title \""+searchCriteria+"\".");
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Seeking window by non strict title \""+searchCriteria+"\".");
     return Window.FindWindowByName(searchCriteria, false);
   }
   @Override

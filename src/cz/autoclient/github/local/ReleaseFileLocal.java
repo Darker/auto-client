@@ -6,7 +6,6 @@
 
 package cz.autoclient.github.local;
 
-import cz.autoclient.github.html.*;
 import cz.autoclient.github.interfaces.Release;
 import cz.autoclient.github.interfaces.ReleaseFile;
 import java.net.MalformedURLException;
@@ -16,8 +15,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 /**
  *
@@ -42,7 +39,7 @@ public class ReleaseFileLocal implements ReleaseFile {
     }
     catch(JSONException e) {}
     catch (MalformedURLException ex) {
-      System.out.println("Error creating url: \""+parent.url+"\" + \""+URLEncoder.encode(name)+"\"");
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Error creating url: \""+parent.url+"\" + \""+URLEncoder.encode(name)+"\"");
       ex.printStackTrace();
     };
    
@@ -56,13 +53,13 @@ public class ReleaseFileLocal implements ReleaseFile {
     return parent; 
   }
   public static long sizeToNumber(String size) {
-    //System.out.println("Parsing size!");
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Parsing size!");
     // Space divides the size and the multipier (k, M, G...)
     int firstSpace = size.indexOf(' ');
     double multiplier = 1;
     // replace bytes to leae the multiplier alone
     size = size.replaceFirst("\\s*(B|b|Bytes)\\s*$", "");
-    //System.out.println("Size: "+size);
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Size: "+size);
     // If the space wasn't replaced there's stull some stuff
     if(firstSpace<size.length()) {
       //get the stuff after the space (if any)

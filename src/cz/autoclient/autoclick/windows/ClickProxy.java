@@ -81,7 +81,7 @@ public class ClickProxy implements Runnable {
 
     //Put the image drawer in the topmost window component
     main.add(display);
-    //System.out.println(image.getWidth(null)+", "+image.getHeight(null));
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, image.getWidth(null)+", "+image.getHeight(null));
     //frame.pack();
 
     //Set window size to the image size plus some padding dimensions
@@ -94,12 +94,12 @@ public class ClickProxy implements Runnable {
       @Override
       public void windowClosing(WindowEvent e) {
         synchronized(thread) {thread.notify();}
-        //System.out.println("Closing");
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Closing");
         frame.dispose();
       }
       @Override
       public void windowClosed(WindowEvent e) {
-         //System.out.println("Closed");
+         //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Closed");
          //synchronized(t) {
            //t.notify();
          //}
@@ -117,7 +117,7 @@ public class ClickProxy implements Runnable {
     ActionListener task = new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        //System.out.println("Redrawing");
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Redrawing");
         try {
           display.forceRedraw();
         }
@@ -143,19 +143,19 @@ public class ClickProxy implements Runnable {
           frame.dispose();
         }
       }
-     //System.out.println("Wait over.");
+     //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Wait over.");
     }
     timer.stop();
   }
   private class MouseProxy implements MouseListener, MouseMotionListener {
     @Override
     public void mouseClicked(MouseEvent e) {
-      //System.out.println("Mouseclick: ["+e.getX()+", "+e.getY()+"]"+MouseButton.fromJavaAwtMouseEvent(e).name());
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Mouseclick: ["+e.getX()+", "+e.getY()+"]"+MouseButton.fromJavaAwtMouseEvent(e).name());
       //window.click(e.getX(), e.getY(), MouseButton.fromJavaAwtMouseEvent(e));
     }
     @Override
     public void mousePressed(MouseEvent e) {
-      //System.out.println("Mousedown: ["+e.getX()+", "+e.getY()+"]"+MouseButton.fromJavaAwtMouseEvent(e).name());
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Mousedown: ["+e.getX()+", "+e.getY()+"]"+MouseButton.fromJavaAwtMouseEvent(e).name());
       try {
         window.mouseDown(e.getX(), e.getY(), MouseButton.fromJavaAwtMouseEvent(e));
       }
@@ -166,7 +166,7 @@ public class ClickProxy implements Runnable {
 
     @Override
     public void mouseReleased(MouseEvent e) {
-      //System.out.println("Mouseup: ["+e.getX()+", "+e.getY()+"] "+MouseButton.fromJavaAwtMouseEvent(e).name());
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Mouseup: ["+e.getX()+", "+e.getY()+"] "+MouseButton.fromJavaAwtMouseEvent(e).name());
       try {
         window.mouseUp(e.getX(), e.getY(), MouseButton.fromJavaAwtMouseEvent(e));
       }

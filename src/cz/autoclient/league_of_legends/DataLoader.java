@@ -15,6 +15,8 @@ import java.io.Writer;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -108,7 +110,7 @@ public abstract class DataLoader implements java.io.Serializable {
       else {
         try {
           data = fromFile(file_path);
-          System.out.println("Loading "+this.getClass().getName()+" from "+file_path);
+          Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Loading "+this.getClass().getName()+" from "+file_path);
         }
         catch(FileNotFoundException e) {
           throw new IllegalArgumentException(file_path.getName()+" in "+file_path.getParent()+" caused error:\n         "+e); 
@@ -146,7 +148,7 @@ public abstract class DataLoader implements java.io.Serializable {
     }
     
     String result = new StringBuilder().append(buff).toString();
-    //System.out.println("JSON from file:\n"+result);
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "JSON from file:\n"+result);
     try { 
       return new JSONObject(result);
     } catch (JSONException ex) {
@@ -156,7 +158,7 @@ public abstract class DataLoader implements java.io.Serializable {
   }
   public static JSONArray arrayFromFile(File file) throws FileNotFoundException {
     String data = stringFromFile(file);
-    //System.out.println("JSON from file:\n"+result);
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "JSON from file:\n"+result);
     try { 
       return new JSONArray(data);
     } catch (JSONException ex) {
@@ -255,7 +257,7 @@ public abstract class DataLoader implements java.io.Serializable {
   public static ArrayList<String> listJSONNames(JSONObject o) {
     ArrayList<String> names = new ArrayList<>();
     String[] ids = JSONObject.getNames(o);
-    //System.out.println("Fetching "+ids.length+" champion names.");
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Fetching "+ids.length+" champion names.");
     for(String id: ids) {
       try {
         names.add(o.getJSONObject(id).getString("name"));
