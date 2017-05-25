@@ -9,6 +9,8 @@ package cz.autoclient.GUI.updates;
 import cz.autoclient.GUI.Dialogs;
 import cz.autoclient.updates.Progress;
 import cz.autoclient.updates.Updater;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.lingala.zip4j.exception.ZipException;
 
 /**
@@ -51,7 +53,7 @@ public class UpdateProgressWindow implements Progress {
   }
   @Override
   public void stopped(Throwable error) {
-    System.out.println("Install failed.");
+    Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Install failed.");
     error.printStackTrace();
     window.close();
 
@@ -68,7 +70,7 @@ public class UpdateProgressWindow implements Progress {
   }
   @Override
   public void finished() {
-    System.out.println("Finished install. Closing window and calling callback.");
+    Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Finished install. Closing window and calling callback.");
     window.status("Done. Restarting program.");
     window.close();
     onEnd.run();

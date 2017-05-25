@@ -36,13 +36,13 @@ public class ButtonSummonerSpell extends JButton {
       //return ConstData.lolData.getSummonerSpells().find(SummonerSpell.GET_NAME, name).img.getIcon();
       SummonerSpell spell = ConstData.lolData.getSummonerSpells().get(name);
       if(spell!=null) {
-        //System.out.println("Spell: "+spell.img.url);
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Spell: "+spell.img.url);
         return new ImageIcon(spell.img.getScaledDiscardOriginal(48,48));
       }
       else {
-        /*System.out.println("No spell at "+name+"\n   Available names: ");
+        /*Logger.getLogger(this.getClass().getName()).log(Level.INFO, "No spell at "+name+"\n   Available names: ");
         for(String sname:ConstData.lolData.getSummonerSpells().keySet()) {
-           System.out.println("      "+sname);
+           Logger.getLogger(this.getClass().getName()).log(Level.INFO, "      "+sname);
         }*/
         return null;
       }

@@ -170,7 +170,7 @@ public class DebugDrawing {
      panel.setSize(image.getWidth(null), image.getHeight(null));
      //Put the image drawer in the topmost window component
      main.add(panel);
-     //System.out.println(image.getWidth(null)+", "+image.getHeight(null));
+     //Logger.getLogger(this.getClass().getName()).log(Level.INFO, image.getWidth(null)+", "+image.getHeight(null));
      //frame.pack();
      frame.setTitle(message+" ["+image.getWidth(null)+" x "+image.getHeight(null)+"]");
      //Set window size to the image size plus some padding dimensions
@@ -183,12 +183,12 @@ public class DebugDrawing {
        @Override
        public void windowClosing(WindowEvent e) {
          synchronized(t) {t.notify();}
-         //System.out.println("Closing");
+         //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Closing");
          frame.dispose();
        }
        @Override
        public void windowClosed(WindowEvent e) {
-         //System.out.println("Closed");
+         //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Closed");
          //synchronized(t) {
            //t.notify();
          //}
@@ -205,7 +205,7 @@ public class DebugDrawing {
      if(synchronous) {
        synchronized(t) {
          t.wait();
-         //System.out.println("Wait over.");
+         //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Wait over.");
        }
      }
      //JOptionPane.showMessageDialog(null, scrollPane, message, javax.swing.JOptionPane.INFORMATION_MESSAGE);

@@ -7,7 +7,6 @@
 package cz.autoclient.main_automation.macros;
 
 import cz.autoclient.PVP_net.PixelOffsetV2;
-import cz.autoclient.autoclick.PixelGroup;
 import cz.autoclient.autoclick.PixelGroupSimple;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.main_automation.Automat;

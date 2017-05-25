@@ -12,9 +12,9 @@ import java.awt.Image;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferInt;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -43,7 +43,7 @@ public class ScreenWatcher {
     double integral_image[][] = integralImageGrayscale(bigImage);
     double sum_small = grayscaleSum(image);
     
-    //System.out.println("Small image sum: "+sum_small);
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Small image sum: "+sum_small);
     
     //Loop and find the least different image
     int wb = bigImage.getWidth();
@@ -68,8 +68,8 @@ public class ScreenWatcher {
         if(return_nearest) {
           //If the numbers are closest of all we were through we remember the position
           if(diff<difference) {
-            //System.out.println("New difference: "+diff+" at ["+difference_pos[0]+", "+difference_pos[1]+"]");
-            //System.out.println(" Big image sum: "+sum);
+            //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "New difference: "+diff+" at ["+difference_pos[0]+", "+difference_pos[1]+"]");
+            //Logger.getLogger(this.getClass().getName()).log(Level.INFO, " Big image sum: "+sum);
             difference = diff;
             difference_pos[0] = rect_x;
             difference_pos[1] = rect_y;            
@@ -84,7 +84,7 @@ public class ScreenWatcher {
       }
     }
     if(return_nearest) {
-      //System.out.println("Lowest difference: "+difference+". Wolerance: "+tolerance);
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Lowest difference: "+difference+". Wolerance: "+tolerance);
       if(difference<=tolerance) {
         return RectMatch.byWidthHeight(difference_pos[1], difference_pos[0], ws, hs, difference);
       }      
@@ -117,18 +117,18 @@ public class ScreenWatcher {
     //Multiply tolerance to make it equal to other values
     // 1 unit represents a color (0-255) in width/height image
     tolerance = tolerance*(float)Math.pow(255, 2)*3;
-    //System.out.println("Tolerance: "+tolerance);
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Tolerance: "+tolerance);
     //Number of pixels
     int no_pixels = ws*hs;
     
-    //System.out.println("Sum: ["+sum_small[0]+", "+sum_small[1]+", "+sum_small[2]+"]");
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Sum: ["+sum_small[0]+", "+sum_small[1]+", "+sum_small[2]+"]");
     //Divide the color sum by number of pixels to get average value
     for(byte i = 0; i<3; i++) {
       sum_small[i] = sum_small[i]/no_pixels; 
     }
     
-    //System.out.println("Pixels: "+ws+"*"+hs+" = "+no_pixels);
-    //System.out.println("Average: ["+sum_small[0]+", "+sum_small[1]+", "+sum_small[2]+"]");
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Pixels: "+ws+"*"+hs+" = "+no_pixels);
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Average: ["+sum_small[0]+", "+sum_small[1]+", "+sum_small[2]+"]");
     
     //Loop and find the least different image
     //VVariable names:
@@ -156,15 +156,15 @@ public class ScreenWatcher {
         if(return_nearest) {
           //If the numbers are closest of all we were through we remember the position
           if(diff<difference) {
-            //System.out.println("New difference: "+diff+" at ["+difference_pos[0]+", "+difference_pos[1]+"]");
-            //System.out.println(" Big image sum: "+sum);
+            //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "New difference: "+diff+" at ["+difference_pos[0]+", "+difference_pos[1]+"]");
+            //Logger.getLogger(this.getClass().getName()).log(Level.INFO, " Big image sum: "+sum);
             difference = diff;
             difference_pos[0] = rect_x;
             difference_pos[1] = rect_y;          
           }
           if(matches!=null && diff<=tolerance) {
             matches.add(RectMatch.byWidthHeight(rect_y-1, rect_x-1, ws, hs, difference, tolerance));
-            //System.out.println("Diff "+diff+" <= tolerance. Adding ["+(rect_x-1)+", "+(rect_y-1)+"]");
+            //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Diff "+diff+" <= tolerance. Adding ["+(rect_x-1)+", "+(rect_y-1)+"]");
           }
         }
         //Find first match below tolerance - ONLY USE WHEN YOUR SEARCHED OBJECT IS VERY UNIQUE
@@ -176,7 +176,7 @@ public class ScreenWatcher {
       }
     }
     if(return_nearest) {
-      //System.out.println("Lowest difference: "+difference+". Tolerance: "+tolerance);
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Lowest difference: "+difference+". Tolerance: "+tolerance);
       if(difference<=tolerance) {
         return RectMatch.byWidthHeight(difference_pos[1]-1, difference_pos[0]-1, ws, hs, difference, tolerance);
       }      
@@ -214,13 +214,13 @@ public class ScreenWatcher {
     int bh = integral_image.length;
     int bw = integral_image[0].length;
     findByAvgColor(sum_small, integral_image, ws, hs, bw, bh, tolerance, true, matches);
-    System.out.println("findByAvgColor_isolated_matches obtained "+matches.size()+" matches.");
+    Logger.getLogger(ScreenWatcher.class.getName()).log(Level.INFO, "findByAvgColor_isolated_matches obtained "+matches.size()+" matches.");
     return bestMatches(matches);
   }
   public static ArrayList<RectMatch> bestMatches(ArrayList<RectMatch> matches) {
-    System.out.println("Grouping "+matches.size()+" rectangles.");
+    Logger.getLogger(ScreenWatcher.class.getName()).log(Level.INFO, "Grouping "+matches.size()+" rectangles.");
     ArrayList<ArrayList<Rect>> grouped = Rect.groupOverlapingRects(matches.toArray(new RectMatch[0]));
-    System.out.println(grouped.size()+" groups.");
+    Logger.getLogger(ScreenWatcher.class.getName()).log(Level.INFO, grouped.size()+" groups.");
     ArrayList<RectMatch> best_matches = new ArrayList<>();
 
     ArrayList<Rect> current;
@@ -309,7 +309,7 @@ public class ScreenWatcher {
     BufferedImage after = new BufferedImage((int)Math.round(w*xscale), (int)Math.round(yscale*h), BufferedImage.TYPE_INT_ARGB);
     AffineTransform at = new AffineTransform();
     at.scale(xscale, yscale);
-    //System.out.println("["+xscale+", "+yscale+"]");
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "["+xscale+", "+yscale+"]");
     AffineTransformOp scaleOp = 
        new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
     after = scaleOp.filter(original, after);
@@ -560,7 +560,7 @@ public class ScreenWatcher {
     int width = image[0].length;
     
     BufferedImage result = new BufferedImage(width,height,BufferedImage.TYPE_INT_RGB);
-    System.out.println("Sum: ["+max[0]+", "+max[1]+", "+max[2]+"]");
+    Logger.getLogger(ScreenWatcher.class.getName()).log(Level.INFO, "Sum: ["+max[0]+", "+max[1]+", "+max[2]+"]");
     
     for(int y=0,ly=image.length; y<ly; y++) {
       for(int x=0,lx=image[x].length; x<lx; x++) {
@@ -601,7 +601,7 @@ public class ScreenWatcher {
 
             //Adjust saturation:
             Color.RGBtoHSB(red, green, blue, hsb);
-            //System.out.println("dd"+hsb[1]);
+            //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "dd"+hsb[1]);
             
             hsb[1] += S;
             hsb[2] += B;

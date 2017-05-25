@@ -10,7 +10,6 @@ import cz.autoclient.github.exceptions.DataException;
 import cz.autoclient.github.exceptions.DataParseException;
 import cz.autoclient.github.interfaces.Release;
 import cz.autoclient.github.interfaces.ReleaseFile;
-import cz.autoclient.github.interfaces.Releases;
 import cz.autoclient.github.interfaces.Repository;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -122,7 +121,7 @@ public class ReleaseHtml implements Release {
   protected void loadDownloads(Element elm) {
     ArrayList<ReleaseFileHtml> releases = new ArrayList();
     Elements elms = elm.select("ul.release-downloads li");
-    //System.out.println("Download elements: "+elms.size());
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Download elements: "+elms.size());
     for (Element div : elms) {
       ReleaseFileHtml tmp = null;
       try {

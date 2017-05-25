@@ -6,15 +6,17 @@
 
 package cz.autoclient.robots;
 
-import cz.autoclient.main_automation.WindowTools;
 import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.PixelOffset;
-import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.exceptions.APIException;
 import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.windows.WindowCallback;
 import cz.autoclient.autoclick.windows.cache.title.CacheByTitle;
+import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
+import cz.autoclient.main_automation.WindowTools;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -34,11 +36,11 @@ public class LaunchBot extends Robot {
   protected void go() throws InterruptedException {
 
     while(true) {
-      //System.out.println("  - entered the loop");
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "  - entered the loop");
       if(Thread.interrupted())
         throw new InterruptedException("Interrupted during main while(true).");
 
-      //System.out.println("  - looking for the pixel");
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "  - looking for the pixel");
       if(WindowTools.checkPoint(window, PixelOffset.Patcher_Launch, 20)) {
         Rect win_rect = window.getRect();
         Rect pos = PixelOffset.Patcher_Launch.toRect(win_rect);
@@ -66,7 +68,7 @@ public class LaunchBot extends Robot {
           try {
             win_rect = window.getRect();
             while(WindowTools.checkPoint(window, PixelOffset.Patcher_Eula_Heading)) {
-              System.out.println("Accepting eula.");
+              Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Accepting eula.");
               final Rect r = win_rect;
               window.everyChild((final Window w)->{
                 try {w.slowClick(PixelOffset.Patcher_Eula_Button.toRect(r), 80);}
@@ -76,13 +78,13 @@ public class LaunchBot extends Robot {
             }
           }
           catch(APIException e) {
-            System.out.println("[AUTO-LAUNCH] Window is gone.");
+            Logger.getLogger(this.getClass().getName()).log(Level.INFO, "[AUTO-LAUNCH] Window is gone.");
             break; 
           }
         }
 //slowClick(pos.left, pos.top, 80);
 
-        //System.out.println("  - Clicked");
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "  - Clicked");
 
         break;
       }
@@ -90,22 +92,22 @@ public class LaunchBot extends Robot {
         //int[] diff = WindowTools.diffPoint(window, PixelOffset.Patcher_Launch.offset(0,0));
         /*BufferedImage im = window.screenshot();
         DebugDrawing.displayImage(im);*/
-        /*System.out.println("   Too much diff: ["+diff[0]+", "+diff[1]+", "+diff[2]+"]");
-        System.out.println("   Window size: "+window.getRect());
-        System.out.println("   Window title: "+window.getTitle());
-        System.out.println("   Window class name: "+MSWindow.getWindowClass(((MSWindow)window).hwnd));
-        System.out.println("   Window HWND : "+((MSWindow)window).hwnd);*/
+        /*Logger.getLogger(this.getClass().getName()).log(Level.INFO, "   Too much diff: ["+diff[0]+", "+diff[1]+", "+diff[2]+"]");
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "   Window size: "+window.getRect());
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "   Window title: "+window.getTitle());
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "   Window class name: "+MSWindow.getWindowClass(((MSWindow)window).hwnd));
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "   Window HWND : "+((MSWindow)window).hwnd);*/
         //Get the window again
         if(window.getRect().width<200) {
           window = MSWindow.windowFromName(ConstData.patcher_window_title, false);
         }
       }
-      //System.out.println("  - Going to sleep.");
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "  - Going to sleep.");
       Thread.sleep(1000);
     }
     overSuccesful = true;
 
-    //System.out.println("WUT!");
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "WUT!");
   }
   
   @Override

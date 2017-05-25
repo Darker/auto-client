@@ -8,12 +8,6 @@ package cz.autoclient.GUI.dialogs.champions;
 
 import cz.autoclient.GUI.champion.ConfigurationManager;
 import cz.autoclient.settings.Settings;
-import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Panel;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import javax.swing.JFrame;
 
 /**
@@ -32,17 +26,17 @@ public class ChampionSettingsDialog extends JFrame {
 //          @Override
 //          public void windowOpened(WindowEvent event)
 //          {
-//            System.out.println("Window opened.");
+//            Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Window opened.");
 //          }
 //          @Override
 //          public void windowClosing(WindowEvent event)
 //          {
-//            System.out.println("Window is closing!");
+//            Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Window is closing!");
 //          }
 //          @Override
 //          public void windowClosed(WindowEvent event)
 //          {
-//            //System.out.println("This function is never called.");
+//            //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "This function is never called.");
 //          }
 //          @Override
 //          public void windowIconified(WindowEvent event) {

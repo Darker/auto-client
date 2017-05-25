@@ -3,7 +3,6 @@
  import com.sun.jna.Structure;
  import com.sun.jna.platform.win32.WinDef;
  import sirius.constants.IMEMConsts;
- import sirius.core.Kernel32Ext;
  
  public class Kernel
    extends Common

@@ -8,8 +8,6 @@ package cz.autoclient.GUI.updates;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import java.beans.*;
-import java.util.Random;
 
 public class ProgressBarWindow extends JFrame {
 
@@ -91,7 +89,7 @@ public class ProgressBarWindow extends JFrame {
          }
          @Override
          public void mouseDragged(MouseEvent e) {
-           //System.out.println("Move: "+e.getLocationOnScreen());
+           //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Move: "+e.getLocationOnScreen());
            if(dragStart!=null) {
              Point current = e.getLocationOnScreen();
              current.translate(-dragStart.x, -dragStart.y);

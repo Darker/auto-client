@@ -7,30 +7,22 @@ import cz.autoclient.GUI.notifications.Notification;
 import cz.autoclient.PVP_net.AcceptedGameType;
 import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.ImageFrame;
-import cz.autoclient.autoclick.windows.Window;
-import cz.autoclient.autoclick.Rect;
-import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
-import cz.autoclient.settings.Settings;
-import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.PVP_net.Images;
+import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.PVP_net.PxGroup;
 import cz.autoclient.PVP_net.Setnames;
-import cz.autoclient.autoclick.exceptions.APIException;
-import java.awt.Color;
-
+import cz.autoclient.autoclick.Rect;
+import cz.autoclient.autoclick.comvis.DebugDrawing;
 import cz.autoclient.autoclick.comvis.RectMatch;
 import cz.autoclient.autoclick.comvis.ScreenWatcher;
-import cz.autoclient.autoclick.windows.cache.title.CacheByTitle;
+import cz.autoclient.autoclick.exceptions.APIException;
 import cz.autoclient.autoclick.exceptions.WindowAccessDeniedException;
+import cz.autoclient.autoclick.windows.Window;
+import cz.autoclient.autoclick.windows.cache.title.CacheByTitle;
+import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
 import cz.autoclient.league_of_legends.SummonerSpell;
-import java.awt.image.BufferedImage;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import cz.autoclient.autoclick.ComparablePixel;
-import static cz.autoclient.main_automation.WindowTools.*;
-import cz.autoclient.autoclick.comvis.DebugDrawing;
 import cz.autoclient.main_automation.SituationDetector.LobbyType;
+import static cz.autoclient.main_automation.WindowTools.*;
 import cz.autoclient.main_automation.scripts.CommandDelay;
 import cz.autoclient.main_automation.scripts.CommandSay;
 import cz.autoclient.scripting.OneLineScript;
@@ -39,10 +31,13 @@ import cz.autoclient.scripting.SleepAction;
 import cz.autoclient.scripting.SleepActionLambda;
 import cz.autoclient.scripting.exception.CommandException;
 import cz.autoclient.scripting.exception.ScriptParseException;
-import java.awt.event.KeyEvent;
+import cz.autoclient.settings.Settings;
+import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.Callable;
 
 public class Automat
     extends AutomatInterface {

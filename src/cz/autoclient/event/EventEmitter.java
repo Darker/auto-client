@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -36,7 +38,7 @@ public interface EventEmitter {
           //Surelly no NullPointer exceptions will occur!
           callback.event(parameters);
         } catch (Exception ex) {
-          System.out.println("EVENT failed!");
+          Logger.getLogger(this.getClass().getName()).log(Level.INFO, "EVENT failed!");
           ex.printStackTrace();
         }
       }

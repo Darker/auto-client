@@ -6,8 +6,6 @@
 
 package cz.autoclient.GUI.urls;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 
 /**

@@ -8,6 +8,8 @@ package cz.autoclient.robots;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Parent thread that contains child robot threads. In a defined interval, child threads
@@ -75,14 +77,14 @@ public class RobotManager extends Thread {
     //Throwable lastBotError = null;
     try {
       while(!interrupted()) {
-        //System.out.println("Entering robot synchronized thread.");
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Entering robot synchronized thread.");
         synchronized (robots) {
           size = robots.size();
           if(size==0) {
             individual_delay = checkInterval;
-            //System.out.println("No robots. Waiting for robots...");
+            //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "No robots. Waiting for robots...");
             robots.wait();
-            System.out.println("Finally got some robots!");
+            Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Finally got some robots!");
           }
           else {
             individual_delay = checkInterval/size;
@@ -92,15 +94,15 @@ public class RobotManager extends Thread {
             rur = robots.get(offset);
           }
         }
-        //System.out.println("  Current sleep interval: "+individual_delay);
-        //System.out.println("  Robot: "+(rur!=null?rur.getClass().getName():"null"));
-        //System.out.println("  Robots: "+(size));
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "  Current sleep interval: "+individual_delay);
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "  Robot: "+(rur!=null?rur.getClass().getName():"null"));
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "  Robots: "+(size));
        
         if(rur!=null) {
           try {
             if(!rur.isRunning()) {
               if(rur.canRun()) {
-                //System.out.println("    Robot "+rur.getClass().getName()+" started.");
+                //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "    Robot "+rur.getClass().getName()+" started.");
                 rur.start();
               }
             }
@@ -111,11 +113,11 @@ public class RobotManager extends Thread {
             }*/
           }
           if(rur.isErrorDisabled()) {
-            System.out.println("    "+rur.getClass().getName()+" was disabled and will be removed.");
+            Logger.getLogger(this.getClass().getName()).log(Level.INFO, "    "+rur.getClass().getName()+" was disabled and will be removed.");
             removeRobot(rur);
           }
           /*else {
-            System.out.println("    "+rur.getClass().getName()+" running.");
+            Logger.getLogger(this.getClass().getName()).log(Level.INFO, "    "+rur.getClass().getName()+" running.");
           }*/
         }
         

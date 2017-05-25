@@ -9,6 +9,8 @@ package cz.autoclient.GUI;
 import java.awt.BorderLayout;
 import java.awt.Image;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -66,12 +68,12 @@ public enum ImageResources {
     this.path = basepath+path;
     this.title = title;
     //Resources are retarded so I prefer to keep these debug lines in case I need them again
-    //System.out.println("Resource "+name()+" at '"+this.path+"'.");
-    //System.out.println("Class location: "+this.getClass().getResource(this.path));
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Resource "+name()+" at '"+this.path+"'.");
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Class location: "+this.getClass().getResource(this.path));
 
     /*URL[] urls = ((URLClassLoader) (Thread.currentThread().getContextClassLoader())).getURLs();
     for (URL url : urls) {
-      System.out.println(url.getPath());
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, url.getPath());
     }*/
   }
   public URL getClasspath() {
@@ -88,7 +90,7 @@ public enum ImageResources {
           icon = new ImageIcon(leclass.getResource(path));
         }
         catch(NullPointerException e) {
-          System.out.println("Can't tray!");
+          Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Can't tray!");
           icon = null; 
         }
       }
@@ -111,7 +113,7 @@ public enum ImageResources {
       //remember that the image is unavailable
       if(image_failed)
         return null;
-      //System.out.println("  LoadImage(\""+leclass.getResource(".")+"\")");
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "  LoadImage(\""+leclass.getResource(".")+"\")");
       //Use whatever is stored in Icon if we have it
       if(icon!=null) {
         image = icon.getImage();
@@ -163,7 +165,7 @@ public enum ImageResources {
           r.run(icon);
         }
         else {
-          System.out.println("Load icon failed "+path);
+          Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Load icon failed "+path);
         }
       }
     }.start();

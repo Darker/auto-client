@@ -9,9 +9,10 @@ package cz.autoclient.GUI.updates;
 import cz.autoclient.updates.VersionId;
 import java.awt.Color;
 import java.awt.Container;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Action;
 import javax.swing.Icon;
-import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
@@ -122,13 +123,13 @@ public class UpdateMenuItem extends JMenuItem {
     if(c instanceof JPopupMenu) {
       JPopupMenu cm = (JPopupMenu)c;
       cm.pack();
-      //System.out.println("Resized menu.");
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Resized menu.");
     }
     else {
       if(c!=null)
-        System.out.println("Error: Unexpected update menu item parent class: "+c.getClass().getName());
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Error: Unexpected update menu item parent class: "+c.getClass().getName());
       //else
-        //System.out.println("Error: Update parent class is fucking NULL!");
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Error: Update parent class is fucking NULL!");
     }
   }
 }

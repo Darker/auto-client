@@ -33,9 +33,10 @@ import cz.autoclient.scripting.SleepActionLambda;
 import cz.autoclient.scripting.exception.CommandException;
 import cz.autoclient.scripting.exception.ScriptParseException;
 import cz.autoclient.settings.Settings;
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import static java.lang.Thread.sleep;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -379,7 +380,7 @@ public class AutomatV2 extends Automat {
     BufferedImage screenshot = ScreenWatcher.resampleImage(
         LazyLoadedImage.crop(windowScreenshot, ImageFrameV2.Lobby_SpellDialog.rect(winRect)),//window.screenshotCrop(cropRect),
         resampleCoefficient, resampleCoefficient);
-    System.out.println("Resampled: "+resampleCoefficient);
+    Logger.getLogger(AutomatV2.class.getName()).log(Level.INFO, "Resampled: "+resampleCoefficient);
     return screenshot;
   }
   public static Rect findSummonerSpell(SummonerSpell s, BufferedImage area, int crop) {

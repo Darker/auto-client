@@ -55,22 +55,22 @@ public class MultiFieldDef extends FieldDef {
       JComponent field = fields.get(i).getField();
       
       GridBagConstraints c = new GridBagConstraints();
-      //System.out.println("Settings for "+field.getClass().getName()+" at "+i+":");
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Settings for "+field.getClass().getName()+" at "+i+":");
       if(weights.length>i && weights[i]>0) {
         c.weightx = weights[i]; 
         c.fill = GridBagConstraints.HORIZONTAL;
-        //System.out.println("      fill = GridBagConstraints.HORIZONTAL");
-        //System.out.println("      weightx = "+weights[i]);
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "      fill = GridBagConstraints.HORIZONTAL");
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "      weightx = "+weights[i]);
       }
       else {
         c.weightx = 0;
         c.fill = GridBagConstraints.NONE;
         
-        //System.out.println("      fill = GridBagConstraints.NONE");
-        //System.out.println("      weightx = 0.0");
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "      fill = GridBagConstraints.NONE");
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "      weightx = 0.0");
       }
       c.gridx = i;
-      //System.out.println("      gridx = "+i);
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "      gridx = "+i);
       
       lay.setConstraints(field, c);
     }

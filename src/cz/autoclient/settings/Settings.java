@@ -25,6 +25,8 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
 import javax.swing.JTextField;
@@ -145,7 +147,7 @@ public class Settings implements java.io.Serializable {
       throw new IllegalStateException("The SecureSettings class must be initialised before using encrypted"
           + "settings!"); 
     }
-    System.out.println("ENCRYPTED: AutomatSettings[\""+name+"\"] = "+value/*(value!=null?"[value hidden]":"null")*/);
+    Logger.getLogger(this.getClass().getName()).log(Level.INFO, "ENCRYPTED: AutomatSettings[\""+name+"\"] = "+value/*(value!=null?"[value hidden]":"null")*/);
     changed = true;
     Object s = settings.get(name);
     if(s!=null && s instanceof EncryptedSetting) {
@@ -208,7 +210,7 @@ public class Settings implements java.io.Serializable {
     }
     changed = true;
     settings.put(name, value);
-    System.out.println("AutomatSettings[\""+name+"\"] = "+(value!=null?value.toString():"null"));
+    Logger.getLogger(this.getClass().getName()).log(Level.INFO, "AutomatSettings[\""+name+"\"] = "+(value!=null?value.toString():"null"));
     //Thread.dumpStack();
     return old;
   }
@@ -230,7 +232,7 @@ public class Settings implements java.io.Serializable {
       return false;
     }
     settings.put(name, value);
-    System.out.println("default AutomatSettings[\""+name+"\"] = "+(value!=null?value.toString():"null"));
+    Logger.getLogger(this.getClass().getName()).log(Level.INFO, "default AutomatSettings[\""+name+"\"] = "+(value!=null?value.toString():"null"));
     return true;
   }
   /** Clear all settings.
@@ -248,7 +250,7 @@ public class Settings implements java.io.Serializable {
    */
   public void listenOnInput(final String setting_name, final JTextField input) {
     //Debug output
-    //System.out.println("Settings[\""+setting_name+"\"] automatically updates on input change.");
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Settings[\""+setting_name+"\"] automatically updates on input change.");
     //Only works if you press enter
     /*input.addActionListener(new ActionListener() {
       @Override
@@ -330,7 +332,7 @@ public class Settings implements java.io.Serializable {
     }
     @Override
     public void changed(Object o) {
-      //System.out.println("Change event!");
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Change event!");
       setSetting(setting_name, o);
     }
   }
@@ -344,7 +346,7 @@ public class Settings implements java.io.Serializable {
       //Can't encrypt unserializable objects
       if(!(o instanceof java.io.Serializable))
         return;
-      //System.out.println("Change event!");
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Change event!");
       setEncrypted(setting_name, (java.io.Serializable)o);
     }
   }
@@ -375,10 +377,10 @@ public class Settings implements java.io.Serializable {
   public void displaySettingsOnBoundFields() {
     for (Map.Entry pair : boundInputs.entrySet()) {
       String name = (String)pair.getKey();
-      //System.out.println("Trying to load setting '"+name+"' on input.");
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Trying to load setting '"+name+"' on input.");
       if(settings.containsKey(name)) {
         Input input = (Input)pair.getValue();
-        //System.out.println("   value='"+settings.get(name)+"'");
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "   value='"+settings.get(name)+"'");
         input.setValue(settings.get(name));
       }
     }
@@ -400,8 +402,8 @@ public class Settings implements java.io.Serializable {
       String name = (String)pair.getKey();
       Input input = (Input)pair.getValue();
       
-      //System.out.println("Trying to load setting '"+name+"' from input.");
-      //System.out.println("   value='"+input.getValue()+"'");
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Trying to load setting '"+name+"' from input.");
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "   value='"+input.getValue()+"'");
       if(input instanceof InputSecure && ((InputSecure)input).isSecure())
         this.setEncrypted(name, (java.io.Serializable)input.getValue());
       else
@@ -423,7 +425,7 @@ public class Settings implements java.io.Serializable {
     ObjectOutput output;
     try (OutputStream buffer = new BufferedOutputStream(file)) {
       output = new ObjectOutputStream(buffer);
-      System.out.println("Saving settings HashMap - "+settings.size()+" fields.");
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Saving settings HashMap - "+settings.size()+" fields.");
       output.writeObject(settings);
     }
     output.close();
@@ -446,7 +448,7 @@ public class Settings implements java.io.Serializable {
     //Get the properties out of the object
     try {
       Map set = (Map)input.readObject();
-      System.out.println(set.size()+" settings loaded from file.");
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, set.size()+" settings loaded from file.");
       this.settings.putAll(set);
     }
     catch(ClassNotFoundException e) {

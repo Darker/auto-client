@@ -6,7 +6,6 @@
 
 package cz.autoclient.GUI.autocomplete;
 
-import static com.sun.java.accessibility.util.AWTEventMonitor.addMouseListener;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;

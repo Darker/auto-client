@@ -6,7 +6,6 @@
 package cz.autoclient.autoclick;
 //Comment this out if you don't have the library
 import com.sun.jna.platform.win32.WinDef;
-//Used for exporting rect class as normal rectangle
 import java.awt.Rectangle;
 import java.util.ArrayList;
 

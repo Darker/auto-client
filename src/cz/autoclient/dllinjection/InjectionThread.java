@@ -43,8 +43,8 @@ public class InjectionThread extends Thread {
         callback.run(false, "Thread interrupted externally.");
         return;
       }
-      //System.out.println("Injection output:\n "+output);
-      //System.out.println("Injection result: "+cmd.exitValue());
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Injection output:\n "+output);
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Injection result: "+cmd.exitValue());
       callback.run(true);
       //Unfortunatelly, the binary allways returns 0, even on error
       //callback.run(p.exitValue()==0, "Error in binary API.");

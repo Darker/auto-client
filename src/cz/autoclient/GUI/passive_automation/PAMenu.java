@@ -7,28 +7,30 @@
 package cz.autoclient.GUI.passive_automation;
 
 import cz.autoclient.GUI.Gui;
+import static cz.autoclient.GUI.ImageResources.PA_BOT_DISABLED_ERROR;
+import static cz.autoclient.GUI.ImageResources.PA_BOT_PAUSED;
+import static cz.autoclient.GUI.ImageResources.PA_BOT_RUNNING;
+import static cz.autoclient.GUI.ImageResources.PA_BOT_STOPPED;
 import cz.autoclient.robots.BotActionListener;
 import cz.autoclient.robots.Robot;
 import cz.autoclient.robots.RobotManager;
 import cz.autoclient.settings.Settings;
 import cz.autoclient.settings.SettingsInputVerifier;
 import cz.autoclient.settings.SettingsValueChanger;
+import cz.autoclient.settings.input_handlers.InputJCheckBoxMenuItem;
 import java.awt.Desktop;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import static cz.autoclient.GUI.ImageResources.PA_BOT_DISABLED_ERROR;
-import static cz.autoclient.GUI.ImageResources.PA_BOT_STOPPED;
-import static cz.autoclient.GUI.ImageResources.PA_BOT_PAUSED;
-import static cz.autoclient.GUI.ImageResources.PA_BOT_RUNNING;
-import cz.autoclient.settings.input_handlers.InputJCheckBoxMenuItem;
-import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
@@ -166,7 +168,7 @@ public class PAMenu {
       if(enabled) {
         if(robots!=null)
           robots.addRobot(robot);
-        System.out.println("Bot "+name+" enabled.");
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Bot "+name+" enabled.");
         //Reset the robots data, it has not been running and data may be outdated
         robot.reset();
       }
@@ -175,7 +177,7 @@ public class PAMenu {
           robots.removeRobot(robot);
         else
           robot.stop();
-        System.out.println("Bot "+name+" disabled.");
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Bot "+name+" disabled.");
       }
       lastState = enabled;
     }
@@ -201,15 +203,15 @@ public class PAMenu {
     @Override
     public void started() {
       setIcon();
-      System.out.println("Bot "+name+" started.");
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Bot "+name+" started.");
     };
     @Override
     public void terminated(Throwable e) {
       setIcon(enable.getState(), false);
       if(e==null)
-        System.out.println("Bot "+name+" terminated.");
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Bot "+name+" terminated.");
       else
-        System.out.println("Bot "+name+" terminated with error: \n     "+e);
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Bot "+name+" terminated with error: \n     "+e);
     };
     @Override
     public void disabledByError(Throwable e) {
@@ -255,7 +257,7 @@ public class PAMenu {
 
     @Override
     public void run() {
-      //System.out.println("Changing icon to "+icon.getDescription());
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Changing icon to "+icon.getDescription());
       //new Exception().printStackTrace();
       menu.setIcon(icon);
     }

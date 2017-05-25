@@ -145,7 +145,7 @@ public class UpdateInfo implements java.io.Serializable {
     } catch (IOException ex) {
       updater.dispatchEvent("download.stopped",ex);
     }
-    System.out.println("Downloading update: "+downloadLink);
+    Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Downloading update: "+downloadLink);
     if(connection instanceof HttpURLConnection) {
       if(!download_http((HttpURLConnection) connection, updater))
         return false;
@@ -165,10 +165,10 @@ public class UpdateInfo implements java.io.Serializable {
     return true;
   }
   private boolean download_http(URLConnection httpConnection, Updater updater) {
-    System.out.println("Downloading update: "+downloadLink);
+    Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Downloading update: "+downloadLink);
  
     long completeFileSize = httpConnection.getContentLength();
-    System.out.println("File size: "+completeFileSize);
+    Logger.getLogger(this.getClass().getName()).log(Level.INFO, "File size: "+completeFileSize);
     localFile.getParentFile().mkdirs();
     java.io.FileOutputStream fos;
     final int BUFFER_SIZE = 128;
@@ -189,7 +189,7 @@ public class UpdateInfo implements java.io.Serializable {
       int x = 0;
       while ((x = in.read(data, 0, BUFFER_SIZE)) >= 0) {
         downloadedFileSize += x;
-        //System.out.println("Downloaded bytes: "+downloadedFileSize);
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Downloaded bytes: "+downloadedFileSize);
         bout.write(data, 0, x);
         updater.dispatchEvent("download.process", (double)downloadedFileSize, (double)completeFileSize);
         //process.process(downloadedFileSize, completeFileSize);
@@ -235,7 +235,7 @@ public class UpdateInfo implements java.io.Serializable {
     File myself;
     try {myself = new File(UpdateInfo.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());}
     catch(Exception e) {
-      System.out.println("Some error with getting current jar file path.");
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Some error with getting current jar file path.");
       e.printStackTrace();
       updater.dispatchEvent("install.stopped", e);
       return;
@@ -285,7 +285,7 @@ public class UpdateInfo implements java.io.Serializable {
         }
       }
       if(targetFile.compareTo(myself)==0) {
-        System.out.println("Cannot overwrite jar.");
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Cannot overwrite jar.");
         // Prepare jar file to be copied
         ScriptWithParameters script;
         try {
@@ -297,7 +297,7 @@ public class UpdateInfo implements java.io.Serializable {
           script.saveToFile(batchFile);
           copyScript = new RunnableScript(batchFile).run();
         } catch (IOException ex) {
-          System.out.println("Cannot create or run the batch file.");
+          Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Cannot create or run the batch file.");
         }
         continue;
       }
@@ -407,7 +407,7 @@ public class UpdateInfo implements java.io.Serializable {
   }
   /** From: http://stackoversourceFilelow.com/a/115086/607407 **/
   public static void copyFile(File sourceFile, File destFile) throws IOException {
-    System.out.println("copy "+sourceFile.getAbsolutePath()+" "+destFile.getAbsolutePath());
+    Logger.getLogger(UpdateInfo.class.getName()).log(Level.INFO, "copy "+sourceFile.getAbsolutePath()+" "+destFile.getAbsolutePath());
     //if(true)
     //  return;
 

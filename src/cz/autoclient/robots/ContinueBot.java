@@ -6,12 +6,6 @@
 
 package cz.autoclient.robots;
 
-import cz.autoclient.PVP_net.ConstData;
-import cz.autoclient.PVP_net.PixelOffset;
-import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
-import cz.autoclient.autoclick.Rect;
-import cz.autoclient.autoclick.windows.Window;
-import cz.autoclient.autoclick.windows.WindowCallback;
 import cz.autoclient.autoclick.comvis.DebugDrawing;
 import cz.autoclient.autoclick.exceptions.APIException;
 
@@ -32,14 +26,14 @@ public class ContinueBot extends Robot {
    */
   @Override
   protected void go() throws InterruptedException {
-    //System.out.println("Start waiting for launch button.");
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Start waiting for launch button.");
     try {
       while(true) {
-        //System.out.println("  - entered the loop");
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "  - entered the loop");
         if(t.interrupted())
           throw new InterruptedException("Interrupted during main while(true).");
         DebugDrawing.displayImage(window.screenshot());
-        //System.out.println("  - Going to sleep.");
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "  - Going to sleep.");
         Thread.sleep(2000);
       }
     } catch(APIException e) {
@@ -49,7 +43,7 @@ public class ContinueBot extends Robot {
         go();
       }
     }
-    //System.out.println("WUT!");
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "WUT!");
   }
   
   @Override

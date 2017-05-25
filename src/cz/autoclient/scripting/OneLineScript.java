@@ -145,10 +145,10 @@ public class OneLineScript implements Callable<Boolean> {
          expected.add(ScriptSymbol.LETTER);
          buffer = new StringBuilder();
          section=Section.COMMAND_NAME;
-         System.out.println("Script started, waiting for first command.");
+         Logger.getLogger(OneLineScript.class.getName()).log(Level.INFO, "Script started, waiting for first command.");
        }
        else if(section==Section.COMMAND_NAME) {
-         //System.out.println("  building command name: \""+buffer+"\"");
+         //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "  building command name: \""+buffer+"\"");
          expected.remove(ScriptSymbol.SCRIPT_START);
          exAddOnce(expected, ScriptSymbol.LETTER);
          exAddOnce(expected, ScriptSymbol.PARAMETER_SEPARATOR);
@@ -160,10 +160,10 @@ public class OneLineScript implements Callable<Boolean> {
              buffer.deleteCharAt(buffer.length()-currentSymbol.length);
            b.name = buffer.toString();
            buffer = new StringBuilder();
-           System.out.println("Command name is '"+b.name+"'");
+           Logger.getLogger(OneLineScript.class.getName()).log(Level.INFO, "Command name is '"+b.name+"'");
            //If there is parameter separator after command name
            if(currentSymbol==ScriptSymbol.PARAMETER_SEPARATOR) {
-             System.out.println("  Expecting parameters...");
+             Logger.getLogger(OneLineScript.class.getName()).log(Level.INFO, "  Expecting parameters...");
              section=Section.COMMAND_ARGS;
              exAddOnce(expected, ScriptSymbol.NUMBER);
              exAddOnce(expected, ScriptSymbol.UNKNOWN_SYMBOL);
@@ -183,7 +183,7 @@ public class OneLineScript implements Callable<Boolean> {
            //Remove separator
            if(currentSymbol!=ScriptSymbol.END)
              buffer.deleteCharAt(buffer.length()-currentSymbol.length);
-           System.out.println("  Param: "+buffer.toString());
+           Logger.getLogger(OneLineScript.class.getName()).log(Level.INFO, "  Param: "+buffer.toString());
            b.args.add(buffer.toString());
            buffer = new StringBuilder();
            //if(currentSymbol==ScriptSymbol.PARAMETER_SEPARATOR)
@@ -196,11 +196,11 @@ public class OneLineScript implements Callable<Boolean> {
        else if(section==Section.ESCAPING) {
          //If current symbol is escapable, the backslash will be consumed
          if(currentSymbol.escapable) {
-           System.out.println("Escaping "+currentSymbol.prettyPrint(data, i));
+           Logger.getLogger(OneLineScript.class.getName()).log(Level.INFO, "Escaping "+currentSymbol.prettyPrint(data, i));
            buffer.deleteCharAt(buffer.length()-1-currentSymbol.length);
          }
          else {
-           System.out.println("No escape operation. Kept backlash as it is.");
+           Logger.getLogger(OneLineScript.class.getName()).log(Level.INFO, "No escape operation. Kept backlash as it is.");
          }
          //Return back to normal argument data parsing
          section=Section.COMMAND_ARGS;
@@ -208,13 +208,13 @@ public class OneLineScript implements Callable<Boolean> {
        
        
        if(currentSymbol==ScriptSymbol.COMMAND_SEPARATOR || currentSymbol == ScriptSymbol.END) {
-         System.out.println("Command "+b.name+" closed.");
+         Logger.getLogger(OneLineScript.class.getName()).log(Level.INFO, "Command "+b.name+" closed.");
          
          commands.add(b);
          
          //If next step is end, we can end now, nothing is unfinished
          if(i>=l-1) {
-           System.out.println("All commands parsed.");
+           Logger.getLogger(OneLineScript.class.getName()).log(Level.INFO, "All commands parsed.");
            break;
          }
          
@@ -227,7 +227,7 @@ public class OneLineScript implements Callable<Boolean> {
          expected.remove(ScriptSymbol.SPACE);
 
          
-         System.out.println("Expecting command or end.");
+         Logger.getLogger(OneLineScript.class.getName()).log(Level.INFO, "Expecting command or end.");
        }
        
     }

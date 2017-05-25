@@ -6,10 +6,8 @@
 
 package cz.autoclient.github.local;
 
-import cz.autoclient.github.html.*;
 import cz.autoclient.github.interfaces.Release;
 import cz.autoclient.github.interfaces.ReleaseFile;
-import cz.autoclient.github.interfaces.Releases;
 import cz.autoclient.github.interfaces.Repository;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -21,8 +19,6 @@ import java.util.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 /**
  *
@@ -49,7 +45,7 @@ public class ReleaseLocal implements Release {
       description = elm.getString("body");
       //https://github.com/twbs/bootstrap/releases/tag/v1.4.0
       url = new URL(parent.getURL(), "releases/"+URLEncoder.encode(tag)+"/");
-      System.out.println("Release "+tag+" at "+url.toString());
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Release "+tag+" at "+url.toString());
       //loadDownloads(elm);
       // The release label
       isPre = elm.getBoolean("prerelease");
@@ -70,7 +66,7 @@ public class ReleaseLocal implements Release {
     try {
       loadDownloads(elm.getJSONArray("assets"));
     } catch (JSONException ex) {
-      System.out.println("Failed to parse released files.");
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Failed to parse released files.");
       ex.printStackTrace();
     }
   }
@@ -108,7 +104,7 @@ public class ReleaseLocal implements Release {
   protected void loadDownloads(JSONArray elm) {
     ArrayList<ReleaseFileLocal> releases = new ArrayList();
     
-    //System.out.println("Download elements: "+elms.size());
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Download elements: "+elms.size());
     for (int i=0,l=elm.length(); i<l; i++) {
       ReleaseFileLocal tmp = null;
       try {

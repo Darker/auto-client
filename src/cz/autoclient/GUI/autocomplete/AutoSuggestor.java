@@ -266,7 +266,7 @@ class AutoSuggestor {
         if (typedWord.isEmpty()) {
             return false;
         }
-        //System.out.println("Typed word: " + typedWord);
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Typed word: " + typedWord);
 
         boolean suggestionAdded = false;
 

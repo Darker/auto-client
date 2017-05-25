@@ -13,8 +13,8 @@ import cz.autoclient.autoclick.windows.WindowValidator;
 import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
 import cz.autoclient.robots.exceptions.RobotDisabledException;
 import cz.autoclient.robots.helpers.DummyLogger;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
 
 
 
@@ -149,7 +149,7 @@ public abstract class Robot implements Runnable {
     lastError = null;
     errorPhase = null;
     errorDisabled = false;
-    //System.out.println("forgetErrors called!");
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "forgetErrors called!");
     //new Exception().printStackTrace();
   }
   
@@ -209,7 +209,7 @@ public abstract class Robot implements Runnable {
   
   @Override
   public final void run() {
-    glg().debug("Robot thread {0} started.", t.getName());//System.out.println("Robot thread "+t.getName()+" started.");
+    glg().debug("Robot thread {0} started.", t.getName());//Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Robot thread "+t.getName()+" started.");
     if(listener!=null)
       listener.started();
     try {
@@ -217,16 +217,16 @@ public abstract class Robot implements Runnable {
       if(listener!=null) 
         listener.terminated();
       glg().debug("Robot thread {0} terminated.", t.getName());
-      //System.out.println("Robot thread "+t.getName()+" terminated.");
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Robot thread "+t.getName()+" terminated.");
     }
     catch(Throwable e) {
-      //System.out.println(e);
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, e);
       if(listener!=null)
         listener.terminated(e);
       glg().debug("Robot thread {0} terminated with error: "+e.getMessage(), t.getName());
       e.printStackTrace();
       continueOnError(e, ExecutionPhase.RUN);
-      //System.out.println("Robot thread "+t.getName()+" terminated with error:\n     "+e);
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Robot thread "+t.getName()+" terminated with error:\n     "+e);
     }
     
     lastExit = System.currentTimeMillis();

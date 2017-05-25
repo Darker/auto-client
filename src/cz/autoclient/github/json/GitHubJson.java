@@ -6,7 +6,6 @@
 
 package cz.autoclient.github.json;
 
-import cz.autoclient.github.html.RepositoryHtml;
 import cz.autoclient.github.interfaces.GitHub;
 import cz.autoclient.github.interfaces.Repository;
 import cz.autoclient.github.interfaces.RepositoryId;

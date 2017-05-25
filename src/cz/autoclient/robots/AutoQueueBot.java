@@ -6,19 +6,20 @@
 
 package cz.autoclient.robots;
 
-import cz.autoclient.main_automation.WindowTools;
-import cz.autoclient.robots.helpers.ValueChangeToWatcher;
 import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.PixelOffset;
 import cz.autoclient.PVP_net.Setnames;
-import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
 import cz.autoclient.autoclick.Rect;
-import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.autoclick.exceptions.APIException;
+import cz.autoclient.autoclick.windows.ms_windows.MSWindow;
+import cz.autoclient.main_automation.WindowTools;
 import cz.autoclient.robots.helpers.IterationLimiter;
+import cz.autoclient.robots.helpers.ValueChangeToWatcher;
 import cz.autoclient.settings.Settings;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -51,10 +52,10 @@ public class AutoQueueBot extends Robot {
     
     IterationLimiter limit = new IterationLimiter();
     watchLoLExit.resetChanged();
-    //System.out.println("Start waiting for launch button.");
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Start waiting for launch button.");
     try {
       while(true) {
-        //System.out.println("  - entered the loop");
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "  - entered the loop");
         if(t.interrupted())
           throw new InterruptedException("Interrupted during main while(true).");
         if(limit.limitIteration(10)) {
@@ -97,7 +98,7 @@ public class AutoQueueBot extends Robot {
         WindowTools.drawCheckPoint(img, PixelOffset.AM_PLAY_AGAIN); 
         WindowTools.drawCheckPoint(img, PixelOffset.AM_SUMMONER_SPELL_COLUMN);
         DebugDrawing.displayImage(img);*/
-        //System.out.println("  - Going to sleep.");
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "  - Going to sleep.");
         Thread.sleep(3000);
       }
     } catch(APIException e) {
@@ -107,7 +108,7 @@ public class AutoQueueBot extends Robot {
         go();
       }
     }
-    //System.out.println("WUT!");
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "WUT!");
   }
   
   @Override
@@ -119,7 +120,7 @@ public class AutoQueueBot extends Robot {
   public boolean canRunEx() {
     //Check if League of legends is running
     if(watchLoLExit.checkValueChangedDebug(MSWindow.windowFromName(ConstData.game_window_title, false)!=null)) {
-      System.out.println("AUTOQUEUE: Game just was closed!"); 
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "AUTOQUEUE: Game just was closed!"); 
     }
     return watchLoLExit.hasChanged() && super.canRunEx() && window.isVisible();
   }

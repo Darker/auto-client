@@ -6,7 +6,6 @@
 
 package cz.autoclient.robots;
 
-import cz.autoclient.main_automation.WindowTools;
 import cz.autoclient.GUI.Gui;
 import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.PixelOffset;
@@ -14,6 +13,7 @@ import cz.autoclient.PVP_net.Setnames;
 import cz.autoclient.autoclick.Rect;
 import cz.autoclient.autoclick.exceptions.APIException;
 import cz.autoclient.autoclick.windows.WindowValidator;
+import cz.autoclient.main_automation.WindowTools;
 import cz.autoclient.robots.exceptions.RobotNotConfiguredException;
 import cz.autoclient.robots.helpers.ValueChangeToWatcher;
 import cz.autoclient.settings.Settings;
@@ -21,6 +21,8 @@ import cz.autoclient.settings.secure.EncryptedSetting;
 import cz.autoclient.settings.secure.InvalidPasswordException;
 import cz.autoclient.settings.secure.PasswordFailedException;
 import java.awt.image.BufferedImage;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -44,9 +46,9 @@ public class AutoLoginBot extends Robot {
    */
   @Override
   protected void go() throws InterruptedException, APIException {
-    System.out.println("Auto login thread started.");
+    Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Auto login thread started.");
     if(initializing) {
-      System.out.println("Initializing phase of auto login.");
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Initializing phase of auto login.");
       initializing = false;
       try {
          settings.getEncryptor().init();
@@ -69,11 +71,11 @@ public class AutoLoginBot extends Robot {
         brokenPassword(e);
       }
       if(!canRun()) {
-        System.out.println("Initializing done. Nothing more to do, so terminating.");
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Initializing done. Nothing more to do, so terminating.");
         return;
       }
     }
-    //System.out.println("Start waiting for login screen at "+window.getTitle());
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Start waiting for login screen at "+window.getTitle());
     PVPAppeared.resetChanged();
     try {
       //Increment as the bot is running, terminate bot at certain value
@@ -91,12 +93,12 @@ public class AutoLoginBot extends Robot {
         
         if(WindowTools.checkPoint(img, points)>=3) {
           Rect size = window.getRect();
-          //System.out.println("Starting debug loop."+size);
+          //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Starting debug loop."+size);
 //          java.awt.Robot robot = null;
 //          try {
 //            robot = new java.awt.Robot();
 //          } catch (AWTException ex) {
-//            System.out.println("Cannot create robot!");
+//            Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Cannot create robot!");
 //            throw new IllegalStateException("Robot cannot be initialized.");
 //          }
 //
@@ -107,7 +109,7 @@ public class AutoLoginBot extends Robot {
 //              Thread.sleep(200);
 //              window.slowClick(PixelOffset.Login_UsernameField.toRect(size), 30);*/
 //              //robot.keyPress(KeyEvent.VK_F);
-//              System.out.println("Window is "+(window.isForeground()?"focused":"not focused")+".");
+//              Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Window is "+(window.isForeground()?"focused":"not focused")+".");
 //              //robot.mouseMove(size.left()+PixelOffset.Login_UsernameField.toRect(size).left,
 //              //    size.top()+PixelOffset.Login_UsernameField.toRect(size).top);
 //              Thread.sleep(800);
@@ -131,7 +133,7 @@ public class AutoLoginBot extends Robot {
           window.click(PixelOffset.Login_ButtonDisabled.toRect(size));
           break;
         }
-        //System.out.println("  - Going to sleep.");
+        //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "  - Going to sleep.");
         Thread.sleep(2000);
       }
     }
@@ -140,7 +142,7 @@ public class AutoLoginBot extends Robot {
       return;      
     }
     catch(InterruptedException e) {
-      System.out.println("[AUTO-LOGIN] Killed by interrupt.");
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "[AUTO-LOGIN] Killed by interrupt.");
       return;
     }
   }
@@ -152,7 +154,7 @@ public class AutoLoginBot extends Robot {
     //This will disable the bot
     disableDueToException(e);
     //This will appear assynchronously and wait for the user to close it
-    System.out.println("Your saved password could not be decrypted. It will be deleted now.");
+    Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Your saved password could not be decrypted. It will be deleted now.");
     new Exception().printStackTrace();
     Gui.inst.dialogErrorAsync("Your saved password could not be decrypted. It will be deleted now.");
     //The execution stops here

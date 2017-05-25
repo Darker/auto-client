@@ -14,7 +14,6 @@ import cz.autoclient.autoclick.windows.Window;
 import cz.autoclient.scripting.SleepAction;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,7 +44,7 @@ public abstract class AutomatInterface extends Thread {
   public abstract Window getWindow();
   
   protected void dbgmsg(final String data) {
-    System.out.println("[MAIN BOT] " + data);
+    Logger.getLogger(this.getClass().getName()).log(Level.INFO, "[MAIN BOT] " + data);
   }
 
   protected void errmsg(final String data) {

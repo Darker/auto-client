@@ -6,7 +6,6 @@
 
 package cz.autoclient.autoclick.windows.cache;
 
-import com.sun.jna.platform.win32.WinDef;
 import cz.autoclient.autoclick.windows.Window;
 
 /**

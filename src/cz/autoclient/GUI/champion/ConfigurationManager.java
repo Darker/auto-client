@@ -8,9 +8,7 @@ package cz.autoclient.GUI.champion;
 
 import cz.autoclient.GUI.ImageResources;
 import cz.autoclient.GUI.summoner_spells.ButtonSummonerSpell;
-import cz.autoclient.PVP_net.ConstData;
 import cz.autoclient.PVP_net.Setnames;
-import cz.autoclient.league_of_legends.maps.Champions;
 import cz.autoclient.settings.Settings;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -19,6 +17,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.InputVerifier;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -149,7 +149,7 @@ public class ConfigurationManager {
     
     
     //input.setInputVerifier(new ButtonUpdater());
-    //System.out.println("Combo box value: ");
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Combo box value: ");
     //Gui.debugInspectElement(input);
   }
   /**
@@ -170,8 +170,8 @@ public class ConfigurationManager {
     //if(champion_names==null)
     //  champion_names = ConstData.lolData.getChampions().enumValues(Champions.getName, true);
     if(item!=null) {
-      //System.out.println("JComboBox.getEditor().getItem() = "+input.getEditor().getItem()+"");
-      //System.out.println("JComboBox.getSelectedItem()     = "+input.getSelectedItem()+"");
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "JComboBox.getEditor().getItem() = "+input.getEditor().getItem()+"");
+      //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "JComboBox.getSelectedItem()     = "+input.getSelectedItem()+"");
 
       if(!item.isEmpty()) {
         //Avoid repetitive loading...
@@ -217,7 +217,7 @@ public class ConfigurationManager {
     if(currentSetup!=null)
       delete.setEnabled(true);
     
-    //System.out.println("Saved settings for "+currentChampion+". "+settings.size()+" settings total.");
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Saved settings for "+currentChampion+". "+settings.size()+" settings total.");
   }
   protected void loadSettings(String name) {
     Settings set = settings.get(name);
@@ -235,9 +235,9 @@ public class ConfigurationManager {
         main_settings.displaySettingsOnBoundFields(names);
       }
     }
-    //System.out.println("Loaded settings for "+name);
+    //Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Loaded settings for "+name);
     //if(currentSetup==null && name!=null)
-    //  System.out.println("  Acutally loaded null, settings were unavalable.");
+    //  Logger.getLogger(this.getClass().getName()).log(Level.INFO, "  Acutally loaded null, settings were unavalable.");
   }
   protected void loadSettings() {
     loadSettings(currentChampion);
@@ -250,7 +250,7 @@ public class ConfigurationManager {
   protected class ButtonUpdater extends InputVerifier {
     @Override
     public boolean verify(JComponent input) {
-      System.out.println("Combo box value: "+(String)ConfigurationManager.this.input.getSelectedItem());
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Combo box value: "+(String)ConfigurationManager.this.input.getSelectedItem());
       return false;
     }
   }

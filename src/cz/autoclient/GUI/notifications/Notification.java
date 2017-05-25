@@ -10,6 +10,8 @@ import cz.autoclient.PVP_net.Setnames;
 import cz.autoclient.settings.Settings;
 import java.awt.TrayIcon;
 import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JCheckBoxMenuItem;
 
 /** Abstract representation of notification. Extend from this class and make a notification
@@ -44,7 +46,7 @@ public abstract class Notification {
     }
     catch(IllegalArgumentException e) {}
     
-    System.out.println("Notification setting name: \""+settingName+"\" (Setnames."+settingName.toUpperCase()+")");
+    Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Notification setting name: \""+settingName+"\" (Setnames."+settingName.toUpperCase()+")");
     if(def.visible) {
       menu_item = new JCheckBoxMenuItem();
       settings.bindToInput(settingName, menu_item);
@@ -192,7 +194,7 @@ public abstract class Notification {
           target.addNotification(instantiate(source, d, set, params));
         }
         catch(CantCreateNotification e) {
-          System.out.println("Cannot create "+d.name()+" because: "+e.getMessage());
+          Logger.getLogger(Notification.class.getName()).log(Level.INFO, "Cannot create "+d.name()+" because: "+e.getMessage());
         }
         catch(Exception e) {
           System.err.println("createAll failed for "+d.name()); 

@@ -6,8 +6,6 @@
 
 package cz.autoclient.scripting;
 
-import java.util.Arrays;
-
 /**
  *
  * @author Jakub

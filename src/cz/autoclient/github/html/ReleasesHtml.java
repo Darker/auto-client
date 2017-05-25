@@ -68,11 +68,11 @@ public class ReleasesHtml implements Releases {
   public boolean fetch() {
     try {
       ArrayList<Release> rels = new ArrayList();
-      System.out.println("Getting releases from: "+url.toExternalForm());
+      Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Getting releases from: "+url.toExternalForm());
       Document doc = Jsoup.connect(url.toExternalForm()).get();
       while(true) {
         Elements releaseElms = doc.select("div.release");
-        System.out.println("Elements: "+releaseElms.size());
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Elements: "+releaseElms.size());
         for (Element div : releaseElms) {
           rels.add(new ReleaseHtml(parent, div));
         }
