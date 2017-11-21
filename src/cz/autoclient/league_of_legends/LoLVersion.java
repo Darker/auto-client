@@ -117,7 +117,7 @@ public class LoLVersion extends DataLoader {
   @Override
   public URL getURL() {
     try {
-      return new URL("http://ddragon.leagueoflegends.com/realms/"+realm+".json");
+      return new URL("http://ddragon.leagueoflegends.com/realms/"+realm.name().toLowerCase()+".json");
     } catch (MalformedURLException ex) {
       return null;
     }
