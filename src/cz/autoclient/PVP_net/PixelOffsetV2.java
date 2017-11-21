@@ -24,8 +24,8 @@ public enum PixelOffsetV2 implements ComparablePixel {
     Accept_DeclineButton (0.4594971361763987D, 0.8558737636914627D, new Color(30, 35, 40, 1), 5),
     Accept_ProgressBar(0.58633890923329D, 0.7516655808867138D, new Color(71, 252, 246, 1), 100),
     
-    Lobby_Chat(0.141431781011012D, 0.9498319613023019D, new Color(1, 10, 19, 1), 3),
-    Lobby_Search(0.6716816408080522D, 0.09908319020779409D, new Color(2, 5, 12, 1), 15),
+    Lobby_Chat(0.09657947941589755D, 0.9455205811138014D, new Color(1, 10, 19, 1), 3),
+    Lobby_Search(0.6122156608511027D, 0.14285714285714285D, new Color(2, 5, 12, 1), 15),
     Lobby_ClientChatButton(0.9678251509271224D, 0.9481236304366503D, new Color(205, 190, 145, 1), 3),
     Lobby_ClientChatButtonOutside(0.9582159256955398D, 0.963498608227515D, new Color(30, 35, 40, 1), 3),
     Lobby_ChanpionSlot1(0.29229661714686006D, 0.19474971868428495D, new Color(36, 135, 246, 1), 1),
