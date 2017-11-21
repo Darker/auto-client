@@ -24,7 +24,7 @@ jar uf AutoClient.jar version
 del version
 echo  
 echo Packing
-7z a -tzip -y -r "../AutoClient_%vid%.zip" "*.*"
+7za a -tzip -y -r "../AutoClient_%vid%.zip" "*.*"
 
 
 rem cd ..
