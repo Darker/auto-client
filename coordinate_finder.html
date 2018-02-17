@@ -1,0 +1,166 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="generator" content="PSPad editor, www.pspad.com">
+  <meta name="author" content="Jakub Mareda">
+  <title>Image coordinate finder</title>
+  <style type="text/css">
+  /**This * rule is very shitty. Never do it. **/
+    * {
+      margin: 0;
+      padding: 0;
+    }        
+    #canvases canvas {
+      width: 100%;
+      display: block;
+      image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
+      image-rendering: -moz-crisp-edges;          /* Firefox                        */
+      image-rendering: -o-crisp-edges;            /* Opera                          */
+      image-rendering: -webkit-optimize-contrast; /* Chrome (and eventually Safari) */
+      image-rendering: pixelated; /* Chrome */
+      image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
+      -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
+    }
+     #paste {
+       position: absolute;
+       top: -300px;
+       width: 5px;
+       height: 5px;
+       overflow: hidden;
+     }
+     table.tooltipTable td{
+       min-width: 5em;
+     }
+     #last_point, #last_color {
+       width: 90%;
+       border: 1px dotted black;
+     }
+     #last_color {
+       border-bottom-style: solid;
+       border-bottom-width: 4px;
+     }
+     .js_tooltip {
+       background-color: rgba(0,0,0,0.3);
+       color: white;
+       font-family: "Courier new", "Lucida console";
+       border: 1px dashed black;
+     }
+     
+#the_two {
+    width: 96vw;
+    border: 1px solid black;
+    margin: 0 auto 0 auto;
+}
+#display {
+    width: 80%;
+    border: 1px solid red;
+}
+
+
+#gui {
+  vertical-align: top;
+}
+#gui div.tool {
+  border: 1px solid black;
+  margin: 0px;
+  padding: 0px;
+}
+#gui div.tool .head {
+  color: #CCC;
+  background-color: #112B90;
+  margin: 0px;
+  padding: 3px;
+  text-align: center;
+  cursor: default;
+}
+#gui div.tool .body {
+  display:none;
+  margin: 0px;
+}
+
+#gui div.tool.active .head {
+  color: white;
+  background-color: #1145C0;
+}
+#gui div.tool.active .body {
+  display: block;
+}
+#gui input[type="text"] {
+  width: 90%;
+}
+/** specific tool stylesheets **/
+#gui span.tolerance.error {
+  background-color: red;
+  color: white;
+}
+#gui span.tolerance.ok {
+  background-color: #80FF6F;
+}
+
+#canvases {
+  position: relative;
+}
+#canvases canvas {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+#canvases canvas#target {
+  position: static;
+}
+  
+  </style>
+  </head>
+  <body dropzone="copy file:image/png file:image/gif file:image/jpeg file:image/bmp">          
+    <table id="the_two">
+      <tr>
+        <td id="display">
+          <div id="select_file">
+            Select file (or Ctrl+V or Drag'n'Drop) :
+            <input type="file" onchange="GetImageAPI.applyFile(this.files[0], DisplayImage);" />
+          </div>
+          <div id="displayed_image" style="display: none">
+            <div id="canvases">
+              <canvas id="target"></canvas>
+              <canvas id="hud" width="0" height="0"></canvas>
+            </div>
+            <input type="text" id="last_point" /><br />
+            <input type="text" id="last_color" /><br />
+            
+          </div>
+        </td>
+        <td id="gui">
+          <div class="tool active">
+            <div class="head">Test point</div>
+            <div class="body">
+              <p>Paste the point value below:</p>
+              <input type="text" id="point_test"/><br /><button id="point_test_button" onclick="">test</button>
+              <pre id="point_test_results">
+              
+              </pre>
+            </div>
+          </div>
+          <div class="tool active">
+            <div class="head">Move point</div>
+            <div class="body">
+              <p>Moves the point by <tt>x&nbsp;*&nbsp;<i>image_width</i></tt> and <tt>y&nbsp;*&nbsp;<i>image_height</i></tt></p>
+              x: <input type="text" value="0" style="width: 80%" id="x_offset"><br />
+              y: <input type="text" value="0" style="width: 80%" id="y_offset"><br />
+              <button onclick="moveRelative(document.getElementById('x_offset').value*1, document.getElementById('y_offset').value*1)">Move relative</button>
+              <button onclick="" id="move_relative_test">Move test point relative</button>
+              
+              </pre>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+   
+  <script type="text/javascript" src="GetImageAPI.class.js"></script>
+  <script type="text/javascript" src="tooltip.class.js"></script>
+  <script type="text/javascript" src="require.js" data-main="main.js"></script>
+
+
+  </body>
+</html>
